@@ -1,6 +1,10 @@
 import { createInertiaApp } from '@inertiajs/vue3'
 import { createApp, h } from 'vue'
 
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap'
+import 'bootstrap-icons/font/bootstrap-icons.css'
+
 const pages = import.meta.glob('./Pages/**/*.vue') // <- permite rutas anidadas
 
 createInertiaApp({

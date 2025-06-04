@@ -13,8 +13,8 @@
 import { useForm } from '@inertiajs/vue3'
 
 const form = useForm({
-  email: '',
-  password: ''
+  email: 'devops@orpot.com',
+  password: 'azda030780'
 })
 
 function submit() {
