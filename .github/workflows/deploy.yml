@@ -8,17 +8,19 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: sFTP cpanel  # <--- ESTO ES IMPORTANTE
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: Deploy via SFTP (SSH sin contraseña)
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          server: ${{ secrets.SFTP_SERVER }}
           username: ${{ secrets.SFTP_USERNAME }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          protocol: sftp
-          local-dir: ./
-          server-dir: ${{ secrets.SFTP_REMOTE_PATH }}
+          server: ${{ secrets.SFTP_SERVER }}
+          port: ${{ secrets.SFTP_PORT }}
+          ssh_private_key: ${{ secrets.SFTP_PRIVATE_KEY }}
+          local_path: './'
+          remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
+          sftp_only: true
