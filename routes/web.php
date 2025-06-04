@@ -3,30 +3,42 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 
-Route::get('/', function () {
-    return Inertia::render('Home');
-});
-
-
-
+// Autenticación
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
 
-Route::get('/register', [AuthController::class, 'registerForm']);
-Route::post('/register', [AuthController::class, 'register']);
+// Redirección general de dashboard según rol
+Route::get('/dashboard', function () {
+    $user = auth()->user();
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-     return Inertia::render('Auth/Dashboard');
-    });
-});
+    if ($user->hasRole('admin')) {
+        return redirect()->route('admin.dashboard');
+    }
 
+    // Dashboard para usuarios normales
+    return Inertia::render('Auth/Dashboard'); // <-- corregido de 'Dashboard' a 'Auth/Dashboard'
+})->middleware('auth')->name('dashboard');
 
-Route::get('/admin', fn() => Inertia::render('Admin'))
-    ->middleware(['auth', 'role:admin']);
+// Panel de administración (solo admin)
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard principal
+    Route::get('/', fn () => Inertia::render('Admin/Index'))->name('dashboard');
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin', fn () => Inertia::render('Admin'));
+    // CRUD de usuarios
+    Route::resource('users', UserController::class)->names([
+        'index'   => 'users.index',
+        'create'  => 'users.create',
+        'store'   => 'users.store',
+        'show'    => 'users.show',
+        'edit'    => 'users.edit',
+        'update'  => 'users.update',
+        'destroy' => 'users.destroy',
+    ]);
+
+    // Asignación de roles
+    Route::post('users/{user}/assign-roles', [UserController::class, 'assignRoles'])
+        ->name('users.assign-roles');
 });

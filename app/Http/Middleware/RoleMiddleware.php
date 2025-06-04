@@ -10,9 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, $role): Response
     {
-        if (!$request->user() || $request->user()->role !== $role) {
+        if (!auth()->check() || auth()->user()->role !== $role) {
             abort(403, 'Acceso denegado');
         }
 

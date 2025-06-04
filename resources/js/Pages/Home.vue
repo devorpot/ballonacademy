@@ -1,5 +1,5 @@
 <template>
 	
-<h1>Home Page Academia de globos</h1>
+<h1>Bienvenido a Academia de Globos</h1>
 	
 </template>

@@ -1,23 +1,101 @@
-<template>
-  <div>
-    <h1>Login</h1>
-    <form @submit.prevent="submit">
-      <input v-model="form.email" type="email" placeholder="Email" />
-      <input v-model="form.password" type="password" placeholder="Password" />
-      <button type="submit">Entrar</button>
-    </form>
-  </div>
-</template>
-
 <script setup>
-import { useForm } from '@inertiajs/vue3'
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import GuestLayout from '@/Layouts/GuestLayout.vue';
 
 const form = useForm({
-  email: 'devops@orpot.com',
-  password: 'azda030780'
-})
+    email: '',
+    password: '',
+    remember: false,
+});
 
-function submit() {
-  form.post('/login')
-}
+const submit = () => {
+    form.post(route('login'), {
+        onFinish: () => form.reset('password'),
+    });
+};
 </script>
+
+<template>
+    <GuestLayout>
+        <Head title="Iniciar Sesión" />
+
+        <div class="card shadow-sm">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h1 class="h3 mb-3 fw-normal">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                    </h1>
+                </div>
+
+                <form @submit.prevent="submit">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo Electrónico</label>
+                        <input 
+                            type="email" 
+                            class="form-control" 
+                            id="email" 
+                            v-model="form.email"
+                            :class="{ 'is-invalid': form.errors.email }"
+                            required
+                            autofocus
+                            autocomplete="username"
+                        >
+                        <div class="invalid-feedback" v-if="form.errors.email">
+                            {{ form.errors.email }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input 
+                            type="password" 
+                            class="form-control" 
+                            id="password" 
+                            v-model="form.password"
+                            :class="{ 'is-invalid': form.errors.password }"
+                            required
+                            autocomplete="current-password"
+                        >
+                        <div class="invalid-feedback" v-if="form.errors.password">
+                            {{ form.errors.password }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input 
+                            type="checkbox" 
+                            class="form-check-input" 
+                            id="remember"
+                            v-model="form.remember"
+                        >
+                        <label class="form-check-label" for="remember">Recordarme</label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button 
+                            type="submit" 
+                            class="btn btn-primary"
+                            :disabled="form.processing"
+                        >
+                            <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
+                        </button>
+                    </div>
+
+                    <div class="mt-3 text-center">
+                        <Link :href="route('password.request')" class="text-decoration-none">
+                            ¿Olvidaste tu contraseña?
+                        </Link>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="text-muted">
+                ¿No tienes una cuenta? 
+                <Link :href="route('register')" class="text-decoration-none">Regístrate</Link>
+            </p>
+        </div>
+    </GuestLayout>
+</template>
