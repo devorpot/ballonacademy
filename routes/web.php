@@ -11,7 +11,9 @@ Route::get('/', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/', [AuthController::class, 'login']);
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');  
 
 Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
     ->middleware('guest')
