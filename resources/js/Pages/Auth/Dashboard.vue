@@ -3,7 +3,7 @@
    <div class="container">
       <h1>Academia de globos</h1>
     <form @submit.prevent="logout">
-      <button type="submit">Cerrar sesión</button>
+      
       <p>asldjkhaskhdkasjhd</p>
     </form>
 
