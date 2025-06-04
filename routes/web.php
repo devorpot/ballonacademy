@@ -6,9 +6,23 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 
 // Autenticación
+
+Route::get('/', [AuthController::class, 'loginForm'])->name('login');
+Route::post('/', [AuthController::class, 'login']);
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
+
+Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+    ->middleware('guest')
+    ->name('password.request');
+
+    Route::get('register', [RegisteredUserController::class, 'create'])
+    ->middleware('guest')
+    ->name('register');
+
+Route::post('register', [RegisteredUserController::class, 'store'])
+    ->middleware('guest');
 
 // Redirección general de dashboard según rol
 Route::get('/dashboard', function () {

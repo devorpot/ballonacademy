@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
+import { route } from 'ziggy-js'; // 👈 Esta es la forma correcta
 
 const form = useForm({
     email: '',
