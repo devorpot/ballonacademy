@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-
+ import { route } from 'ziggy-js'
 const props = defineProps({
     user: Object
 });

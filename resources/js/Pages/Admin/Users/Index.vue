@@ -2,7 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Inertia } from '@inertiajs/inertia';
-
+ import { route } from 'ziggy-js'
 const props = defineProps({
     users: Array,
     roles: Array
@@ -15,6 +15,8 @@ const deleteUser = (id) => {
 };
 </script>
 
+
+
 <template>
     <Head title="Gestión de Usuarios" />
 
@@ -23,10 +25,10 @@ const deleteUser = (id) => {
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h1 class="h3 mb-0">
+                        <h3 class="h4 mb-0">
                             <i class="bi bi-people-fill me-2"></i>Gestión de Usuarios
-                        </h1>
-                        <Link :href="route('admin.users.create')" class="btn btn-primary">
+                        </h3>
+                        <Link :href="route('admin.users.create')" class="btn btn-primary btn-sm">
                             <i class="bi bi-plus-lg me-2"></i>Nuevo Usuario
                         </Link>
                     </div>

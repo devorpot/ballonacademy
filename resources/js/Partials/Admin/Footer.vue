@@ -12,7 +12,7 @@ function logout() {
         <footer class="bg-light mt-5 py-3">
             <div class="container-fluid">
                 <div class="text-center text-muted">
-                    <small>Academia de Globos &copy; {{ new Date().getFullYear() }}</small>
+                    <small>Academia Internacional de Globos &copy; {{ new Date().getFullYear() }}</small>
                 </div>
             </div>
         </footer>

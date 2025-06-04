@@ -2,7 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { useForm } from '@inertiajs/vue3';
-
+ import { route } from 'ziggy-js'
 const form = useForm({
     name: '',
     email: '',
