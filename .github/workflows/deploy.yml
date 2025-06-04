@@ -23,4 +23,4 @@ jobs:
           local_path: './'
           remote_path: '/home/ballonaca/public_html'
           sftp_only: true
-          dry_run: false
+          dry_run: true
