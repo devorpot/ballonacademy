@@ -1,17 +1,16 @@
-name: Deploy via SFTP
+name: Deploy to cPanel via SFTP
 
 on:
   push:
     branches:
-      - main
+      - main  # Cambia al branch que quieras desplegar
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: sFTP cpanel  
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Deploy via SFTP
@@ -19,8 +18,8 @@ jobs:
         with:
           server: ${{ secrets.SFTP_SERVER }}
           username: ${{ secrets.SFTP_USERNAME }}
-          port: ${{ secrets.SFTP_PORT }}       # si usas otro puerto, ej: 22
-          ssh-private-key: ${{ secrets.SFTP_PRIVATE_KEY }}
-          local-path: './'
-          remote-path: ${{ secrets.SFTP_REMOTE_PATH }}
-          sftp-only: true
+          port: ${{ secrets.SFTP_PORT }}
+          ssh_private_key: ${{ secrets.SFTP_PRIVATE_KEY }}
+          local_path: './'             # Carpeta local a subir
+          remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
+          sftp_only: true              # Sólo protocolo sftp (sin ssh exec)
