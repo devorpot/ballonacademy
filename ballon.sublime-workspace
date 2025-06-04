@@ -1,0 +1,422 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"place",
+				"placehold.co"
+			],
+			[
+				"text",
+				"text-center"
+			],
+			[
+				"Exposici",
+				"exposición"
+			],
+			[
+				"He",
+				"Heading1"
+			],
+			[
+				"min-",
+				"min-width"
+			],
+			[
+				"max",
+				"max-width"
+			],
+			[
+				"background",
+				"background-color"
+			],
+			[
+				"bg-colo",
+				"bg-color-3"
+			],
+			[
+				"b",
+				"bg-color-3"
+			],
+			[
+				"back",
+				"background-image"
+			],
+			[
+				"font-",
+				"font-size"
+			],
+			[
+				"margin-",
+				"margin-top"
+			],
+			[
+				"tex",
+				"text-align"
+			],
+			[
+				"bg-color",
+				"bg-color-6"
+			],
+			[
+				"border",
+				"border-radius"
+			],
+			[
+				"align",
+				"align-items-center"
+			],
+			[
+				"max-",
+				"max-width"
+			],
+			[
+				"displ",
+				"display-6"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"pa",
+				"Package Control: Install Package"
+			],
+			[
+				"pacake",
+				"Package Control: Install Package"
+			],
+			[
+				"packa",
+				"Install Package Control"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy"
+	],
+	"file_history":
+	[
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/.env",
+		"/tmp/fz3temp-2/authorized_keys",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/.github/workflows/deploy.yml",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/vite.config.js",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Auth/Dashboard.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/,github/workflows/deploy.yml",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/app.js",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Auth/Register.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Home.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Auth/Login.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Middleware/RoleMiddleware.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/bootstrap/app.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/vite.config.js",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_06_03_224954_add_role_to_users_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/User.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/seeders/RolesSeeder.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/seeders/DatabaseSeeder.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/AuthController.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/views/app.blade.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/routes/web.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/bootstrap/app.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Welcome.vue",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/.env",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/resources/js/app.js",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Middleware/HandleInertiaRequests.php",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/app/Models/User.php",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/routes/web.php",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/bootstrap/providers.php",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/app/Http/Controllers/DashboardController.php",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/app/Http/Middleware/HandleInertiaRequests.php",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/resources/js/Pages/Home.vue",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/resources/js/Pages/Welcome.vue",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/resources/views/app.blade.php",
+		"/home/daniel/Escritorio/emails.txt",
+		"/media/daniel/SERVIDOR1/httpd/academyballon/.gitignore",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy.com/.env",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/index.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/partials/Header.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/stands/asesoria.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/servicios/traslado-y-montaje.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/proyectos-realizados.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/servicios/retail-y-punto-de-venta.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/stands/fabricacion-stands.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/stands/stands-modulares.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/stands/preguntas-frecuentes.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/preguntas-frecuentes.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/metodologia.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/servicios/eventos-y-conciertos.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/servicios/popups-banners-y-counters.astro",
+		"/home/daniel/Proyectos/themes/acaglobos/index.html",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/servicios/impresion-a-gran-formato.astro",
+		"/home/daniel/Proyectos/github/themeBuilder/sitepages/retail.html",
+		"/home/daniel/Proyectos/github/themeBuilder/sitepages/conciertos.html.html",
+		"/home/daniel/Proyectos/themes/standsavila/src/straps/features/StrapFeatures15.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/straps/headings/Heading3.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/straps/headings/Heading2.astro",
+		"/home/daniel/Proyectos/github/themeBuilder/sitepages/page-metodologia.html",
+		"/home/daniel/Proyectos/themes/standsavila/src/straps/cta/StrapCta6.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/acerca.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/straps/gallery/StrapGallery1.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/gallery/strap-gallery-1.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/style.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/straps/headings/Heading1.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/layouts/BaseLayout.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/straps/logos/StrapLogos.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/straps/clients/strap-clients-1.html",
+		"/home/daniel/Proyectos/themes/standsavila/src/components/images/ImageGallery.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/components/headings/Heading1.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/components/headings/Heading2.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/straps/cta/StrapCta7.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/components/cards/Card2.astro",
+		"/home/daniel/Proyectos/github/themeBuilder/sitepages/impresion.html",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/impresion.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/fabricacion-stands.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/asesoria.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/cnc.astro",
+		"/home/daniel/Proyectos/github/themeBuilder/sitepages/cnc.html",
+		"/home/daniel/Proyectos/github/themeBuilder/sitepages/mobiliario.html",
+		"/home/daniel/Proyectos/github/themeBuilder/sitepages/page-asesoria.html",
+		"/home/daniel/Proyectos/github/themeBuilder/sitepages/page-faqs.html",
+		"/home/daniel/Proyectos/github/themeBuilder/sitepages/page-fabricacion.html",
+		"/home/daniel/Proyectos/themes/standsavila/src/straps/cta/strap-cta-15.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/straps/HeroInterior.astro",
+		"/home/daniel/Proyectos/themes/standsavila/src/pages/servicios.astro",
+		"/home/daniel/Proyectos/github/themeBuilder/sitepages/page-about.html",
+		"/home/daniel/Proyectos/themes/standsavila/src/partials/Hero.astro",
+		"/home/daniel/Proyectos/themes/standsavila/astro.config.mjs",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/js/main.js",
+		"/home/daniel/Proyectos/github/themeBuilder/sitepages/page-home.html",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/styles.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/cta/strap-cta-6.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/gallery/strap-gallery-2.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/gallery/strap-gallery-3.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/gallery/strap-gallery-4.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/gallery/strap-gallery-5.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/services/strap-services-5.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/metodology/strap-metodology-2.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/metodology/strap-metodology-3.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/metodology/strap-metodology-4.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/metodology/strap-metodology-5.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/assets/css/hero/strap-hero-2.less",
+		"/home/daniel/Proyectos/themes/standsavila/src/partials/Footer.astro",
+		"/home/daniel/Proyectos/themes/acaglobos/src/main.js",
+		"/home/daniel/Proyectos/themes/acaglobos/src/styles/main.less",
+		"/home/daniel/Proyectos/www/acaglobos/wp-content/themes/academia_wp/front-page.php",
+		"/home/daniel/Proyectos/www/acaglobos/wp-content/themes/academia_wp/assets/css/main.less",
+		"/home/daniel/Proyectos/www/acaglobos/wp-content/themes/academia_wp/assets/css/main.css",
+		"/home/daniel/Proyectos/.htaccess",
+		"/home/daniel/Proyectos/www/acaglobos/wp-content/themes/academia_wp/header.php",
+		"/tmp/fz3temp-2/.htaccess",
+		"/tmp/fz3temp-2/vite.svg",
+		"/home/daniel/Proyectos/www/acaglobos/wp-content/themes/academia_wp/style.less",
+		"/home/daniel/Proyectos/www/acaglobos/wp-content/themes/academia_wp/style.css",
+		"/home/daniel/Proyectos/www/acaglobos/wp-content/themes/academia_wp/functions.php",
+		"/home/daniel/Proyectos/www/acaglobos/wp-content/themes/academia_wp/footer.php",
+		"/home/daniel/Proyectos/www/acaglobos/wp-content/themes/academia_wp/assets/js/main.js",
+		"/home/daniel/Proyectos/themes/acaglobos/vite.config.js",
+		"/home/daniel/Proyectos/themes/acaglobos/src/style.css",
+		"/home/daniel/Proyectos/www/acaglobos/index.html",
+		"/home/daniel/Escritorio/vhosts.sh",
+		"/home/daniel/Proyectos/www/academiaglobos/index.html",
+		"/media/daniel/SERVIDOR1/public_html/academiaglobos/index.html",
+		"/media/daniel/SERVIDOR/dev/themes/avila/sitepages/expos.html",
+		"/media/daniel/SERVIDOR/dev/themes/avila/page-expos.html",
+		"/media/daniel/SERVIDOR/dev/themes/avila/sitepages/cotizar.html",
+		"/media/daniel/SERVIDOR/dev/themes/avila/assets/css/style-1.less",
+		"/home/daniel/Proyectos/github/themeBuilder/page-cotizar.html"
+	],
+	"find":
+	{
+		"height": 31.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			" rounded shadow",
+			"rounded-3 shadow",
+			"shadow-lg",
+			"rounded-3",
+			"400x800",
+			"600x400",
+			"Heading2",
+			"HeaderSection",
+			"card-stand",
+			"stand",
+			"card-stand",
+			"cademia Internacional",
+			"[URL DE IMAGEN DESTACADA]",
+			"\" id=\"strapLevels\">\n       <div class=\"in",
+			"> ",
+			"Precio",
+			"container-fluid",
+			"strap-dragon",
+			"big",
+			"Niveles",
+			"400",
+			"[URL DE TU PÁGINA]",
+			"strap-about",
+			"strap-niveles",
+			"<div class=\"card border-0 shadow-sm h-100\">",
+			"Todo para tu stand bajo un mismo techo",
+			"<span class=\"text-primary fw-bold fs-4\">Desde $XX,XXX</span>"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"",
+			"800x600",
+			"400x800",
+			"Heading1",
+			"card-2",
+			"2",
+			"card-1",
+			"cademia Internacional de Globos",
+			"https://academiainternacionalglobos.com/images/social-media.png",
+			"container",
+			"http://academiainternacionalglobos.com/",
+			"<div class=\"card border-0 shadow-sm h-100 my-3\">",
+			""
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 31.0
+	},
+	"input":
+	{
+		"height": 44.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "ballon.sublime-project",
+	"replace":
+	{
+		"height": 58.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 440.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
