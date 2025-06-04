@@ -14,12 +14,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Deploy via SFTP
-         uses: actions/checkout@v3
+      - name: Upload files via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: ${{ secrets.SFTP_SERVER }}
+          host: ${{ secrets.SFTP_SERVER }}
           username: ${{ secrets.SFTP_USERNAME }}
           password: ${{ secrets.SFTP_PASSWORD }}
-          local_path: './'
-          remote_path: ${{ secrets.SFTP_REMOTE_PATH }}
-          sftp_only: true
+          port: ${{ secrets.SFTP_PORT }}
+          source: "./*"
+          target: ${{ secrets.SFTP_REMOTE_PATH }}
