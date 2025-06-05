@@ -12,8 +12,8 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
-      use HasRoles;
+    use HasFactory, Notifiable, HasRoles;
+ 
     /**
      * The attributes that are mass assignable.
      *

@@ -15,88 +15,96 @@ class UserController extends Controller
     {
         $users = User::with('roles')->get();
         $roles = Role::all();
-        
+
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
-            'roles' => $roles
+            'roles' => $roles,
         ]);
     }
 
-    public function create()
-    {
-        $roles = Role::all();
-        return Inertia::render('Admin/Users/Create', [
-            'roles' => $roles
-        ]);
+public function create()
+{
+    $roles = Role::all(['id', 'name']); // Traemos solo id y nombre
+
+    return Inertia::render('Admin/Users/Create', [
+        'roles' => $roles,
+    ]);
+}
+
+
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255|unique:users,email',
+        'password' => 'required|string|min:8|confirmed',
+        'roles' => 'nullable|array',
+        'roles.*' => 'exists:roles,id',
+    ]);
+
+    $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+    ]);
+
+    if (!empty($validated['roles'])) {
+        $user->syncRoles($validated['roles']);
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'roles' => 'sometimes|array',
-        ]);
+    return redirect()->route('admin.users.index')->with('success', 'Usuario creado exitosamente');
+}
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        if ($request->has('roles')) {
-            $user->syncRoles($request->roles);
-        }
-
-        return redirect()->route('admin.users.index')->with('success', 'Usuario creado exitosamente');
-    }
 
     public function show(User $user)
     {
         return Inertia::render('Admin/Users/Show', [
-            'user' => $user->load('roles')
+            'user' => $user->load('roles'),
         ]);
     }
 
     public function edit(User $user)
     {
-        $roles = Role::all();
+        $user->load(['roles:id,name']);
+
         return Inertia::render('Admin/Users/Edit', [
-            'user' => $user->load('roles'),
-            'roles' => $roles,
-            'userRoles' => $user->roles->pluck('name')->toArray()
+            'user' => $user,
+            'roles' => Role::select('id', 'name')->get(),
+            'user_roles' => $user->roles->pluck('id')->toArray(),
         ]);
     }
 
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
-            'roles' => 'sometimes|array',
+            'role_ids' => 'nullable|array',
+            'role_ids.*' => 'exists:roles,id',
         ]);
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-        ]);
+        $updateData = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ];
 
-        if ($request->filled('password')) {
-            $user->update(['password' => Hash::make($request->password)]);
+        if (!empty($validated['password'])) {
+            $updateData['password'] = Hash::make($validated['password']);
         }
 
-        if ($request->has('roles')) {
-            $user->syncRoles($request->roles);
-        }
+        $user->update($updateData);
 
-        return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado exitosamente');
+        // Si vienen roles, sincroniza; si no vienen, elimina todos los roles del usuario.
+        $user->syncRoles($validated['role_ids'] ?? []);
+
+        return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado correctamente');
     }
 
     public function destroy(User $user)
     {
         $user->delete();
+
         return redirect()->route('admin.users.index')->with('success', 'Usuario eliminado exitosamente');
     }
 }
