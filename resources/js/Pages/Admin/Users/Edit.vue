@@ -3,34 +3,29 @@ import { Head, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
-  user: {
-    type: Object,
-    required: true,
-    default: () => ({})
-  },
   roles: {
     type: Array,
     default: () => []
-  },
-  user_roles: {
-    type: Array,
-    default: () => []
-  },
-  errors: {
-    type: Object,
-    default: () => ({})
   }
 });
 
 const form = useForm({
-  name: props.user.name || '',
-  email: props.user.email || '',
+  name: '',
+  email: '',
   password: '',
   password_confirmation: '',
-  role_ids: props.user_roles || []
+  role_ids: []
+});
+
+// Estados para validación en tiempo real
+const touched = ref({
+  name: false,
+  email: false,
+  password: false,
+  password_confirmation: false
 });
 
 const allRolesSelected = computed({
@@ -40,23 +35,87 @@ const allRolesSelected = computed({
   }
 });
 
+// Validaciones personalizadas
+const validateName = () => {
+  if (!form.name.trim()) return 'El nombre es requerido';
+  if (form.name.length < 3) return 'El nombre debe tener al menos 3 caracteres';
+  return '';
+};
+
+const validateEmail = () => {
+  if (!form.email.trim()) return 'El email es requerido';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(form.email)) return 'Ingrese un email válido';
+  return '';
+};
+
+const validatePassword = () => {
+  if (!form.password) return 'La contraseña es requerida';
+  if (form.password.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+  if (!/[A-Z]/.test(form.password)) return 'La contraseña debe contener al menos una mayúscula';
+  if (!/[0-9]/.test(form.password)) return 'La contraseña debe contener al menos un número';
+  return '';
+};
+
+const validatePasswordConfirmation = () => {
+  if (form.password !== form.password_confirmation) return 'Las contraseñas no coinciden';
+  return '';
+};
+
+const validateRoles = () => {
+  if (form.role_ids.length === 0) return 'Seleccione al menos un rol';
+  return '';
+};
+
+const validateForm = () => {
+  const errors = {
+    name: validateName(),
+    email: validateEmail(),
+    password: validatePassword(),
+    password_confirmation: validatePasswordConfirmation(),
+    role_ids: validateRoles()
+  };
+  
+  return {
+    errors,
+    isValid: !Object.values(errors).some(error => error !== '')
+  };
+};
+
+const handleBlur = (field) => {
+  touched.value[field] = true;
+};
+
 const submit = () => {
-  form.put(route('admin.users.update', props.user.id), {
-    preserveScroll: true
+  // Marcar todos los campos como tocados al enviar
+  Object.keys(touched.value).forEach(key => {
+    touched.value[key] = true;
   });
+  
+  const { isValid } = validateForm();
+  
+  if (isValid) {
+    form.post(route('admin.users.store'), {
+      preserveScroll: true,
+      onSuccess: () => form.reset(),
+      onError: () => {
+        // Manejar errores del servidor si es necesario
+      }
+    });
+  }
 };
 </script>
 
 <template>
-  <Head :title="`Editar Usuario: ${user.name}`" />
+  <Head title="Crear Nuevo Usuario" />
 
   <AdminLayout>
     <div class="container-fluid py-4">
       <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
-          <h2 class="h3 mb-0">
-            <i class="bi bi-person-gear me-2"></i>Editar Usuario: {{ user.name }}
-          </h2>
+          <h1 class="h3 mb-0">
+            <i class="bi bi-person-plus me-2"></i>Crear Nuevo Usuario
+          </h1>
           <Link :href="route('admin.users.index')" class="btn btn-secondary btn-sm">
             <i class="bi bi-arrow-left me-2"></i>Volver
           </Link>
@@ -74,10 +133,14 @@ const submit = () => {
                   class="form-control"
                   id="name"
                   v-model="form.name"
-                  required
-                  :class="{'is-invalid': form.errors.name}"
+                  @blur="handleBlur('name')"
+                  :class="{
+                    'is-invalid': (touched.name && validateName()) || form.errors.name
+                  }"
                 >
-                <div v-if="form.errors.name" class="invalid-feedback">{{ form.errors.name }}</div>
+                <div class="invalid-feedback">
+                  {{ touched.name ? validateName() : '' || form.errors.name }}
+                </div>
               </div>
 
               <div class="col-md-6 mb-3">
@@ -87,33 +150,51 @@ const submit = () => {
                   class="form-control"
                   id="email"
                   v-model="form.email"
-                  required
-                  :class="{'is-invalid': form.errors.email}"
+                  @blur="handleBlur('email')"
+                  :class="{
+                    'is-invalid': (touched.email && validateEmail()) || form.errors.email
+                  }"
                 >
-                <div v-if="form.errors.email" class="invalid-feedback">{{ form.errors.email }}</div>
+                <div class="invalid-feedback">
+                  {{ touched.email ? validateEmail() : '' || form.errors.email }}
+                </div>
               </div>
 
               <div class="col-md-6 mb-3">
-                <label for="password" class="form-label">Nueva Contraseña</label>
+                <label for="password" class="form-label">Contraseña</label>
                 <input
                   type="password"
                   class="form-control"
                   id="password"
                   v-model="form.password"
-                  :class="{'is-invalid': form.errors.password}"
+                  @blur="handleBlur('password')"
+                  :class="{
+                    'is-invalid': (touched.password && validatePassword()) || form.errors.password
+                  }"
                 >
-                <small class="text-muted">Dejar en blanco para no cambiar</small>
-                <div v-if="form.errors.password" class="invalid-feedback">{{ form.errors.password }}</div>
+                <div class="invalid-feedback">
+                  {{ touched.password ? validatePassword() : '' || form.errors.password }}
+                </div>
+                <small class="form-text text-muted">
+                  Mínimo 8 caracteres, al menos una mayúscula y un número
+                </small>
               </div>
 
               <div class="col-md-6 mb-3">
-                <label for="password_confirmation" class="form-label">Confirmar Nueva Contraseña</label>
+                <label for="password_confirmation" class="form-label">Confirmar Contraseña</label>
                 <input
                   type="password"
                   class="form-control"
                   id="password_confirmation"
                   v-model="form.password_confirmation"
+                  @blur="handleBlur('password_confirmation')"
+                  :class="{
+                    'is-invalid': (touched.password_confirmation && validatePasswordConfirmation()) || form.errors.password_confirmation
+                  }"
                 >
+                <div class="invalid-feedback">
+                  {{ touched.password_confirmation ? validatePasswordConfirmation() : '' || form.errors.password_confirmation }}
+                </div>
               </div>
 
               <div class="col-12 mb-3">
@@ -144,15 +225,15 @@ const submit = () => {
                   </div>
                 </div>
 
-                <div v-if="form.errors.role_ids || form.errors.role" class="text-danger mt-2">
-                  {{ form.errors.role_ids || form.errors.role }}
+                <div v-if="validateRoles() && (form.role_ids.length === 0 || form.errors.role_ids)" class="text-danger mt-2">
+                  {{ validateRoles() || form.errors.role_ids || form.errors.role }}
                 </div>
               </div>
 
               <div class="col-12">
                 <button type="submit" class="btn btn-primary btn-sm" :disabled="form.processing">
                   <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
-                  <i class="bi bi-save me-2"></i>Guardar Cambios
+                  <i class="bi bi-save me-2"></i>Guardar
                 </button>
               </div>
             </div>

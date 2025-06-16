@@ -15,11 +15,24 @@ import Breadcrumbs from '@/Partials/Admin/Breadcrumbs.vue'
 
         <Navbar />
         <Breadcrumbs />
-        <!-- Contenido principal -->
-        <main class="main">
-            <slot />
-        </main>
+        <Transition name="fade" mode="out-in">
+            <main class="main container-fluid">
+                <slot />
+            </main>
+          </Transition>
 
        <Footer />
     </div>
 </template>
+
+<style scoped>
+/* Ejemplo de animación */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

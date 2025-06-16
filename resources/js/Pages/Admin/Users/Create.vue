@@ -3,7 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
   roles: {
@@ -20,17 +20,91 @@ const form = useForm({
   role_ids: []
 });
 
+// Estados para controlar campos tocados
+const touched = ref({
+  name: false,
+  email: false,
+  password: false,
+  password_confirmation: false,
+  role_ids: false
+});
+
+// Computed para selección de todos los roles
 const allRolesSelected = computed({
   get: () => form.role_ids.length === props.roles.length,
   set: (value) => {
     form.role_ids = value ? props.roles.map(role => role.id) : [];
+    touched.value.role_ids = true; // Marcar como tocado al cambiar
   }
 });
 
+// Funciones de validación
+const validateName = () => {
+  if (!form.name.trim()) return 'El nombre es requerido';
+  if (form.name.length < 3) return 'El nombre debe tener al menos 3 caracteres';
+  return '';
+};
+
+const validateEmail = () => {
+  if (!form.email.trim()) return 'El email es requerido';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(form.email)) return 'Ingrese un email válido';
+  return '';
+};
+
+const validatePassword = () => {
+  if (!form.password) return 'La contraseña es requerida';
+  if (form.password.length < 8) return 'Debe tener al menos 8 caracteres';
+  if (!/[A-Z]/.test(form.password)) return 'Debe contener al menos una mayúscula';
+  if (!/[0-9]/.test(form.password)) return 'Debe contener al menos un número';
+  return '';
+};
+
+const validatePasswordConfirmation = () => {
+  if (form.password !== form.password_confirmation) return 'Las contraseñas no coinciden';
+  return '';
+};
+
+const validateRoles = () => {
+  if (form.role_ids.length === 0) return 'Seleccione al menos un rol';
+  return '';
+};
+
+// Validación general del formulario
+const isFormValid = computed(() => {
+  return !validateName() && 
+         !validateEmail() && 
+         !validatePassword() && 
+         !validatePasswordConfirmation() && 
+         !validateRoles();
+});
+
+// Manejar blur (cuando el campo pierde el foco)
+const handleBlur = (field) => {
+  touched.value[field] = true;
+};
+
+// Manejar cambios en roles individuales
+const handleRoleChange = () => {
+  touched.value.role_ids = true;
+};
+
+// Envío del formulario
 const submit = () => {
-  form.post(route('admin.users.store'), {
-    preserveScroll: true
+  // Marcar todos los campos como tocados al enviar
+  Object.keys(touched.value).forEach(key => {
+    touched.value[key] = true;
   });
+
+  if (isFormValid.value) {
+    form.post(route('admin.users.store'), {
+      preserveScroll: true,
+      onSuccess: () => form.reset(),
+      onError: () => {
+        // Manejar errores del servidor si es necesario
+      }
+    });
+  }
 };
 </script>
 
@@ -41,9 +115,9 @@ const submit = () => {
     <div class="container-fluid py-4">
       <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
-          <h1 class="h3 mb-0">
-            <i class="bi bi-person-plus me-2"></i>Crear Nuevo Usuario
-          </h1>
+           <h3 class="admin-title">
+                <i class="bi bi-people-fill me-2"></i>Crear Usuario
+           </h3>
           <Link :href="route('admin.users.index')" class="btn btn-secondary btn-sm">
             <i class="bi bi-arrow-left me-2"></i>Volver
           </Link>
@@ -54,6 +128,7 @@ const submit = () => {
         <div class="card-body">
           <form @submit.prevent="submit" novalidate>
             <div class="row">
+              <!-- Campo Nombre -->
               <div class="col-md-6 mb-3">
                 <label for="name" class="form-label">Nombre</label>
                 <input
@@ -61,12 +136,17 @@ const submit = () => {
                   class="form-control"
                   id="name"
                   v-model="form.name"
-                  required
-                  :class="{'is-invalid': form.errors.name}"
+                  @blur="handleBlur('name')"
+                  :class="{
+                    'is-invalid': (touched.name && validateName()) || form.errors.name
+                  }"
                 >
-                <div v-if="form.errors.name" class="invalid-feedback">{{ form.errors.name }}</div>
+                <div class="invalid-feedback">
+                  {{ touched.name ? validateName() : '' || form.errors.name }}
+                </div>
               </div>
 
+              <!-- Campo Email -->
               <div class="col-md-6 mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input
@@ -74,12 +154,17 @@ const submit = () => {
                   class="form-control"
                   id="email"
                   v-model="form.email"
-                  required
-                  :class="{'is-invalid': form.errors.email}"
+                  @blur="handleBlur('email')"
+                  :class="{
+                    'is-invalid': (touched.email && validateEmail()) || form.errors.email
+                  }"
                 >
-                <div v-if="form.errors.email" class="invalid-feedback">{{ form.errors.email }}</div>
+                <div class="invalid-feedback">
+                  {{ touched.email ? validateEmail() : '' || form.errors.email }}
+                </div>
               </div>
 
+              <!-- Campo Contraseña -->
               <div class="col-md-6 mb-3">
                 <label for="password" class="form-label">Contraseña</label>
                 <input
@@ -87,12 +172,20 @@ const submit = () => {
                   class="form-control"
                   id="password"
                   v-model="form.password"
-                  required
-                  :class="{'is-invalid': form.errors.password}"
+                  @blur="handleBlur('password')"
+                  :class="{
+                    'is-invalid': (touched.password && validatePassword()) || form.errors.password
+                  }"
                 >
-                <div v-if="form.errors.password" class="invalid-feedback">{{ form.errors.password }}</div>
+                <div class="invalid-feedback">
+                  {{ touched.password ? validatePassword() : '' || form.errors.password }}
+                </div>
+                <small class="form-text text-muted">
+                  Requisitos: mínimo 8 caracteres, al menos una mayúscula y un número
+                </small>
               </div>
 
+              <!-- Campo Confirmar Contraseña -->
               <div class="col-md-6 mb-3">
                 <label for="password_confirmation" class="form-label">Confirmar Contraseña</label>
                 <input
@@ -100,10 +193,17 @@ const submit = () => {
                   class="form-control"
                   id="password_confirmation"
                   v-model="form.password_confirmation"
-                  required
+                  @blur="handleBlur('password_confirmation')"
+                  :class="{
+                    'is-invalid': (touched.password_confirmation && validatePasswordConfirmation()) || form.errors.password_confirmation
+                  }"
                 >
+                <div class="invalid-feedback">
+                  {{ touched.password_confirmation ? validatePasswordConfirmation() : '' || form.errors.password_confirmation }}
+                </div>
               </div>
 
+              <!-- Selección de Roles -->
               <div class="col-12 mb-3">
                 <label class="form-label">Roles</label>
 
@@ -113,6 +213,7 @@ const submit = () => {
                     type="checkbox"
                     id="select_all_roles"
                     v-model="allRolesSelected"
+                    @change="handleRoleChange"
                   >
                   <label class="form-check-label fw-bold" for="select_all_roles">Seleccionar todos los roles</label>
                 </div>
@@ -126,19 +227,25 @@ const submit = () => {
                         :id="'role_' + role.id"
                         :value="role.id"
                         v-model="form.role_ids"
+                        @change="handleRoleChange"
                       >
                       <label class="form-check-label" :for="'role_' + role.id">{{ role.name }}</label>
                     </div>
                   </div>
                 </div>
 
-                <div v-if="form.errors.role_ids || form.errors.role" class="text-danger mt-2">
-                  {{ form.errors.role_ids || form.errors.role }}
+                <div v-if="(touched.role_ids && validateRoles()) || form.errors.role_ids || form.errors.role" class="text-danger mt-2">
+                  {{ touched.role_ids ? validateRoles() : '' || form.errors.role_ids || form.errors.role }}
                 </div>
               </div>
 
+              <!-- Botón de envío -->
               <div class="col-12">
-                <button type="submit" class="btn btn-primary btn-sm" :disabled="form.processing">
+                <button 
+                  type="submit" 
+                  class="btn btn-primary btn-sm" 
+                  :disabled="form.processing || !isFormValid"
+                >
                   <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
                   <i class="bi bi-save me-2"></i>Guardar
                 </button>

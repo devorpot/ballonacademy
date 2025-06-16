@@ -8,7 +8,7 @@ import { route } from 'ziggy-js'
 
 <template>
    <div class="w-100 d-block my-3">
-        <div class="container">
+        <div class="container-fluid">
            <div class="row align-items-center">
                <div class="col-12 col-md-6">
                    <div class="d-block">
