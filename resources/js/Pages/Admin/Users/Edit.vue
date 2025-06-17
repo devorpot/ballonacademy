@@ -6,18 +6,27 @@ import { route } from 'ziggy-js';
 import { computed, ref } from 'vue';
 
 const props = defineProps({
+  user: {
+    type: Object,
+    required: true
+  },
   roles: {
+    type: Array,
+    required: true
+  },
+  user_roles: {
     type: Array,
     default: () => []
   }
 });
 
+// Inicializa el formulario con los datos del usuario
 const form = useForm({
-  name: '',
-  email: '',
+  name: props.user.name || '',
+  email: props.user.email || '',
   password: '',
   password_confirmation: '',
-  role_ids: []
+  role_ids: props.user_roles
 });
 
 // Estados para validación en tiempo real
@@ -50,15 +59,16 @@ const validateEmail = () => {
 };
 
 const validatePassword = () => {
-  if (!form.password) return 'La contraseña es requerida';
-  if (form.password.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
-  if (!/[A-Z]/.test(form.password)) return 'La contraseña debe contener al menos una mayúscula';
-  if (!/[0-9]/.test(form.password)) return 'La contraseña debe contener al menos un número';
+  if (form.password && form.password.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+  if (form.password && !/[A-Z]/.test(form.password)) return 'Debe contener una mayúscula';
+  if (form.password && !/[0-9]/.test(form.password)) return 'Debe contener un número';
   return '';
 };
 
 const validatePasswordConfirmation = () => {
-  if (form.password !== form.password_confirmation) return 'Las contraseñas no coinciden';
+  if (form.password && form.password !== form.password_confirmation) {
+    return 'Las contraseñas no coinciden';
+  }
   return '';
 };
 
@@ -87,34 +97,36 @@ const handleBlur = (field) => {
 };
 
 const submit = () => {
-  // Marcar todos los campos como tocados al enviar
   Object.keys(touched.value).forEach(key => {
     touched.value[key] = true;
   });
-  
+
   const { isValid } = validateForm();
-  
+
   if (isValid) {
-    form.post(route('admin.users.store'), {
+    form.put(route('admin.users.update', props.user.id), {
       preserveScroll: true,
-      onSuccess: () => form.reset(),
+      onSuccess: () => {
+        // opcional: feedback
+      },
       onError: () => {
-        // Manejar errores del servidor si es necesario
+        // opcional: manejar errores
       }
     });
   }
 };
+
 </script>
 
 <template>
-  <Head title="Crear Nuevo Usuario" />
+  <Head title="Editar Usuario" />
 
   <AdminLayout>
     <div class="container-fluid py-4">
       <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
           <h1 class="h3 mb-0">
-            <i class="bi bi-person-plus me-2"></i>Crear Nuevo Usuario
+            <i class="bi bi-person-plus me-2"></i>Editar Usuario
           </h1>
           <Link :href="route('admin.users.index')" class="btn btn-secondary btn-sm">
             <i class="bi bi-arrow-left me-2"></i>Volver
@@ -122,12 +134,14 @@ const submit = () => {
         </div>
       </div>
 
+
+
       <div class="card">
         <div class="card-body">
           <form @submit.prevent="submit" novalidate>
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label for="name" class="form-label">Nombre</label>
+                <label for="name" class="form-label">Nombre </label>
                 <input
                   type="text"
                   class="form-control"

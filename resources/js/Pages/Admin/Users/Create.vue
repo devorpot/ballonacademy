@@ -99,9 +99,17 @@ const submit = () => {
   if (isFormValid.value) {
     form.post(route('admin.users.store'), {
       preserveScroll: true,
-      onSuccess: () => form.reset(),
-      onError: () => {
-        // Manejar errores del servidor si es necesario
+      onSuccess: () => {
+        form.reset();
+        // Limpiar los estados de "touched"
+        Object.keys(touched.value).forEach(key => {
+          touched.value[key] = false;
+        });
+      },
+      onError: (errors) => {
+        // Inertia automáticamente inyecta los errores en form.errors
+        // No necesitas hacer nada adicional aquí
+        console.log('Errores del servidor:', errors);
       }
     });
   }
@@ -113,6 +121,15 @@ const submit = () => {
 
   <AdminLayout>
     <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-12">
+          <div v-if="form.hasErrors" class="alert alert-danger">
+            <div v-for="error in Object.values(form.errors).flat()" :key="error">
+              {{ error }}
+            </div>
+          </div>
+        </div>
+      </div>  
       <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
            <h3 class="admin-title">
@@ -146,24 +163,24 @@ const submit = () => {
                 </div>
               </div>
 
-              <!-- Campo Email -->
-              <div class="col-md-6 mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  id="email"
-                  v-model="form.email"
-                  @blur="handleBlur('email')"
-                  :class="{
-                    'is-invalid': (touched.email && validateEmail()) || form.errors.email
-                  }"
-                >
-                <div class="invalid-feedback">
-                  {{ touched.email ? validateEmail() : '' || form.errors.email }}
-                </div>
+             <!-- Ejemplo para el campo email -->
+            <div class="col-md-6 mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                v-model="form.email"
+                @blur="handleBlur('email')"
+                :class="{
+                  'is-invalid': (touched.email && validateEmail()) || form.errors.email
+                }"
+              >
+              <div class="invalid-feedback">
+                <!-- Muestra primero el error del servidor, si existe -->
+                {{ form.errors.email || (touched.email ? validateEmail() : '') }}
               </div>
-
+            </div>
               <!-- Campo Contraseña -->
               <div class="col-md-6 mb-3">
                 <label for="password" class="form-label">Contraseña</label>
@@ -229,7 +246,7 @@ const submit = () => {
                         v-model="form.role_ids"
                         @change="handleRoleChange"
                       >
-                      <label class="form-check-label" :for="'role_' + role.id">{{ role.name }}</label>
+                      <label class="form-check-label" :for="'role_' + role.id">{{ role.label }}</label>
                     </div>
                   </div>
                 </div>

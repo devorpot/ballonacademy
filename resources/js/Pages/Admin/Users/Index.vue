@@ -7,6 +7,15 @@ import { route } from 'ziggy-js';
 import { useToast } from '@/composables/useToast';
 import { ref, computed, onMounted } from 'vue';
 
+import Title from '@/Components/Admin/Title.vue';
+import UserModal from '@/Components/Admin/UserModal.vue';
+import ConfirmDeleteModal from '@/Components/Admin/ConfirmDeleteModal.vue';
+import Breadcrumbs  from '@/Components/Admin/Breadcrumbs.vue';
+const showCreateModal = ref(false);
+const openCreateModal = () => { showCreateModal.value = true; };
+const closeCreateModal = () => { showCreateModal.value = false; };
+
+
 
 const showToast = useToast();
 const page = usePage();
@@ -120,9 +129,7 @@ const deleteUser = () => {
 
 // Activar tooltips de Bootstrap
 onMounted(() => {
-
- showToast('Probando', 'Probando el toast', 'success');
-
+ 
  const flash = page.props.flash;
 
   if (flash?.success) {
@@ -143,30 +150,55 @@ onMounted(() => {
     <Head title="Gestión de Usuarios" />
 
     <AdminLayout>
-        <div class="container-fluid py-4">
-            <!-- Encabezado -->
-            <div class="row mb-4">
-                <div class="col-12 d-flex justify-content-between align-items-center">
-                    <h3><i class="bi bi-people-fill me-2"></i>Gestión de Usuarios</h3>
-                    <Link :href="route('admin.users.create')" class="btn btn-primary btn-sm">
-                        <i class="bi bi-plus-lg me-2"></i>Nuevo Usuario
-                    </Link>
-                </div>
-            </div>
 
-            <!-- Búsqueda -->
-            <div class="card mb-4">
+
+
+        <BreadcrumbHeader
+              username="admin"
+              :breadcrumbs="[
+                { label: 'Dashboard', route: 'admin.dashboard' },
+                { label: 'Usuarios', route: 'admin.users.index' },
+                { label: 'Crear', route: '' } // sin ruta porque es la actual
+              ]"
+            />
+
+
+<section class="section-heading my-3">
+    <div class="container-fluid">
+     <div class="row mb-4 py-4">
+                <div class="col-12 d-flex justify-content-between align-items-center">
+                  <Title :title="'Gestionar Usuarios'" />
+                  <button class="btn btn-primary btn-sm rounded" @click="openCreateModal">
+                    <i class="bi bi-plus-lg me-2"></i>Nuevo Usuario
+                  </button>
+    <!-- 
+            <Link :href="route('admin.users.create')" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-lg me-2"></i>Nuevo Usuario
+                        </Link>
+    -->
+
+                </div>
+          </div>
+    </div>
+</section>
+
+<section class="section-filters">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+             <div class="card mb-4">
                 <div class="card-body">
                     <div class="row justify-content-between align-items-center">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-search"></i></span>
                                 <input
-                                    type="text"
-                                    class="form-control"
-                                    placeholder="Buscar usuarios..."
-                                    v-model="searchQuery"
-                                >
+                                  type="text"
+                                  class="form-control"
+                                  :class="{ 'is-invalid': searchQuery && filteredUsers.length === 0 }"
+                                  placeholder="Buscar usuarios..."
+                                  v-model="searchQuery"
+                                />
                             </div>
                         </div>
                         <div class="col-md-4 text-end">
@@ -179,7 +211,14 @@ onMounted(() => {
                 </div>
             </div>
 
-            <!-- Tabla -->
+            </div>
+        </div>
+    </div>
+    
+</section>
+
+ <section class="section-data">
+            <div class="container-fluid ">
             <div class="card">
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -188,16 +227,22 @@ onMounted(() => {
                                 <tr>
                                    <th class="ps-4" @click="sortBy('id')" style="cursor: pointer;">
                                         ID
-                                        <span v-if="sortKey === 'id'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+                                         <span v-if="sortKey === 'id'">
+                                          <i :class="sortOrder === 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'"></i>
+                                        </span>
                                     </th>
                                     <th @click="sortBy('name')" style="cursor: pointer;">
                                         Nombre
-                                        <span v-if="sortKey === 'name'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+                                       <span v-if="sortKey === 'name'">
+                                          <i :class="sortOrder === 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'"></i>
+                                        </span>
                                     </th>
 
                                     <th @click="sortBy('email')" style="cursor: pointer;">
                                         Email
-                                        <span v-if="sortKey === 'email'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+                                        <span v-if="sortKey === 'email'">
+                                          <i :class="sortOrder === 'asc' ? 'bi bi-caret-up-fill' : 'bi bi-caret-down-fill'"></i>
+                                        </span>
                                     </th>
                                     <th>Roles</th>
                                     <th class="text-end pe-4">Acciones</th>
@@ -219,12 +264,13 @@ onMounted(() => {
                                     <td>{{ user.email }}</td>
                                     <td>
                                         <div class="d-flex flex-wrap gap-1">
-                                            <span
-                                                v-for="role in user.roles"
-                                                :key="role.id"
-                                                class="badge bg-primary"
+                                           <span
+                                              class="badge bg-primary text-truncate"
+                                              style="max-width: 120px"
+                                              v-for="role in user.roles"
+                                              :key="role.id"
                                             >
-                                                {{ role.name }}
+                                              {{ role.name }}
                                             </span>
                                             <span v-if="user.roles.length === 0" class="badge bg-secondary">
                                                 Sin roles
@@ -249,13 +295,12 @@ onMounted(() => {
                                             >
                                                 <i class="bi bi-pencil-fill"></i>
                                             </Link>
-                                            <button
-                                                @click="prepareDelete(user.id)"
-                                                class="btn btn-sm btn-outline-danger"
-                                                title="Eliminar"
-                                                data-bs-toggle="tooltip"
+                                           <button
+                                              @click="prepareDelete(user.id)"
+                                              class="btn btn-sm btn-outline-danger"
+                                              :disabled="isDeleting"
                                             >
-                                                <i class="bi bi-trash-fill"></i>
+                                              <i class="bi bi-trash-fill"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -274,7 +319,7 @@ onMounted(() => {
             <!-- Paginación -->
             <div class="d-flex justify-content-center my-4">
                 <nav>
-                    <ul class="pagination mb-0">
+                    <ul class="pagination mb-0 align-items-center">
                         <li
                             class="page-item"
                             :class="{ disabled: currentPage === 1 }"
@@ -282,14 +327,15 @@ onMounted(() => {
                         >
                             <a class="page-link" href="#">Anterior</a>
                         </li>
-                        <li
-                            v-for="page in totalPages"
-                            :key="page"
-                            class="page-item"
-                            :class="{ active: currentPage === page }"
-                            @click="changePage(page)"
+                      <li
+                          v-for="page in totalPages"
+                          :key="page"
+                          class="page-item"
+                          :class="{ active: currentPage === page }"
+                          @click="changePage(page)"
+                          :aria-current="currentPage === page ? 'page' : null"
                         >
-                            <a class="page-link" href="#">{{ page }}</a>
+                          <a class="page-link" href="#" :aria-label="`Página ${page}`">{{ page }}</a>
                         </li>
                         <li
                             class="page-item"
@@ -302,36 +348,25 @@ onMounted(() => {
                 </nav>
             </div>
         </div>
+ </section>
 
         <!-- Modal eliminar -->
-        <div class="modal fade" id="modal-alert" :class="{ 'show d-block': showDeleteModal }" tabindex="-1" v-if="showDeleteModal">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title text-danger">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar eliminación
-                        </h5>
-                        <button type="button" class="btn-close" @click="cancelDelete"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>
-                            ¿Estás seguro de que deseas eliminar al usuario 
-                            <strong>{{ deletingUser?.name }}</strong>?
-                        </p>
-                        <p class="small text-muted">Esta acción no se puede deshacer.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" @click="cancelDelete">Cancelar</button>
-                        <button class="btn btn-danger" @click="deleteUser" :disabled="isDeleting">
-                            <span v-if="isDeleting" class="spinner-border spinner-border-sm me-2"></span>
-                            Eliminar
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-backdrop fade show" @click="cancelDelete"></div>
-        </div>
+       <ConfirmDeleteModal
+          :show="showDeleteModal"
+          :user="deletingUser"
+          :loading="isDeleting"
+          @close="cancelDelete"
+          @confirm="deleteUser"
+          title="¿Deseas eliminar este usuario?"
+          confirm-message="Por favor confirma la eliminación de"
+          warning-text="Ten en cuenta que esta operación es irreversible."
+          cancel-text="No, cancelar"
+          confirm-text="Sí, eliminar"
+        />
+        <UserModal :show="showCreateModal" @close="closeCreateModal" :roles="props.roles" />
+
     </AdminLayout>
+
 </template>
 
 <style scoped>
@@ -360,14 +395,39 @@ onMounted(() => {
     padding: 0.35rem 0.5rem;
 }
 
-.modal {
-    background-color: rgba(0, 0, 0, 0.5);
+/* Animaciones suaves con fade-in */
+ 
+/* Input de búsqueda con estilo de error si no hay resultados */
+input.is-invalid {
+  border-color: #dc3545;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%23dc3545' viewBox='0 0 16 16'%3e%3cpath d='M16 1.5v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0h13A1.5 1.5 0 0 1 16 1.5zM8 3.993a.905.905 0 1 0-1.81 0 .905.905 0 0 0 1.81 0zM7.1 6h1.8v6H7.1V6z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right calc(0.375em + 0.1875rem) center;
+  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
 }
 
-#modal-alert{
-    
-    .modal-content{
-        z-index:9999!important;
-    }
+/* Botones de tabla con espaciado uniforme */
+.btn-group .btn {
+  min-width: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
+
+/* Tooltip más visible */
+[data-bs-toggle="tooltip"] {
+  cursor: pointer;
+}
+
+/* Roles con truncado en badges para evitar overflow */
+.badge.text-truncate {
+  max-width: 100px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+
 </style>

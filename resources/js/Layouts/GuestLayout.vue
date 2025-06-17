@@ -14,7 +14,7 @@ import { Head } from '@inertiajs/vue3';
                     <div class="text-center mb-4">
                         <h2 class="fw-bold">
                             <i class="bi bi-shield-lock me-2"></i>
-                            Nombre de tu App
+                            Academia de Globos
                         </h2>
                     </div>
                     
@@ -26,12 +26,12 @@ import { Head } from '@inertiajs/vue3';
 </template>
 
 <style scoped>
-.auth-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 20px;
-    background-color: #f8f9fa;
-}
+    .auth-page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 20px;
+        background-color: #f8f9fa;
+    }
 </style>

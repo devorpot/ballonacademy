@@ -7,12 +7,7 @@
       aria-live="assertive"
       aria-atomic="true"
     >
-    <div class="toast-header">
-       
-      <strong class="me-auto">{{ title }}</strong>
-      <small class="text-body-secondary">...</small>
-      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
+ 
       <div class="d-flex">
         <div class="toast-body">
           {{ message }}
@@ -43,6 +38,7 @@ const toastEl = ref(null);
 
 onMounted(() => {
   const toast = new bootstrap.Toast(toastEl.value, {
+     trigger: 'hover focus',
    delay: Number(props.duration)  // <-- fuerza número
   });
   toast.show();
