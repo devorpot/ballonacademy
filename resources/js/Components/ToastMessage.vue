@@ -25,7 +25,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
- 
+import { Toast } from 'bootstrap'; // ✅ Esto es lo correcto
 
 const props = defineProps({
   title: String,
@@ -37,11 +37,12 @@ const props = defineProps({
 const toastEl = ref(null);
 
 onMounted(() => {
-  const toast = new bootstrap.Toast(toastEl.value, {
-     trigger: 'hover focus',
-   delay: Number(props.duration)  // <-- fuerza número
-  });
-  toast.show();
+  if (toastEl.value) {
+    const toast = new Toast(toastEl.value, {
+      delay: Number(props.duration)
+    });
+    toast.show();
+  }
 });
 </script>
 

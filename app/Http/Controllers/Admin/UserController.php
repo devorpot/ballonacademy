@@ -31,48 +31,46 @@ class UserController extends Controller
         ]);
     }
 
-public function create()
-{
-    $roles = Role::all(['id', 'name']); // Traemos solo id y nombre
+    public function create()
+    {
+        $roles = Role::all(['id', 'name','label']); 
 
-    return Inertia::render('Admin/Users/Create', [
-        'roles' => $roles,
-    ]);
-}
-
-
-public function store(Request $request)
-{
-    try {
-        $validated = $request->validate(
-            $this->validationRules(),
-            $this->validationMessages()
-        );
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+        return Inertia::render('Admin/Users/Create', [
+            'roles' => $roles,
         ]);
-
-        $user->syncRoles($validated['role_ids'] ?? []);
-
-        return redirect()->route('admin.users.index')->with('success', 'Usuario creado exitosamente');
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Validation Error',
-                'errors' => $e->errors(),
-            ], 422);
-        }
-        throw $e;
     }
-}
 
 
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate(
+                $this->validationRules(),
+                $this->validationMessages()
+            );
+
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
+
+            $user->syncRoles($validated['role_ids'] ?? []);
+
+            return redirect()->route('admin.users.index')->with('success', 'Usuario creado exitosamente');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Validation Error',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+            throw $e;
+        }
+    }
 
 
-    public function show(User $user)
+   public function show(User $user)
     {
         return Inertia::render('Admin/Users/Show', [
             'user' => $user->load('roles'),
@@ -81,12 +79,13 @@ public function store(Request $request)
 
     public function edit(User $user)
     {
-        $user->load(['roles:id,name']);
+        $roles = Role::all(['id', 'name', 'label']); 
+
  
 
         return Inertia::render('Admin/Users/Edit', [
             'user' => $user,
-            'roles' => Role::select('id', 'name')->get(),
+            'roles' => Role::select('id', 'name','label')->get(),
             'user_roles' => $user->roles->pluck('id')->toArray(),
         ]);
     }
@@ -152,6 +151,12 @@ public function store(Request $request)
                 'role_ids.*.exists' => 'Uno o más roles seleccionados no son válidos.',
             ];
         }
+
+
+        public function student()
+            {
+                return $this->hasOne(Student::class);
+            }
 
 
 

@@ -1,13 +1,16 @@
 import { createInertiaApp } from '@inertiajs/vue3'
 import { createApp, h } from 'vue'
+
+// Bootstrap y estilos
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap'; // Esto importa los ES modules de Bootstrap
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import '../css/app.less'
+
+// Bootstrap JS (incluye Popper)
  
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap'
-import 'bootstrap-icons/font/bootstrap-icons.css'
 
-import '../css/app.less';
-
-const pages = import.meta.glob('./Pages/**/*.vue') // <- permite rutas anidadas
+const pages = import.meta.glob('./Pages/**/*.vue')
 
 createInertiaApp({
   resolve: name => {

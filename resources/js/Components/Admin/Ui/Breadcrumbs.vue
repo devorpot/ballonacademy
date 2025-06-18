@@ -17,7 +17,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <section  class="section-breadcrumbs  w-100 d-block my-4">
+  <section  class="section-breadcrumbs  w-100 d-block my-3">
     <div class="container-fluid">
       <div class="row align-items-center">
         <div class="col-12 col-md-6">

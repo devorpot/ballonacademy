@@ -59,8 +59,13 @@ function logout() {
                             </Link>
                         </li>
                         <li class="nav-item">
-                            <Link class="nav-link" :href="route('admin.users.index')">
-                                <i class="bi bi-people me-1"></i> Alumnos
+                            <Link class="nav-link" :href="route('admin.students.index')">
+                                <i class="bi bi-people me-1"></i> Estudiantes
+                            </Link>
+                        </li>
+                         <li class="nav-item">
+                            <Link class="nav-link" :href="route('admin.courses.index')">
+                                <i class="bi bi-people me-1"></i> Cursos
                             </Link>
                         </li>
                         <li class="nav-item">
@@ -73,11 +78,7 @@ function logout() {
                                 <i class="bi bi-people me-1"></i> Certificados
                             </Link>
                         </li>
-                         <li class="nav-item">
-                            <Link class="nav-link" :href="route('admin.users.index')">
-                                <i class="bi bi-people me-1"></i> Cursos
-                            </Link>
-                        </li>
+                        
                          <li class="nav-item">
                             <Link class="nav-link" :href="route('admin.users.index')">
                                 <i class="bi bi-people me-1"></i> Suscripciones
