@@ -69,26 +69,22 @@ function logout() {
                             </Link>
                         </li>
                         <li class="nav-item">
-                            <Link class="nav-link" :href="route('admin.users.index')">
+                            <Link class="nav-link" :href="route('admin.teachers.index')">
                                 <i class="bi bi-people me-1"></i> Maestros
                             </Link>
                         </li>
                         <li class="nav-item">
-                            <Link class="nav-link" :href="route('admin.users.index')">
+                            <Link class="nav-link" :href="route('admin.certificates.index')">
                                 <i class="bi bi-people me-1"></i> Certificados
                             </Link>
                         </li>
                         
                          <li class="nav-item">
-                            <Link class="nav-link" :href="route('admin.users.index')">
+                            <Link class="nav-link" :href="route('admin.subscriptions.index')">
                                 <i class="bi bi-people me-1"></i> Suscripciones
                             </Link>
                         </li>
-                        <li class="nav-item">
-                            <Link class="nav-link" :href="route('admin.users.index')">
-                                <i class="bi bi-people me-1"></i> Pagos
-                            </Link>
-                        </li>
+                        
                          
                     </ul>
                

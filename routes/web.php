@@ -65,17 +65,17 @@ Route::middleware(['auth', 'role:admin'])
         // Alumnos
         Route::resource('students', StudentController::class);
         // Maestros
-        Route::resource('teachers', TeacherController::class)->only(['index']);
+        Route::resource('teachers', TeacherController::class);
 
         // Certificados
-        Route::resource('certificates', CertificateController::class)->only(['index']);
+        Route::resource('certificates', CertificateController::class);
 
         // Cursos
         Route::resource('courses', CourseController::class);
         Route::resource('courses.videos', VideoController::class);
 
         // Suscripciones
-        Route::resource('subscriptions', SubscriptionController::class)->only(['index']);
+        Route::resource('subscriptions', SubscriptionController::class);
 
         // Pagos
         Route::resource('payments', PaymentController::class)->only(['index']);

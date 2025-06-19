@@ -24,4 +24,9 @@ class Course extends Model
     {
         return $this->hasMany(Video::class);
     }
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
 }
