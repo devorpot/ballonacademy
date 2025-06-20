@@ -84,265 +84,14 @@
 	"buffers":
 	[
 		{
-			"file": "resources/js/Pages/Admin/Courses/Edit.vue",
+			"file": "app/Http/Controllers/Admin/CertificateController.php",
 			"settings":
 			{
-				"buffer_size": 6761,
-				"encoding": "UTF-8",
+				"buffer_size": 2920,
 				"line_ending": "Unix"
 			},
 			"undo_stack":
 			[
-				[
-					9,
-					1,
-					"insert",
-					{
-						"characters": "\n\n\n\n"
-					},
-					"BAAAAEEQAAAAAAAAQhAAAAAAAAAAAAAAQhAAAAAAAABDEAAAAAAAAAAAAABDEAAAAAAAAEQQAAAAAAAAAAAAAEQQAAAAAAAARRAAAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAAQRAAAAAAAABBEAAAAAAAAAAAAAAAAD5A"
-				],
-				[
-					12,
-					1,
-					"",
-					null,
-					"AQAAAEQQAAAAAAAAsBAAAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAARBAAAAAAAABEEAAAAAAAAAAAAAAAAAAA"
-				],
-				[
-					18,
-					1,
-					"",
-					null,
-					"AgAAAB8LAAAAAAAAfgsAAAAAAAAAAAAAfgsAAAAAAAB+CwAAAAAAAEcAAAAgZGF0ZV9zdGFydDogcHJvcHMuY291cnNlLmRhdGVfc3RhcnQsCiAgZGF0ZV9lbmQ6IHByb3BzLmNvdXJzZS5kYXRlX2VuZA",
-					"AQAAAAAAAAABAAAAHwsAAAAAAABmCwAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					22,
-					1,
-					"cut",
-					null,
-					"AQAAAFsQAAAAAAAAWxAAAAAAAABuAAAACmNvbnN0IGZvcm1hdERhdGUgPSAodmFsdWUpID0+IHsKICBpZiAoIXZhbHVlKSByZXR1cm4gJyc7CiAgcmV0dXJuIHZhbHVlLnNwbGl0KCdUJylbMF07IC8vIFNvbG8gWVlZWS1NTS1ERAp9Owo",
-					"AQAAAAAAAAABAAAAyRAAAAAAAABbEAAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					25,
-					1,
-					"insert",
-					{
-						"characters": "\n\n"
-					},
-					"AgAAACkKAAAAAAAAKgoAAAAAAAAAAAAAKgoAAAAAAAArCgAAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAAKQoAAAAAAAApCgAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					26,
-					1,
-					"paste",
-					null,
-					"AQAAACsKAAAAAAAAmQoAAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAAKwoAAAAAAAArCgAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					30,
-					1,
-					"cut",
-					null,
-					"AQAAAJsKAAAAAAAAmwoAAAAAAABYAQAAY29uc3QgZm9ybSA9IHVzZUZvcm0oewogIHRpdGxlOiBwcm9wcy5jb3Vyc2UudGl0bGUsCiAgZGVzY3JpcHRpb246IHByb3BzLmNvdXJzZS5kZXNjcmlwdGlvbiwKICBkZXNjcmlwdGlvbl9zaG9ydDogcHJvcHMuY291cnNlLmRlc2NyaXB0aW9uX3Nob3J0LAogIGxldmVsOiBwcm9wcy5jb3Vyc2UubGV2ZWwsCiAgaW1hZ2VfY292ZXI6IHByb3BzLmNvdXJzZS5pbWFnZV9jb3ZlciwKICBsb2dvOiBwcm9wcy5jb3Vyc2UubG9nbywKICBkYXRlX3N0YXJ0OiBmb3JtYXREYXRlKHByb3BzLmNvdXJzZS5kYXRlX3N0YXJ0KSwKICBkYXRlX2VuZDogZm9ybWF0RGF0ZShwcm9wcy5jb3Vyc2UuZGF0ZV9lbmQpCn0pOwo",
-					"AQAAAAAAAAABAAAA8wsAAAAAAACbCgAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					33,
-					1,
-					"insert",
-					{
-						"characters": "\n"
-					},
-					"AQAAAHIPAAAAAAAAcw8AAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAAcg8AAAAAAAByDwAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					34,
-					1,
-					"paste",
-					null,
-					"AQAAAHMPAAAAAAAAyxAAAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAAcw8AAAAAAABzDwAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					46,
-					1,
-					"",
-					null,
-					"AgAAACsKAAAAAAAAogoAAAAAAAAAAAAAogoAAAAAAACiCgAAAAAAAG4AAAAKY29uc3QgZm9ybWF0RGF0ZSA9ICh2YWx1ZSkgPT4gewogIGlmICghdmFsdWUpIHJldHVybiAnJzsKICByZXR1cm4gdmFsdWUuc3BsaXQoJ1QnKVswXTsgLy8gU29sbyBZWVlZLU1NLURECn07Cg",
-					"AQAAAAAAAAABAAAAmQoAAAAAAAArCgAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					50,
-					1,
-					"",
-					null,
-					"AgAAAG8QAAAAAAAAyxAAAAAAAAAAAAAAyxAAAAAAAADLEAAAAAAAAGAAAAAgIGRhdGVfc3RhcnQ6IGZvcm1hdERhdGUocHJvcHMuY291cnNlLmRhdGVfc3RhcnQpLAogIGRhdGVfZW5kOiBmb3JtYXREYXRlKHByb3BzLmNvdXJzZS5kYXRlX2VuZCk",
-					"AQAAAAAAAAABAAAAzxAAAAAAAABvEAAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					53,
-					1,
-					"indent",
-					null,
-					"AgAAAG8QAAAAAAAAcRAAAAAAAAAAAAAAohAAAAAAAACkEAAAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAAyxAAAAAAAABvEAAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					61,
-					1,
-					"",
-					null,
-					"AgAAAAAAAAAAAAAAaBoAAAAAAAAAAAAAaBoAAAAAAABoGgAAAAAAAOUQAAA8dGVtcGxhdGU+CiAgPEhlYWQgdGl0bGU9IkVkaXRhciBDdXJzbyIgLz4KICA8QWRtaW5MYXlvdXQ+CiAgICA8QnJlYWRjcnVtYnMKICAgICAgdXNlcm5hbWU9ImFkbWluIgogICAgICA6YnJlYWRjcnVtYnM9IlsKICAgICAgICB7IGxhYmVsOiAnRGFzaGJvYXJkJywgcm91dGU6ICdhZG1pbi5kYXNoYm9hcmQnIH0sCiAgICAgICAgeyBsYWJlbDogJ0N1cnNvcycsIHJvdXRlOiAnYWRtaW4uY291cnNlcy5pbmRleCcgfSwKICAgICAgICB7IGxhYmVsOiAnRWRpdGFyJywgcm91dGU6ICcnIH0KICAgICAgXSIKICAgIC8+CgogICAgPHNlY3Rpb24gY2xhc3M9InNlY3Rpb24taGVhZGluZyBteS0yIj4KICAgICAgPGRpdiBjbGFzcz0iY29udGFpbmVyLWZsdWlkIj4KICAgICAgICA8ZGl2IGNsYXNzPSJyb3cgbWItNCI+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJjb2wtMTIgZC1mbGV4IGp1c3RpZnktY29udGVudC1iZXR3ZWVuIGFsaWduLWl0ZW1zLWNlbnRlciI+CiAgICAgICAgICAgIDxUaXRsZSA6dGl0bGU9ImBFZGl0YXIgQ3Vyc29gIiAvPgogICAgICAgICAgICA8QnV0dG9uQmFjayBsYWJlbD0iVm9sdmVyIiBpY29uPSJiaSBiaS1hcnJvdy1sZWZ0IiA6aHJlZj0icm91dGUoJ2FkbWluLmNvdXJzZXMuaW5kZXgnKSIgLz4KICAgICAgICAgIDwvZGl2PgogICAgICAgIDwvZGl2PgogICAgICA8L2Rpdj4KICAgIDwvc2VjdGlvbj4KCiAgICA8c2VjdGlvbiBjbGFzcz0ic2VjdGlvbi1mb3JtIG15LTIiPgogICAgICA8ZGl2IGNsYXNzPSJjb250YWluZXItZmx1aWQiPgogICAgICAgIDxmb3JtIEBzdWJtaXQucHJldmVudD0ic3VibWl0IiBub3ZhbGlkYXRlPgogICAgICAgICAgPGRpdiBjbGFzcz0iY2FyZCI+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9ImNhcmQtYm9keSI+CiAgICAgICAgICAgICAgPGRpdiBjbGFzcz0icm93Ij4KICAgICAgICAgICAgICAgIDxkaXYgdi1mb3I9ImZpZWxkIGluIGNvdXJzZUZpZWxkcyIgOmtleT0iZmllbGQua2V5IiBjbGFzcz0iY29sLW1kLTYgbWItMyI+CiAgICAgICAgICAgICAgICAgIDxsYWJlbCBjbGFzcz0iZm9ybS1sYWJlbCI+e3sgZmllbGQubGFiZWwgfX08L2xhYmVsPgogICAgICAgICAgICAgICAgICA8aW5wdXQKICAgICAgICAgICAgICAgICAgICA6dHlwZT0iZmllbGQudHlwZSB8fCAndGV4dCciCiAgICAgICAgICAgICAgICAgICAgY2xhc3M9ImZvcm0tY29udHJvbCIKICAgICAgICAgICAgICAgICAgICB2LW1vZGVsPSJmb3JtW2ZpZWxkLmtleV0iCiAgICAgICAgICAgICAgICAgICAgQGJsdXI9ImhhbmRsZUJsdXIoZmllbGQua2V5KSIKICAgICAgICAgICAgICAgICAgICA6Y2xhc3M9InsgJ2lzLWludmFsaWQnOiAodG91Y2hlZFtmaWVsZC5rZXldICYmIHZhbGlkYXRlRmllbGQoZmllbGQua2V5KSkgfHwgZm9ybS5lcnJvcnNbZmllbGQua2V5XSB9IgogICAgICAgICAgICAgICAgICA+CiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3M9ImludmFsaWQtZmVlZGJhY2siPgogICAgICAgICAgICAgICAgICAgIHt7IHRvdWNoZWRbZmllbGQua2V5XSA/IHZhbGlkYXRlRmllbGQoZmllbGQua2V5KSA6ICcnIHx8IGZvcm0uZXJyb3JzW2ZpZWxkLmtleV0gfX0KICAgICAgICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPC9kaXY+CgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJjYXJkLWZvb3RlciB0ZXh0LWVuZCI+CiAgICAgICAgICAgICAgPGJ1dHRvbiB0eXBlPSJzdWJtaXQiIGNsYXNzPSJidG4gYnRuLXByaW1hcnkiIDpkaXNhYmxlZD0iZm9ybS5wcm9jZXNzaW5nIHx8ICFpc0Zvcm1WYWxpZCI+CiAgICAgICAgICAgICAgICA8c3BhbiB2LWlmPSJmb3JtLnByb2Nlc3NpbmciIGNsYXNzPSJzcGlubmVyLWJvcmRlciBzcGlubmVyLWJvcmRlci1zbSBtZS0xIj48L3NwYW4+CiAgICAgICAgICAgICAgICA8aSBjbGFzcz0iYmkgYmktc2F2ZSBtZS0yIj48L2k+R3VhcmRhciBjYW1iaW9zCiAgICAgICAgICAgICAgPC9idXR0b24+CiAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9mb3JtPgogICAgICA8L2Rpdj4KICAgIDwvc2VjdGlvbj4KICA8L0FkbWluTGF5b3V0Pgo8L3RlbXBsYXRlPgoKPHNjcmlwdCBzZXR1cD4KaW1wb3J0IHsgSGVhZCB9IGZyb20gJ0BpbmVydGlhanMvdnVlMyc7CmltcG9ydCB7IHVzZUZvcm0gfSBmcm9tICdAaW5lcnRpYWpzL3Z1ZTMnOwppbXBvcnQgeyByb3V0ZSB9IGZyb20gJ3ppZ2d5LWpzJzsKaW1wb3J0IHsgY29tcHV0ZWQsIHJlZiB9IGZyb20gJ3Z1ZSc7CgppbXBvcnQgQWRtaW5MYXlvdXQgZnJvbSAnQC9MYXlvdXRzL0FkbWluTGF5b3V0LnZ1ZSc7CmltcG9ydCBUaXRsZSBmcm9tICdAL0NvbXBvbmVudHMvQWRtaW4vVWkvVGl0bGUudnVlJzsKaW1wb3J0IEJyZWFkY3J1bWJzIGZyb20gJ0AvQ29tcG9uZW50cy9BZG1pbi9VaS9CcmVhZGNydW1icy52dWUnOwppbXBvcnQgQnV0dG9uQmFjayBmcm9tICdAL0NvbXBvbmVudHMvQWRtaW4vVWkvQnV0dG9uQmFjay52dWUnOwoKY29uc3QgcHJvcHMgPSBkZWZpbmVQcm9wcyh7CiAgY291cnNlOiB7IHR5cGU6IE9iamVjdCwgcmVxdWlyZWQ6IHRydWUgfQp9KTsKCmNvbnN0IGZvcm1hdERhdGUgPSAodmFsdWUpID0+IHsKICBpZiAoIXZhbHVlKSByZXR1cm4gbnVsbDsgLy8gRW52aWFyIG51bGwgZW4gdmV6IGRlICcnCiAgcmV0dXJuIHZhbHVlLnNwbGl0KCdUJylbMF07Cn07CgoKY29uc3QgdG91Y2hlZCA9IHJlZih7fSk7CmNvbnN0IGNvdXJzZUZpZWxkcyA9IFsKICB7IGtleTogJ3RpdGxlJywgbGFiZWw6ICdUw610dWxvJyB9LAogIHsga2V5OiAnZGVzY3JpcHRpb24nLCBsYWJlbDogJ0Rlc2NyaXBjacOzbicgfSwKICB7IGtleTogJ2Rlc2NyaXB0aW9uX3Nob3J0JywgbGFiZWw6ICdEZXNjcmlwY2nDs24gY29ydGEnIH0sCiAgeyBrZXk6ICdsZXZlbCcsIGxhYmVsOiAnTml2ZWwnIH0sCiAgeyBrZXk6ICdpbWFnZV9jb3ZlcicsIGxhYmVsOiAnVVJMIGltYWdlbiBjb3ZlcicgfSwKICB7IGtleTogJ2xvZ28nLCBsYWJlbDogJ1VSTCBsb2dvJyB9LAogIHsga2V5OiAnZGF0ZV9zdGFydCcsIGxhYmVsOiAnRmVjaGEgZGUgaW5pY2lvJywgdHlwZTogJ2RhdGUnIH0sCiAgeyBrZXk6ICdkYXRlX2VuZCcsIGxhYmVsOiAnRmVjaGEgZGUgZmluJywgdHlwZTogJ2RhdGUnIH0KXTsKCmNvbnN0IGhhbmRsZUJsdXIgPSAoZmllbGQpID0+IHsKICB0b3VjaGVkLnZhbHVlW2ZpZWxkXSA9IHRydWU7Cn07Cgpjb25zdCB2YWxpZGF0ZUZpZWxkID0gKGZpZWxkKSA9PiB7CiAgaWYgKChmaWVsZCA9PT0gJ3RpdGxlJyB8fCBmaWVsZCA9PT0gJ2Rlc2NyaXB0aW9uJykgJiYgIWZvcm1bZmllbGRdLnRyaW0oKSkgewogICAgcmV0dXJuIGBFbCBjYW1wbyAke2ZpZWxkID09PSAndGl0bGUnID8gJ1TDrXR1bG8nIDogJ0Rlc2NyaXBjacOzbid9IGVzIG9ibGlnYXRvcmlvYDsKICB9CiAgaWYgKGZpZWxkID09PSAnZGF0ZV9lbmQnICYmIGZvcm0uZGF0ZV9zdGFydCAmJiBmb3JtLmRhdGVfZW5kICYmIGZvcm0uZGF0ZV9lbmQgPCBmb3JtLmRhdGVfc3RhcnQpIHsKICAgIHJldHVybiAnTGEgZmVjaGEgZGUgZmluIG5vIHB1ZWRlIHNlciBhbnRlcmlvciBhIGxhIGZlY2hhIGRlIGluaWNpbyc7CiAgfQogIHJldHVybiAnJzsKfTsKCmNvbnN0IGlzRm9ybVZhbGlkID0gY29tcHV0ZWQoKCkgPT4gewogIHJldHVybiBjb3Vyc2VGaWVsZHMuZXZlcnkoZiA9PiAhdmFsaWRhdGVGaWVsZChmLmtleSkpOwp9KTsKCmNvbnN0IHN1Ym1pdCA9ICgpID0+IHsKICBjb3Vyc2VGaWVsZHMuZm9yRWFjaChmID0+IHsKICAgIHRvdWNoZWQudmFsdWVbZi5rZXldID0gdHJ1ZTsKICB9KTsKCiAgaWYgKGlzRm9ybVZhbGlkLnZhbHVlKSB7CiAgICBmb3JtLnB1dChyb3V0ZSgnYWRtaW4uY291cnNlcy51cGRhdGUnLCBwcm9wcy5jb3Vyc2UuaWQpLCB7CiAgICAgIHByZXNlcnZlU2Nyb2xsOiB0cnVlCiAgICB9KTsKICB9Cn07Cgpjb25zdCBmb3JtID0gdXNlRm9ybSh7CiAgdGl0bGU6IHByb3BzLmNvdXJzZS50aXRsZSwKICBkZXNjcmlwdGlvbjogcHJvcHMuY291cnNlLmRlc2NyaXB0aW9uLAogIGRlc2NyaXB0aW9uX3Nob3J0OiBwcm9wcy5jb3Vyc2UuZGVzY3JpcHRpb25fc2hvcnQsCiAgbGV2ZWw6IHByb3BzLmNvdXJzZS5sZXZlbCwKICBpbWFnZV9jb3ZlcjogcHJvcHMuY291cnNlLmltYWdlX2NvdmVyLAogIGxvZ286IHByb3BzLmNvdXJzZS5sb2dvLAogIGRhdGVfc3RhcnQ6IGZvcm1hdERhdGUocHJvcHMuY291cnNlLmRhdGVfc3RhcnQpLAogIGRhdGVfZW5kOiBmb3JtYXREYXRlKHByb3BzLmNvdXJzZS5kYXRlX2VuZCkKfSk7CgoKPC9zY3JpcHQ+Cg",
-					"AQAAAAAAAAABAAAAAAAAAAAAAADgEAAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					64,
-					1,
-					"paste",
-					null,
-					"AgAAADkXAAAAAAAA0xgAAAAAAAAAAAAA0xgAAAAAAADTGAAAAAAAAJsBAABjb25zdCB2YWxpZGF0ZUZpZWxkID0gKGZpZWxkKSA9PiB7CiAgaWYgKGZpZWxkID09PSAndGl0bGUnICYmICFmb3JtLnRpdGxlLnRyaW0oKSkgcmV0dXJuICdFbCB0w610dWxvIGVzIG9ibGlnYXRvcmlvJzsKICBpZiAoZmllbGQgPT09ICdkZXNjcmlwdGlvbicgJiYgIWZvcm0uZGVzY3JpcHRpb24udHJpbSgpKSByZXR1cm4gJ0xhIGRlc2NyaXBjacOzbiBlcyBvYmxpZ2F0b3JpYSc7CiAgaWYgKGZpZWxkID09PSAnZGF0ZV9lbmQnICYmIGZvcm0uZGF0ZV9zdGFydCAmJiBmb3JtLmRhdGVfZW5kICYmIGZvcm0uZGF0ZV9lbmQgPCBmb3JtLmRhdGVfc3RhcnQpIHsKICAgIHJldHVybiAnTGEgZmVjaGEgZGUgZmluIG5vIHB1ZWRlIHNlciBhbnRlcmlvciBhIGxhIGZlY2hhIGRlIGluaWNpbyc7CiAgfQogIHJldHVybiAnJzsKfTs",
-					"AQAAAAAAAAABAAAA0hgAAAAAAAA5FwAAAAAAAAAAAAAAAPC/"
-				]
-			]
-		},
-		{
-			"file": "/media/daniel/SERVIDOR1/pwd.htaccess",
-			"settings":
-			{
-				"buffer_size": 2284,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			},
-			"undo_stack":
-			[
-			]
-		},
-		{
-			"file": "app/Http/Controllers/Admin/CourseController.php",
-			"settings":
-			{
-				"buffer_size": 2560,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			},
-			"undo_stack":
-			[
-				[
-					10,
-					1,
-					"",
-					null,
-					"AgAAAAAAAAAAAAAANAoAAAAAAAAAAAAANAoAAAAAAAA0CgAAAAAAANYIAAA8P3BocAoKbmFtZXNwYWNlIEFwcFxIdHRwXENvbnRyb2xsZXJzXEFkbWluOwoKdXNlIEFwcFxIdHRwXENvbnRyb2xsZXJzXENvbnRyb2xsZXI7CnVzZSBBcHBcTW9kZWxzXENvdXJzZTsKdXNlIElsbHVtaW5hdGVcSHR0cFxSZXF1ZXN0Owp1c2UgSW5lcnRpYVxJbmVydGlhOwoKY2xhc3MgQ291cnNlQ29udHJvbGxlciBleHRlbmRzIENvbnRyb2xsZXIKewogICAgcHVibGljIGZ1bmN0aW9uIGluZGV4KCkKICAgIHsKICAgICAgICAkY291cnNlcyA9IENvdXJzZTo6YWxsKCk7CiAgICAgICAgcmV0dXJuIEluZXJ0aWE6OnJlbmRlcignQWRtaW4vQ291cnNlcy9JbmRleCcsIFsKICAgICAgICAgICAgJ2NvdXJzZXMnID0+ICRjb3Vyc2VzCiAgICAgICAgXSk7CiAgICB9CgogICAgcHVibGljIGZ1bmN0aW9uIGNyZWF0ZSgpCiAgICB7CiAgICAgICAgcmV0dXJuIEluZXJ0aWE6OnJlbmRlcignQWRtaW4vQ291cnNlcy9DcmVhdGUnKTsKICAgIH0KCiAgICBwdWJsaWMgZnVuY3Rpb24gc3RvcmUoUmVxdWVzdCAkcmVxdWVzdCkKICAgIHsKICAgICAgICAkdmFsaWRhdGVkID0gJHJlcXVlc3QtPnZhbGlkYXRlKFsKICAgICAgICAgICAgJ3RpdGxlJyA9PiAncmVxdWlyZWR8c3RyaW5nfG1heDoyNTUnLAogICAgICAgICAgICAnZGVzY3JpcHRpb24nID0+ICdyZXF1aXJlZHxzdHJpbmcnLAogICAgICAgICAgICAnZGVzY3JpcHRpb25fc2hvcnQnID0+ICdudWxsYWJsZXxzdHJpbmcnLAogICAgICAgICAgICAnbGV2ZWwnID0+ICdudWxsYWJsZXxzdHJpbmd8bWF4OjI1NScsCiAgICAgICAgICAgICdpbWFnZV9jb3ZlcicgPT4gJ251bGxhYmxlfHN0cmluZ3xtYXg6MjU1JywKICAgICAgICAgICAgJ2xvZ28nID0+ICdudWxsYWJsZXxzdHJpbmd8bWF4OjI1NScsCiAgICAgICAgICAgICdkYXRlX3N0YXJ0JyA9PiAnbnVsbGFibGV8ZGF0ZScsCiAgICAgICAgICAgICdkYXRlX2VuZCcgPT4gJ251bGxhYmxlfGRhdGV8YWZ0ZXJfb3JfZXF1YWw6ZGF0ZV9zdGFydCcsCiAgICAgICAgXSk7CgogICAgICAgIENvdXJzZTo6Y3JlYXRlKCR2YWxpZGF0ZWQpOwoKICAgICAgICByZXR1cm4gcmVkaXJlY3QoKS0+cm91dGUoJ2FkbWluLmNvdXJzZXMuaW5kZXgnKS0+d2l0aCgnc3VjY2VzcycsICdDdXJzbyBjcmVhZG8gZXhpdG9zYW1lbnRlJyk7CiAgICB9CgogICAgcHVibGljIGZ1bmN0aW9uIGVkaXQoQ291cnNlICRjb3Vyc2UpCiAgICB7CiAgICAgICAgcmV0dXJuIEluZXJ0aWE6OnJlbmRlcignQWRtaW4vQ291cnNlcy9FZGl0JywgWwogICAgICAgICAgICAnY291cnNlJyA9PiAkY291cnNlCiAgICAgICAgXSk7CiAgICB9CgogICAgcHVibGljIGZ1bmN0aW9uIHVwZGF0ZShSZXF1ZXN0ICRyZXF1ZXN0LCBDb3Vyc2UgJGNvdXJzZSkKICAgICAgICB7CiAgICAgICAgICAgJHZhbGlkYXRlZCA9ICRyZXF1ZXN0LT52YWxpZGF0ZShbCiAgICAgICAgICAgICd0aXRsZScgPT4gJ3JlcXVpcmVkfHN0cmluZ3xtYXg6MjU1JywKICAgICAgICAgICAgJ2Rlc2NyaXB0aW9uJyA9PiAncmVxdWlyZWR8c3RyaW5nJywKICAgICAgICAgICAgJ2Rlc2NyaXB0aW9uX3Nob3J0JyA9PiAnbnVsbGFibGV8c3RyaW5nJywKICAgICAgICAgICAgJ2xldmVsJyA9PiAnbnVsbGFibGV8c3RyaW5nfG1heDoyNTUnLAogICAgICAgICAgICAnaW1hZ2VfY292ZXInID0+ICdudWxsYWJsZXxzdHJpbmd8bWF4OjI1NScsCiAgICAgICAgICAgICdsb2dvJyA9PiAnbnVsbGFibGV8c3RyaW5nfG1heDoyNTUnLAogICAgICAgICAgICAnZGF0ZV9zdGFydCcgPT4gJ251bGxhYmxlfGRhdGUnLAogICAgICAgICAgICAnZGF0ZV9lbmQnID0+ICdudWxsYWJsZXxkYXRlfGFmdGVyX29yX2VxdWFsOmRhdGVfc3RhcnQnLAogICAgICAgIF0pOwoKICAgICAgICAvLyBMaW1waWEgc3RyaW5ncyB2YWPDrW9zCiAgICAgICAgICBkZCgkdmFsaWRhdGVkKTsKCiAgICAgICAgJGNvdXJzZS0+dXBkYXRlKCR2YWxpZGF0ZWQpOwogICAgICAgICAgICByZXR1cm4gcmVkaXJlY3QoKS0+cm91dGUoJ2FkbWluLmNvdXJzZXMuaW5kZXgnKS0+d2l0aCgnc3VjY2VzcycsICdDdXJzbyBhY3R1YWxpemFkbyBleGl0b3NhbWVudGUnKTsKICAgIH0KCgogICAgcHVibGljIGZ1bmN0aW9uIGRlc3Ryb3koQ291cnNlICRjb3Vyc2UpCiAgICB7CiAgICAgICAgJGNvdXJzZS0+ZGVsZXRlKCk7CgogICAgICAgIHJldHVybiByZWRpcmVjdCgpLT5yb3V0ZSgnYWRtaW4uY291cnNlcy5pbmRleCcpLT53aXRoKCdzdWNjZXNzJywgJ0N1cnNvIGVsaW1pbmFkbyBleGl0b3NhbWVudGUnKTsKICAgIH0KfQo",
-					"AQAAAAAAAAABAAAAAAAAAAAAAADVCAAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					19,
-					1,
-					"left_delete",
-					null,
-					"AQAAALEIAAAAAAAAsQgAAAAAAAAaAAAAfGFmdGVyX29yX2VxdWFsOmRhdGVfc3RhcnQ",
-					"AQAAAAAAAAABAAAAywgAAAAAAACxCAAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					28,
-					3,
-					"delete_word",
-					{
-						"forward": true
-					},
-					"AwAAAJQEAAAAAAAAlAQAAAAAAAAOAAAAYWZ0ZXJfb3JfZXF1YWyUBAAAAAAAAJQEAAAAAAAAAQAAADqUBAAAAAAAAJQEAAAAAAAACgAAAGRhdGVfc3RhcnQ",
-					"AQAAAAAAAAABAAAAlAQAAAAAAACiBAAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					29,
-					1,
-					"left_delete",
-					null,
-					"AQAAAJMEAAAAAAAAkwQAAAAAAAABAAAAfA",
-					"AQAAAAAAAAABAAAAlAQAAAAAAACUBAAAAAAAAAAAAAAAAPC/"
-				]
-			]
-		},
-		{
-			"file": "resources/js/Pages/Admin/Courses/Create.vue",
-			"settings":
-			{
-				"buffer_size": 6353,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			},
-			"undo_stack":
-			[
-				[
-					4,
-					1,
-					"cut",
-					null,
-					"AQAAAHwKAAAAAAAAfAoAAAAAAACoAQAAY29uc3QgY291cnNlRmllbGRzID0gWwogIHsga2V5OiAndGl0bGUnLCBsYWJlbDogJ1TDrXR1bG8nIH0sCiAgeyBrZXk6ICdkZXNjcmlwdGlvbicsIGxhYmVsOiAnRGVzY3JpcGNpw7NuJyB9LAogIHsga2V5OiAnZGVzY3JpcHRpb25fc2hvcnQnLCBsYWJlbDogJ0Rlc2NyaXBjacOzbiBjb3J0YScgfSwKICB7IGtleTogJ2xldmVsJywgbGFiZWw6ICdOaXZlbCcgfSwKICB7IGtleTogJ2ltYWdlX2NvdmVyJywgbGFiZWw6ICdVUkwgaW1hZ2VuIGNvdmVyJyB9LAogIHsga2V5OiAnbG9nbycsIGxhYmVsOiAnVVJMIGxvZ28nIH0sCiAgeyBrZXk6ICdkYXRlX3N0YXJ0JywgbGFiZWw6ICdGZWNoYSBkZSBpbmljaW8nLCB0eXBlOiAnZGF0ZScgfSwKICB7IGtleTogJ2RhdGVfZW5kJywgbGFiZWw6ICdGZWNoYSBkZSBmaW4nLCB0eXBlOiAnZGF0ZScgfQpdOw",
-					"AQAAAAAAAAABAAAAIQwAAAAAAAB8CgAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					7,
-					1,
-					"insert",
-					{
-						"characters": "\n\n"
-					},
-					"AgAAALYNAAAAAAAAtw0AAAAAAAAAAAAAtw0AAAAAAAC4DQAAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAAtg0AAAAAAAC2DQAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					8,
-					1,
-					"run_macro_file",
-					{
-						"file": "res://Packages/Default/Add Line.sublime-macro"
-					},
-					"AQAAALgNAAAAAAAAuQ0AAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAAuA0AAAAAAAC4DQAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					9,
-					1,
-					"paste",
-					null,
-					"AQAAALkNAAAAAAAAXg8AAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAAuQ0AAAAAAAC5DQAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					12,
-					1,
-					"insert",
-					{
-						"characters": "\n\n"
-					},
-					"AgAAALYNAAAAAAAAtw0AAAAAAAAAAAAAtw0AAAAAAAC4DQAAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAAtg0AAAAAAAC2DQAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					13,
-					1,
-					"paste",
-					null,
-					"AQAAALgNAAAAAAAAJQ4AAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAAuA0AAAAAAAC4DQAAAAAAAAAAAAAAAPC/"
-				],
-				[
-					32,
-					1,
-					"",
-					null,
-					"AgAAAAAAAAAAAAAA0RgAAAAAAAAAAAAA0RgAAAAAAADRGAAAAAAAAN0PAAA8dGVtcGxhdGU+CiAgPEhlYWQgdGl0bGU9IkNyZWFyIE51ZXZvIEN1cnNvIiAvPgogIDxBZG1pbkxheW91dD4KICAgIDxCcmVhZGNydW1icwogICAgICB1c2VybmFtZT0iYWRtaW4iCiAgICAgIDpicmVhZGNydW1icz0iWwogICAgICAgIHsgbGFiZWw6ICdEYXNoYm9hcmQnLCByb3V0ZTogJ2FkbWluLmRhc2hib2FyZCcgfSwKICAgICAgICB7IGxhYmVsOiAnQ3Vyc29zJywgcm91dGU6ICdhZG1pbi5jb3Vyc2VzLmluZGV4JyB9LAogICAgICAgIHsgbGFiZWw6ICdDcmVhcicsIHJvdXRlOiAnJyB9CiAgICAgIF0iCiAgICAvPgoKICAgIDxzZWN0aW9uIGNsYXNzPSJzZWN0aW9uLWhlYWRpbmcgbXktMiI+CiAgICAgIDxkaXYgY2xhc3M9ImNvbnRhaW5lci1mbHVpZCI+CiAgICAgICAgPGRpdiBjbGFzcz0icm93IG1iLTQiPgogICAgICAgICAgPGRpdiBjbGFzcz0iY29sLTEyIGQtZmxleCBqdXN0aWZ5LWNvbnRlbnQtYmV0d2VlbiBhbGlnbi1pdGVtcy1jZW50ZXIiPgogICAgICAgICAgICA8VGl0bGUgOnRpdGxlPSInQ3JlYXIgQ3Vyc28nIiAvPgogICAgICAgICAgICA8QnV0dG9uQmFjayBsYWJlbD0iVm9sdmVyIiBpY29uPSJiaSBiaS1hcnJvdy1sZWZ0IiA6aHJlZj0icm91dGUoJ2FkbWluLmNvdXJzZXMuaW5kZXgnKSIgLz4KICAgICAgICAgIDwvZGl2PgogICAgICAgIDwvZGl2PgogICAgICA8L2Rpdj4KICAgIDwvc2VjdGlvbj4KCiAgICA8c2VjdGlvbiBjbGFzcz0ic2VjdGlvbi1mb3JtIG15LTIiPgogICAgICA8ZGl2IGNsYXNzPSJjb250YWluZXItZmx1aWQiPgogICAgICAgIDxmb3JtIEBzdWJtaXQucHJldmVudD0ic3VibWl0IiBub3ZhbGlkYXRlPgogICAgICAgICAgPGRpdiBjbGFzcz0iY2FyZCI+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9ImNhcmQtYm9keSI+CiAgICAgICAgICAgICAgPGRpdiBjbGFzcz0icm93Ij4KICAgICAgICAgICAgICAgIDxkaXYgdi1mb3I9ImZpZWxkIGluIGNvdXJzZUZpZWxkcyIgOmtleT0iZmllbGQua2V5IiBjbGFzcz0iY29sLW1kLTYgbWItMyI+CiAgICAgICAgICAgICAgICAgIDxsYWJlbCBjbGFzcz0iZm9ybS1sYWJlbCI+e3sgZmllbGQubGFiZWwgfX08L2xhYmVsPgogICAgICAgICAgICAgICAgICA8aW5wdXQKICAgICAgICAgICAgICAgICAgICA6dHlwZT0iZmllbGQudHlwZSB8fCAndGV4dCciCiAgICAgICAgICAgICAgICAgICAgY2xhc3M9ImZvcm0tY29udHJvbCIKICAgICAgICAgICAgICAgICAgICB2LW1vZGVsPSJmb3JtW2ZpZWxkLmtleV0iCiAgICAgICAgICAgICAgICAgICAgQGJsdXI9ImhhbmRsZUJsdXIoZmllbGQua2V5KSIKICAgICAgICAgICAgICAgICAgICA6Y2xhc3M9InsgJ2lzLWludmFsaWQnOiAodG91Y2hlZFtmaWVsZC5rZXldICYmIHZhbGlkYXRlRmllbGQoZmllbGQua2V5KSkgfHwgZm9ybS5lcnJvcnNbZmllbGQua2V5XSB9IgogICAgICAgICAgICAgICAgICA+CiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3M9ImludmFsaWQtZmVlZGJhY2siPgogICAgICAgICAgICAgICAgICAgIHt7IHRvdWNoZWRbZmllbGQua2V5XSA/IHZhbGlkYXRlRmllbGQoZmllbGQua2V5KSA6ICcnIHx8IGZvcm0uZXJyb3JzW2ZpZWxkLmtleV0gfX0KICAgICAgICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPC9kaXY+CgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJjYXJkLWZvb3RlciB0ZXh0LWVuZCI+CiAgICAgICAgICAgICAgPGJ1dHRvbiB0eXBlPSJzdWJtaXQiIGNsYXNzPSJidG4gYnRuLXByaW1hcnkiIDpkaXNhYmxlZD0iZm9ybS5wcm9jZXNzaW5nIHx8ICFpc0Zvcm1WYWxpZCI+CiAgICAgICAgICAgICAgICA8c3BhbiB2LWlmPSJmb3JtLnByb2Nlc3NpbmciIGNsYXNzPSJzcGlubmVyLWJvcmRlciBzcGlubmVyLWJvcmRlci1zbSBtZS0xIj48L3NwYW4+CiAgICAgICAgICAgICAgICA8aSBjbGFzcz0iYmkgYmktc2F2ZSBtZS0yIj48L2k+R3VhcmRhcgogICAgICAgICAgICAgIDwvYnV0dG9uPgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDwvZGl2PgogICAgICAgIDwvZm9ybT4KICAgICAgPC9kaXY+CiAgICA8L3NlY3Rpb24+CiAgPC9BZG1pbkxheW91dD4KPC90ZW1wbGF0ZT4KCjxzY3JpcHQgc2V0dXA+CmltcG9ydCB7IEhlYWQgfSBmcm9tICdAaW5lcnRpYWpzL3Z1ZTMnOwppbXBvcnQgeyB1c2VGb3JtIH0gZnJvbSAnQGluZXJ0aWFqcy92dWUzJzsKaW1wb3J0IHsgcm91dGUgfSBmcm9tICd6aWdneS1qcyc7CmltcG9ydCB7IHJlZiwgY29tcHV0ZWQgfSBmcm9tICd2dWUnOwoKaW1wb3J0IEFkbWluTGF5b3V0IGZyb20gJ0AvTGF5b3V0cy9BZG1pbkxheW91dC52dWUnOwppbXBvcnQgVGl0bGUgZnJvbSAnQC9Db21wb25lbnRzL0FkbWluL1VpL1RpdGxlLnZ1ZSc7CmltcG9ydCBCcmVhZGNydW1icyBmcm9tICdAL0NvbXBvbmVudHMvQWRtaW4vVWkvQnJlYWRjcnVtYnMudnVlJzsKaW1wb3J0IEJ1dHRvbkJhY2sgZnJvbSAnQC9Db21wb25lbnRzL0FkbWluL1VpL0J1dHRvbkJhY2sudnVlJzsKCmNvbnN0IGZvcm0gPSB1c2VGb3JtKHsKICB0aXRsZTogJycsCiAgZGVzY3JpcHRpb246ICcnLAogIGRlc2NyaXB0aW9uX3Nob3J0OiAnJywKICBsZXZlbDogJycsCiAgaW1hZ2VfY292ZXI6ICcnLAogIGxvZ286ICcnLAogIGRhdGVfc3RhcnQ6ICcnLAogIGRhdGVfZW5kOiAnJwp9KTsKCgoKY29uc3QgdG91Y2hlZCA9IHJlZih7fSk7Cgpjb25zdCBoYW5kbGVCbHVyID0gKGZpZWxkKSA9PiB7CiAgdG91Y2hlZC52YWx1ZVtmaWVsZF0gPSB0cnVlOwp9OwoKY29uc3QgdmFsaWRhdGVGaWVsZCA9IChmaWVsZCkgPT4gewogIGlmICgoZmllbGQgPT09ICd0aXRsZScgfHwgZmllbGQgPT09ICdkZXNjcmlwdGlvbicpICYmICFmb3JtW2ZpZWxkXS50cmltKCkpIHsKICAgIHJldHVybiBgRWwgY2FtcG8gJHtmaWVsZCA9PT0gJ3RpdGxlJyA/ICdUw610dWxvJyA6ICdEZXNjcmlwY2nDs24nfSBlcyBvYmxpZ2F0b3Jpb2A7CiAgfQogIGlmIChmaWVsZCA9PT0gJ2RhdGVfZW5kJyAmJiBmb3JtLmRhdGVfc3RhcnQgJiYgZm9ybS5kYXRlX2VuZCAmJiBmb3JtLmRhdGVfZW5kIDwgZm9ybS5kYXRlX3N0YXJ0KSB7CiAgICByZXR1cm4gJ0xhIGZlY2hhIGRlIGZpbiBubyBwdWVkZSBzZXIgYW50ZXJpb3IgYSBsYSBmZWNoYSBkZSBpbmljaW8nOwogIH0KICByZXR1cm4gJyc7Cn07Cgpjb25zdCBpc0Zvcm1WYWxpZCA9IGNvbXB1dGVkKCgpID0+IHsKICByZXR1cm4gY291cnNlRmllbGRzLmV2ZXJ5KGYgPT4gIXZhbGlkYXRlRmllbGQoZi5rZXkpKTsKfSk7Cgpjb25zdCBzdWJtaXQgPSAoKSA9PiB7CiAgY291cnNlRmllbGRzLmZvckVhY2goZiA9PiB0b3VjaGVkLnZhbHVlW2Yua2V5XSA9IHRydWUpOwoKICBpZiAoaXNGb3JtVmFsaWQudmFsdWUpIHsKICAgIGZvcm0ucG9zdChyb3V0ZSgnYWRtaW4uY291cnNlcy5zdG9yZScpLCB7CiAgICAgIHByZXNlcnZlU2Nyb2xsOiB0cnVlLAogICAgICBvblN1Y2Nlc3M6ICgpID0+IGZvcm0ucmVzZXQoKQogICAgfSk7CiAgfQp9OwoKY29uc3QgZm9ybWF0RGF0ZSA9ICh2YWx1ZSkgPT4gewogIGlmICghdmFsdWUpIHJldHVybiAnJzsKICByZXR1cm4gdmFsdWUuc3BsaXQoJ1QnKVswXTsgLy8gU29sbyBZWVlZLU1NLURECn07CgoKCmNvbnN0IGNvdXJzZUZpZWxkcyA9IFsKICB7IGtleTogJ3RpdGxlJywgbGFiZWw6ICdUw610dWxvJyB9LAogIHsga2V5OiAnZGVzY3JpcHRpb24nLCBsYWJlbDogJ0Rlc2NyaXBjacOzbicgfSwKICB7IGtleTogJ2Rlc2NyaXB0aW9uX3Nob3J0JywgbGFiZWw6ICdEZXNjcmlwY2nDs24gY29ydGEnIH0sCiAgeyBrZXk6ICdsZXZlbCcsIGxhYmVsOiAnTml2ZWwnIH0sCiAgeyBrZXk6ICdpbWFnZV9jb3ZlcicsIGxhYmVsOiAnVVJMIGltYWdlbiBjb3ZlcicgfSwKICB7IGtleTogJ2xvZ28nLCBsYWJlbDogJ1VSTCBsb2dvJyB9LAogIHsga2V5OiAnZGF0ZV9zdGFydCcsIGxhYmVsOiAnRmVjaGEgZGUgaW5pY2lvJywgdHlwZTogJ2RhdGUnIH0sCiAgeyBrZXk6ICdkYXRlX2VuZCcsIGxhYmVsOiAnRmVjaGEgZGUgZmluJywgdHlwZTogJ2RhdGUnIH0KXTsKPC9zY3JpcHQ+Cg",
-					"AQAAAAAAAAABAAAAAAAAAAAAAADYDwAAAAAAAAAAAAAAAPC/"
-				]
 			]
 		}
 	],
@@ -401,15 +150,13 @@
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/seeders",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/Ui",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/composables",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Layouts",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Courses",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Students",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Subscriptions",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Users",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Videos",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Auth",
@@ -420,22 +167,46 @@
 	],
 	"file_history":
 	[
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Partials/Admin/Navbar.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_06_18_225939_create_certificates_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/Certificate.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/User.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/Teacher.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/CertificateController.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/routes/web.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Certificates/Create.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Certificates/Edit.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Certificates/Index.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Certificates/Show.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/SubscriptionController.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Suscriptions/Create.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_06_18_222707_create_subscriptions_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/Subscription.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Suscriptions/Edit.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Suscriptions/Index.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Suscriptions/Show.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Teachers/Create.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Teachers/Edit.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Teachers/Index.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Teachers/Show.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/Course.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/TeacherController.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_06_18_214158_create_teachers_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_06_18_215635_add_columns_to_teachers_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Courses/Create.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/CourseController.php",
+		"/media/daniel/SERVIDOR1/pwd.htaccess",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Courses/Edit.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Courses/Index.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Videos/Edit.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_06_18_030746_add_date_start_and_date_end_to_courses_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/CourseController.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Courses/Create.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Courses/Edit.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/Course.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Videos/Create.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/VideoController.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/routes/web.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Videos/Index.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Videos/Show.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/Video.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/StudentController.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Courses/Show.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Partials/Admin/Navbar.vue",
 		"/tmp/fz3temp-2/index.php",
 		"/media/daniel/SERVIDOR1/httpd/academiaglobos/wp-content/themes/academiaglobos/pages/page-home.php",
 		"/tmp/fz3temp-2/page-home.php",
@@ -444,7 +215,6 @@
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/UserController.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_06_17_224627_add_student_fields_to_users_table.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_06_17_230505_create_students_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/User.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Students/Create.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Students/Edit.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Students/Index.vue",
@@ -466,7 +236,6 @@
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/Title.vue",
 		"/tmp/fz3temp-2/wp-config.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/UserModal.vue",
-		"/media/daniel/SERVIDOR1/pwd.htaccess",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Layouts/GuestLayout.vue",
 		"/media/daniel/SERVIDOR1/astro/invitaciones/oswaldo/src/pages/index.astro",
 		"/media/daniel/SERVIDOR1/astro/invitaciones/oswaldo/astro.config.mjs",
@@ -525,33 +294,11 @@
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/vite.config.js",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/bootstrap/app.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Middleware/HandleInertiaRequests.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Dashboard.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Middleware/Authenticate.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/seeders/RoleSeeder.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Home.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/seeders/RolePermissionSeeder.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/RolePermissionController.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Middleware/RoleMiddleware.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/seeders/AdminUserSeeder.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/UserController.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Edit.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/.env",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/seeders/RolesSeeder.php",
-		"/tmp/fz3temp-2/authorized_keys",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/.github/workflows/deploy.yml",
-		"/media/daniel/SERVIDOR1/httpd/academyballon/vite.config.js",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/,github/workflows/deploy.yml",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Auth/Register.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_06_03_224954_add_role_to_users_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js",
-		"/media/daniel/SERVIDOR1/httpd/academyballon/bootstrap/app.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Welcome.vue",
-		"/media/daniel/SERVIDOR1/httpd/academyballon/.env",
-		"/media/daniel/SERVIDOR1/httpd/academyballon/resources/js/app.js"
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Dashboard.vue"
 	],
 	"find":
 	{
-		"height": 43.0
+		"height": 31.0
 	},
 	"find_in_files":
 	{
@@ -659,80 +406,20 @@
 			[
 				{
 					"buffer": 0,
-					"file": "resources/js/Pages/Admin/Courses/Edit.vue",
+					"file": "app/Http/Controllers/Admin/CertificateController.php",
 					"selected": true,
-					"semi_transient": false,
+					"semi_transient": true,
 					"settings":
 					{
-						"buffer_size": 6761,
+						"buffer_size": 2920,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6645,
-								6684
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Vue/Vue Component.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"stack_multiselect": false,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "/media/daniel/SERVIDOR1/pwd.htaccess",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2284,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2284,
-								2284
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/zzz A File Icon zzz/aliases/Plain Text (Apache Conf).sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 3059.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"stack_multiselect": false,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "app/Http/Controllers/Admin/CourseController.php",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2560,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1171,
-								1171
+								483,
+								483
 							]
 						],
 						"settings":
@@ -742,41 +429,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 640.0,
+						"translation.y": 528.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
-					"stack_multiselect": false,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "resources/js/Pages/Admin/Courses/Create.vue",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6353,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5927,
-								5517
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Vue/Vue Component.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 3456.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
+					"stack_index": 0,
 					"stack_multiselect": false,
 					"type": "text"
 				}

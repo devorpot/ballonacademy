@@ -23,96 +23,133 @@
 
     <section class="section-form my-2">
       <div class="container-fluid">
-        <form @submit.prevent="submit" novalidate>
+        <form @submit.prevent="submit" enctype="multipart/form-data" novalidate>
           <div class="card">
             <div class="card-body">
               <div class="row">
                 <!-- Usuario -->
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Usuario</label>
-                  <select
-                    class="form-control"
+                  <FieldSelect
+                    id="user_id"
+                    label="Usuario"
                     v-model="form.user_id"
-                    :class="{ 'is-invalid': touched.user_id && validateField('user_id') }"
-                    @blur="handleBlur('user_id')"
-                  >
-                    <option value="">Seleccione un usuario</option>
-                    <option v-for="user in users" :key="user.id" :value="user.id">
-                      {{ user.name }} ({{ user.email }})
-                    </option>
-                  </select>
-                  <div class="invalid-feedback">
-                    {{ validateField('user_id') }}
-                  </div>
+                    :required="true"
+                    :showValidation="touched.user_id"
+                    :formError="form.errors.user_id"
+                    :validateFunction="() => validateField('user_id')"
+                    :options="userOptions"
+                    @blur="() => handleBlur('user_id')"
+                  />
                 </div>
 
                 <!-- Maestro -->
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Maestro</label>
-                  <select
-                    class="form-control"
+                  <FieldSelect
+                    id="master_id"
+                    label="Maestro"
                     v-model="form.master_id"
-                    :class="{ 'is-invalid': touched.master_id && validateField('master_id') }"
-                    @blur="handleBlur('master_id')"
-                  >
-                    <option value="">Seleccione un maestro</option>
-                    <option v-for="teacher in teachers" :key="teacher.id" :value="teacher.id">
-                      {{ teacher.firstname }} {{ teacher.lastname }}
-                    </option>
-                  </select>
-                  <div class="invalid-feedback">
-                    {{ validateField('master_id') }}
-                  </div>
+                    :required="true"
+                    :showValidation="touched.master_id"
+                    :formError="form.errors.master_id"
+                    :validateFunction="() => validateField('master_id')"
+                    :options="teacherOptions"
+                    @blur="() => handleBlur('master_id')"
+                  />
                 </div>
 
                 <!-- Autorizado por -->
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Autorizado por</label>
-                  <input
-                    type="text"
-                    class="form-control"
+                  <FieldText
+                    id="authorized_by"
+                    label="Autorizado por"
                     v-model="form.authorized_by"
-                    @blur="handleBlur('authorized_by')"
-                    :class="{ 'is-invalid': touched.authorized_by && validateField('authorized_by') }"
-                  >
-                  <div class="invalid-feedback">
-                    {{ validateField('authorized_by') }}
-                  </div>
+                    :required="true"
+                    :showValidation="touched.authorized_by"
+                    :formError="form.errors.authorized_by"
+                    :validateFunction="() => validateField('authorized_by')"
+                    placeholder="Nombre del autorizador"
+                    @blur="() => handleBlur('authorized_by')"
+                  />
                 </div>
 
                 <!-- Fechas -->
                 <div class="col-md-4 mb-3">
-                  <label class="form-label">Fecha de Inicio</label>
-                  <input type="date" class="form-control" v-model="form.date_start">
+                 <FieldDate
+                    id="date_start"
+                    label="Fecha de inicio"
+                    v-model="form.date_start"
+                    :required="false"
+                    :showValidation="touched.date_start"
+                    :formError="form.errors.date_start"
+                    :validateFunction="() => ''"   
+                    @blur="() => handleBlur('date_start')"
+                  />
                 </div>
 
                 <div class="col-md-4 mb-3">
-                  <label class="form-label">Fecha de Fin</label>
-                  <input type="date" class="form-control" v-model="form.date_end">
+                  <FieldDate
+                    id="date_end"
+                    label="Fecha de Finalización"
+                    v-model="form.date_end"
+                    :required="false"
+                    :showValidation="touched.date_end"
+                    :formError="form.errors.date_end"
+                    :validateFunction="() => ''"   
+                    @blur="() => handleBlur('date_end')"
+                  />
                 </div>
 
                 <div class="col-md-4 mb-3">
-                  <label class="form-label">Fecha de Expedición</label>
-                  <input type="date" class="form-control" v-model="form.date_expedition">
+                   <FieldDate
+                    id="date_expedition"
+                    label="Fecha de Expedición"
+                    v-model="form.date_expedition"
+                    :required="false"
+                    :showValidation="touched.date_expedition"
+                    :formError="form.errors.date_expedition"
+                    :validateFunction="() => ''"   
+                    @blur="() => handleBlur('date_expedition')"
+                  />
+                  
                 </div>
 
                 <!-- Comentarios -->
                 <div class="col-md-12 mb-3">
-                  <label class="form-label">Comentarios</label>
-                  <input type="text" class="form-control" v-model="form.comments">
+                  <FieldTextarea
+                    id="comments"
+                    label="Comentarios"
+                    v-model="form.comments"
+                    :required="false"
+                    :showValidation="false"
+                    placeholder="Ingrese comentarios"
+                  />
                 </div>
 
                 <!-- Foto -->
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Foto (URL o nombre archivo)</label>
-                  <input type="text" class="form-control" v-model="form.photo">
+                    <FieldImage
+                    id="photo"
+                    label="Foto"
+                    v-model="form.photo"
+                    :showValidation="touched.photo"
+                    :formError="form.errors.photo"
+                    @blur="() => handleBlur('photo')"
+                  />
                 </div>
 
                 <!-- Logo -->
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Logo (URL o nombre archivo)</label>
-                  <input type="text" class="form-control" v-model="form.logo">
-                </div>
+                    <FieldImage
+                        id="logo"
+                        label="Foto del certificado"
+                        v-model="form.logo"
+                        :required="false"
+                        :showValidation="touched.logo"
+                        :formError="form.errors.logo"
+                        :validateFunction="() => ''"
+                        @blur="() => handleBlur('logo')"
+                      />
+                   </div>
               </div>
             </div>
 
@@ -140,10 +177,27 @@ import Title from '@/Components/Admin/Ui/Title.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
 
+import FieldText from '@/Components/Admin/Fields/FieldText.vue';
+import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
+import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
+import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
+import FieldUrl from '@/Components/Admin/Fields/FieldUrl.vue';
+import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
+
 const props = defineProps({
   users: Array,
   teachers: Array
 });
+
+const userOptions = props.users.map(user => ({
+  value: user.id,
+  label: `${user.name} (${user.email})`
+}));
+
+const teacherOptions = props.teachers.map(teacher => ({
+  value: teacher.id,
+  label: `${teacher.firstname} ${teacher.lastname}`
+}));
 
 const form = useForm({
   user_id: '',
@@ -153,8 +207,8 @@ const form = useForm({
   date_end: '',
   date_expedition: '',
   comments: '',
-  photo: '',
-  logo: ''
+  photo: null,
+  logo: null
 });
 
 const touched = ref({});
@@ -171,7 +225,9 @@ const validateField = (field) => {
 };
 
 const isFormValid = computed(() => {
-  return ['user_id', 'master_id', 'authorized_by'].every(f => !validateField(f));
+  return !validateField('user_id') &&
+         !validateField('master_id') &&
+         !validateField('authorized_by');
 });
 
 const submit = () => {

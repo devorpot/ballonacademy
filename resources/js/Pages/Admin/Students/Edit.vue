@@ -30,78 +30,153 @@
               <h6 class="text-muted mb-3">Datos de usuario</h6>
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Nombre de usuario</label>
-                  <input
-                    type="text"
-                    class="form-control"
+                  <FieldText
+                    id="name"
+                    label="Nombre de usuario"
                     v-model="form.name"
-                    @blur="handleBlur('name')"
-                    :class="{ 'is-invalid': (touched.name && validateName()) || form.errors.name }"
-                  >
-                  <div class="invalid-feedback">
-                    {{ touched.name ? validateName() : '' || form.errors.name }}
-                  </div>
+                    :required="true"
+                    :showValidation="touched.name"
+                    :formError="form.errors.name"
+                    :validateFunction="validateName"
+                    placeholder="Ingrese el nombre de usuario"
+                    @blur="() => handleBlur('name')"
+                  />
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Email</label>
-                  <input
-                    type="email"
-                    class="form-control"
+                  <FieldEmail
+                    id="email"
+                    label="Email"
                     v-model="form.email"
-                    @blur="handleBlur('email')"
-                    :class="{ 'is-invalid': (touched.email && validateEmail()) || form.errors.email }"
-                  >
-                  <div class="invalid-feedback">
-                    {{ touched.email ? validateEmail() : '' || form.errors.email }}
-                  </div>
+                    :required="true"
+                    :showValidation="touched.email"
+                    :formError="form.errors.email"
+                    :validateFunction="validateEmail"
+                    placeholder="Ingrese el email"
+                    @blur="() => handleBlur('email')"
+                  />
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Contraseña <small class="text-muted">(opcional)</small></label>
-                  <input
-                    type="password"
-                    class="form-control"
-                    v-model="form.password"
-                    @blur="handleBlur('password')"
-                    :class="{ 'is-invalid': (touched.password && validatePassword()) || form.errors.password }"
-                  >
-                  <div class="invalid-feedback">
-                    {{ touched.password ? validatePassword() : '' || form.errors.password }}
-                  </div>
+                  <FieldPassword
+                    id="password"
+                    confirmId="password_confirmation"
+                    label="Contraseña"
+                    :password="form.password"
+                    :passwordConfirmation="form.password_confirmation"
+                    :required="false"
+                    :showValidation="touched.password || touched.password_confirmation"
+                    :formError="form.errors.password"
+                    :confirmFormError="form.errors.password_confirmation"
+                    :validateFunction="validatePassword"
+                    :validateConfirmFunction="validatePasswordConfirmation"
+                    @update:password="val => form.password = val"
+                    @update:passwordConfirmation="val => form.password_confirmation = val"
+                    @blur="(field) => handleBlur(field)"
+                  />
                   <small class="form-text text-muted">Dejar en blanco para mantener la actual</small>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Confirmar contraseña</label>
-                  <input
-                    type="password"
-                    class="form-control"
-                    v-model="form.password_confirmation"
-                    @blur="handleBlur('password_confirmation')"
-                    :class="{ 'is-invalid': (touched.password_confirmation && validatePasswordConfirmation()) || form.errors.password_confirmation }"
-                  >
-                  <div class="invalid-feedback">
-                    {{ touched.password_confirmation ? validatePasswordConfirmation() : '' || form.errors.password_confirmation }}
-                  </div>
                 </div>
               </div>
 
               <!-- SECCIÓN ESTUDIANTE -->
               <h6 class="text-muted mt-4 mb-3">Datos del estudiante</h6>
               <div class="row">
-                <div v-for="field in studentFields" :key="field.key" class="col-md-6 mb-3">
-                  <label class="form-label">{{ field.label }}</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    v-model="form[field.key]"
-                    @blur="handleBlur(field.key)"
-                    :class="{ 'is-invalid': (touched[field.key] && validateField(field.key)) || form.errors[field.key] }"
-                  >
-                  <div class="invalid-feedback">
-                    {{ touched[field.key] ? validateField(field.key) : '' || form.errors[field.key] }}
-                  </div>
+                <div class="col-md-6 mb-3">
+                  <FieldText
+                    id="student_id"
+                    label="Matrícula"
+                    v-model="form.student_id"
+                    :required="true"
+                    :showValidation="touched.student_id"
+                    :formError="form.errors.student_id"
+                    :validateFunction="() => validateField('student_id')"
+                    placeholder="Ingrese matrícula"
+                    @blur="() => handleBlur('student_id')"
+                  />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <FieldText
+                    id="firstname"
+                    label="Nombre"
+                    v-model="form.firstname"
+                    :required="true"
+                    :showValidation="touched.firstname"
+                    :formError="form.errors.firstname"
+                    :validateFunction="() => validateField('firstname')"
+                    placeholder="Ingrese nombre"
+                    @blur="() => handleBlur('firstname')"
+                  />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <FieldText
+                    id="lastname"
+                    label="Apellido"
+                    v-model="form.lastname"
+                    :required="true"
+                    :showValidation="touched.lastname"
+                    :formError="form.errors.lastname"
+                    :validateFunction="() => validateField('lastname')"
+                    placeholder="Ingrese apellido"
+                    @blur="() => handleBlur('lastname')"
+                  />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <FieldPhone
+                    id="phone"
+                    label="Teléfono"
+                    v-model="form.phone"
+                    :required="true"
+                    :showValidation="touched.phone"
+                    :formError="form.errors.phone"
+                    :validateFunction="() => validateField('phone')"
+                    placeholder="Ingrese teléfono"
+                    @blur="() => handleBlur('phone')"
+                  />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <FieldSelect
+                    id="shirt_size"
+                    label="Talla de camiseta"
+                    v-model="form.shirt_size"
+                    :required="true"
+                    :showValidation="touched.shirt_size"
+                    :formError="form.errors.shirt_size"
+                    :validateFunction="() => validateField('shirt_size')"
+                    :options="shirtSizes"
+                    @blur="() => handleBlur('shirt_size')"
+                  />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <FieldTextarea
+                    id="address"
+                    label="Dirección"
+                    v-model="form.address"
+                    :required="true"
+                    :showValidation="touched.address"
+                    :formError="form.errors.address"
+                    :validateFunction="() => validateField('address')"
+                    placeholder="Ingrese dirección"
+                    @blur="() => handleBlur('address')"
+                  />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <FieldText
+                    id="country"
+                    label="País"
+                    v-model="form.country"
+                    :required="true"
+                    :showValidation="touched.country"
+                    :formError="form.errors.country"
+                    :validateFunction="() => validateField('country')"
+                    placeholder="Ingrese país"
+                    @blur="() => handleBlur('country')"
+                  />
                 </div>
               </div>
             </div>
@@ -119,7 +194,6 @@
   </AdminLayout>
 </template>
 
-
 <script setup>
 import { Head } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
@@ -130,6 +204,13 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Title from '@/Components/Admin/Ui/Title.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
+
+import FieldText from '@/Components/Admin/Fields/FieldText.vue';
+import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue';
+import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue';
+import FieldPhone from '@/Components/Admin/Fields/FieldPhone.vue';
+import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
+import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
 
 const props = defineProps({
   student: { type: Object, required: true }
@@ -149,16 +230,14 @@ const form = useForm({
   country: props.student.country
 });
 
-const touched = ref({});
-const studentFields = [
-  { key: 'student_id', label: 'Matrícula' },
-  { key: 'firstname', label: 'Nombre' },
-  { key: 'lastname', label: 'Apellido' },
-  { key: 'phone', label: 'Teléfono' },
-  { key: 'shirt_size', label: 'Talla de camiseta' },
-  { key: 'address', label: 'Dirección' },
-  { key: 'country', label: 'País' }
+const shirtSizes = [
+  { value: 'c', label: 'Chica' },
+  { value: 'm', label: 'Mediana' },
+  { value: 'l', label: 'Grande' },
+  { value: 'xl', label: 'Extragrande' }
 ];
+
+const touched = ref({});
 
 const handleBlur = (field) => {
   touched.value[field] = true;
@@ -199,7 +278,13 @@ const isFormValid = computed(() => {
          !validateEmail() &&
          !validatePassword() &&
          !validatePasswordConfirmation() &&
-         studentFields.every(f => !validateField(f.key));
+         !validateField('student_id') &&
+         !validateField('firstname') &&
+         !validateField('lastname') &&
+         !validateField('phone') &&
+         !validateField('shirt_size') &&
+         !validateField('address') &&
+         !validateField('country');
 });
 
 const submit = () => {

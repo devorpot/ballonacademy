@@ -69,6 +69,7 @@ Route::middleware(['auth', 'role:admin'])
 
         // Certificados
         Route::resource('certificates', CertificateController::class);
+  
 
         // Cursos
         Route::resource('courses', CourseController::class);

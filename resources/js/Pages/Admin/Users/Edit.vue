@@ -9,155 +9,114 @@
         { label: 'Editar', route: '' }
       ]"
     />
-      <!--section-heading-->
-        <section class="section-heading my-2">
-          <div class="container-fluid">
-            <div class="row mb-4">
-              <div class="col-12 d-flex justify-content-between align-items-center">
-                <Title :title="`Editar Usuario`" />
 
-                <ButtonBack
-                  label="Volver"
-                  icon="bi bi-arrow-left"
-                  :href="route('admin.users.index')"
-                />
-              </div>
-            </div>
+    <section class="section-heading my-2">
+      <div class="container-fluid">
+        <div class="row mb-4">
+          <div class="col-12 d-flex justify-content-between align-items-center">
+            <Title :title="`Editar Usuario`" />
+            <ButtonBack label="Volver" icon="bi bi-arrow-left" :href="route('admin.users.index')" />
           </div>
-        </section>
-          <!--/section-heading-->
+        </div>
+      </div>
+    </section>
 
-   
-          <!--/section-form-->
-        <section class="section-form my-2">
-          <div class="container-fluid">
-            <div class="row">
-              <div class="col-12">
-                <form @submit.prevent="submit" novalidate>
-                  <div class="card">
-                    <div class="card-body">
-                      <div class="row">
-                        <!-- Nombre -->
-                        <div class="col-md-6 mb-3">
-                          <label for="name" class="form-label">Nombre</label>
-                          <input
-                            type="text"
-                            class="form-control"
-                            id="name"
-                            v-model="form.name"
-                            @blur="handleBlur('name')"
-                            :class="{ 'is-invalid': (touched.name && validateName()) || form.errors.name }"
-                          >
-                          <div class="invalid-feedback">
-                            {{ touched.name ? validateName() : '' || form.errors.name }}
-                          </div>
-                        </div>
+    <section class="section-form my-2">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <form @submit.prevent="submit" novalidate>
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
 
-                        <!-- Email -->
-                        <div class="col-md-6 mb-3">
-                          <label for="email" class="form-label">Email</label>
-                          <input
-                            type="email"
-                            class="form-control"
-                            id="email"
-                            v-model="form.email"
-                            @blur="handleBlur('email')"
-                            :class="{ 'is-invalid': (touched.email && validateEmail()) || form.errors.email }"
-                          >
-                          <div class="invalid-feedback">
-                            {{ touched.email ? validateEmail() : '' || form.errors.email }}
-                          </div>
-                        </div>
-
-                        <!-- Contraseña -->
-                        <div class="col-md-6 mb-3">
-                          <label for="password" class="form-label">Contraseña</label>
-                          <input
-                            type="password"
-                            class="form-control"
-                            id="password"
-                            v-model="form.password"
-                            @blur="handleBlur('password')"
-                            :class="{ 'is-invalid': (touched.password && validatePassword()) || form.errors.password }"
-                          >
-                          <div class="invalid-feedback">
-                            {{ touched.password ? validatePassword() : '' || form.errors.password }}
-                          </div>
-                          <small class="form-text text-muted">
-                            Mínimo 8 caracteres, al menos una mayúscula y un número
-                          </small>
-                        </div>
-
-                        <!-- Confirmar contraseña -->
-                        <div class="col-md-6 mb-3">
-                          <label for="password_confirmation" class="form-label">Confirmar Contraseña</label>
-                          <input
-                            type="password"
-                            class="form-control"
-                            id="password_confirmation"
-                            v-model="form.password_confirmation"
-                            @blur="handleBlur('password_confirmation')"
-                            :class="{ 'is-invalid': (touched.password_confirmation && validatePasswordConfirmation()) || form.errors.password_confirmation }"
-                          >
-                          <div class="invalid-feedback">
-                            {{ touched.password_confirmation ? validatePasswordConfirmation() : '' || form.errors.password_confirmation }}
-                          </div>
-                        </div>
-
-                        <!-- Roles -->
-                        <div class="col-12 mb-3">
-                          <label class="form-label">Roles</label>
-
-                          <div class="form-check mb-2">
-                            <input
-                              class="form-check-input"
-                              type="checkbox"
-                              id="select_all_roles"
-                              v-model="allRolesSelected"
-                              @change="handleRoleChange"
-                            >
-                            <label class="form-check-label fw-bold" for="select_all_roles">Seleccionar todos los roles</label>
-                          </div>
-
-                          <div class="row">
-                            <div class="col-md-3 mb-2" v-for="role in roles" :key="role.id">
-                              <div class="form-check">
-                                <input
-                                  class="form-check-input"
-                                  type="checkbox"
-                                  :id="'role_' + role.id"
-                                  :value="role.id"
-                                  v-model="form.role_ids"
-                                  @change="handleRoleChange"
-                                >
-                                <label class="form-check-label" :for="'role_' + role.id">{{ role.label }}</label>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div v-if="(touched.role_ids && validateRoles()) || form.errors.role_ids" class="text-danger mt-2">
-                            {{ touched.role_ids ? validateRoles() : '' || form.errors.role_ids }}
-                          </div>
-                        </div>
-                      </div>
+                    <!-- Nombre -->
+                    <div class="col-md-6 mb-3">
+                      <FieldText
+                        id="name"
+                        label="Nombre"
+                        v-model="form.name"
+                        :required="true"
+                        :showValidation="touched.name"
+                        :formError="form.errors.name"
+                        :validateFunction="validateName"
+                        placeholder="Ingrese el nombre"
+                        @blur="() => handleBlur('name')"
+                      />
                     </div>
-                    <div class="card-footer text-end">
-                      <button
-                        type="submit"
-                        class="btn btn-primary"
-                        :disabled="form.processing || !isFormValid"
-                      >
-                        <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
-                        <i class="bi bi-save me-2"></i>Guardar
-                      </button>
+
+                    <!-- Email -->
+                    <div class="col-md-6 mb-3">
+                      <FieldEmail
+                        id="email"
+                        label="Email"
+                        v-model="form.email"
+                        :required="true"
+                        :showValidation="touched.email"
+                        :formError="form.errors.email"
+                        :validateFunction="validateEmail"
+                        placeholder="Ingrese el correo"
+                        @blur="() => handleBlur('email')"
+                      />
                     </div>
+
+                    <!-- Password + Confirmación -->
+                    <div class="col-md-6 mb-3">
+                      <FieldPassword
+                        id="password"
+                        confirmId="password_confirmation"
+                        label="Contraseña"
+                        :password="form.password"
+                        :passwordConfirmation="form.password_confirmation"
+                        :required="false"
+                        :showValidation="touched.password || touched.password_confirmation"
+                        :formError="form.errors.password"
+                        :confirmFormError="form.errors.password_confirmation"
+                        :validateFunction="validatePassword"
+                        :validateConfirmFunction="validatePasswordConfirmation"
+                        @update:password="val => form.password = val"
+                        @update:passwordConfirmation="val => form.password_confirmation = val"
+                        @blur="(field) => handleBlur(field)"
+                      />
+                      <small class="form-text text-muted">
+                        Mínimo 8 caracteres, al menos una mayúscula y un número (si desea cambiar contraseña)
+                      </small>
+                    </div>
+
+                    <!-- Roles -->
+                    <div class="col-12 mb-3">
+                      <!-- Roles -->
+                       
+                        <FieldCheckboxes
+                          v-model="form.role_ids"
+                          :items="roles"
+                          label="Roles"
+                          id-prefix="role_"
+                          select-all-id="select_all_roles"
+                          select-all-label="Seleccionar todos los roles"
+                          :showValidation="touched.role_ids"
+                          :formError="form.errors.role_ids || form.errors.role"
+                          :validateFunction="validateRoles"
+                          @change="handleRoleChange"
+                        />
+ 
+
+                    </div>
+
                   </div>
-                </form>
+                </div>
+                <div class="card-footer text-end">
+                  <button type="submit" class="btn btn-primary" :disabled="form.processing || !isFormValid">
+                    <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
+                    <i class="bi bi-save me-2"></i>Guardar
+                  </button>
+                </div>
               </div>
-            </div>
+            </form>
           </div>
-        </section>
-          <!--/section-form-->
+        </div>
+      </div>
+    </section>
   </AdminLayout>
 </template>
 
@@ -171,6 +130,13 @@ import { computed, ref } from 'vue';
 import Title from '@/Components/Admin/Ui/Title.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
+
+import FieldText from '@/Components/Admin/Fields/FieldText.vue';
+import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue';
+import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue';
+
+import FieldCheckboxes from '@/Components/Admin/Fields/FieldCheckboxes.vue';
+
 
 const props = defineProps({
   user: { type: Object, required: true },
