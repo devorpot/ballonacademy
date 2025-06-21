@@ -24,25 +24,11 @@ class StudentController extends Controller
     {
         return Inertia::render('Admin/Students/Create');
     }
+
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            // User
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
+        $validated = $this->validateData($request);
 
-            // Student
-            'student_id' => 'required|string|max:255',
-            'firstname' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
-            'phone' => 'required|string|max:255',
-            'shirt_size' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
-            'country' => 'required|string|max:255',
-        ], $this->validationMessages());
-
-        // Crear el usuario y asignar rol student
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -51,20 +37,10 @@ class StudentController extends Controller
 
         $user->assignRole('student');
 
-        // Crear el estudiante
-        $user->student()->create([
-            'student_id' => $validated['student_id'],
-            'firstname' => $validated['firstname'],
-            'lastname' => $validated['lastname'],
-            'phone' => $validated['phone'],
-            'shirt_size' => $validated['shirt_size'],
-            'address' => $validated['address'],
-            'country' => $validated['country'],
-        ]);
+        $user->student()->create($this->studentData($validated));
 
         return redirect()->route('admin.students.index')->with('success', 'Estudiante creado exitosamente');
     }
-
 
     public function edit(Student $student)
     {
@@ -75,39 +51,17 @@ class StudentController extends Controller
 
     public function update(Request $request, Student $student)
     {
-        $validated = $request->validate([
-            // User
-            'name' => 'required|string|max:255',
-            'email' => "required|email|max:255|unique:users,email,{$student->user_id}",
-            'password' => 'nullable|string|min:8|confirmed',
+        $validated = $this->validateData($request, false, $student->user_id);
 
-            // Student
-            'student_id' => 'required|string|max:255',
-            'firstname' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
-            'phone' => 'required|string|max:255',
-            'shirt_size' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
-            'country' => 'required|string|max:255',
-        ], $this->validationMessages());
-
-        // Actualizar user
         $student->user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => !empty($validated['password']) ? Hash::make($validated['password']) : $student->user->password,
+            'password' => !empty($validated['password'])
+                ? Hash::make($validated['password'])
+                : $student->user->password,
         ]);
 
-        // Actualizar student
-        $student->update([
-            'student_id' => $validated['student_id'],
-            'firstname' => $validated['firstname'],
-            'lastname' => $validated['lastname'],
-            'phone' => $validated['phone'],
-            'shirt_size' => $validated['shirt_size'],
-            'address' => $validated['address'],
-            'country' => $validated['country'],
-        ]);
+        $student->update($this->studentData($validated));
 
         return redirect()->route('admin.students.index')->with('success', 'Estudiante actualizado correctamente');
     }
@@ -118,6 +72,43 @@ class StudentController extends Controller
         $student->delete();
 
         return redirect()->route('admin.students.index')->with('success', 'Estudiante eliminado exitosamente');
+    }
+
+    private function validateData(Request $request, $isStore = true, $userId = null): array
+    {
+        $rules = [
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', 'max:255'],
+            'password' => $isStore ? 'required|string|min:8|confirmed' : 'nullable|string|min:8|confirmed',
+            'student_id' => 'required|string|max:255',
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
+            'phone' => 'required|string|max:255',
+            'shirt_size' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'country' => 'required|string|max:255',
+        ];
+
+        if ($userId) {
+            $rules['email'][] = 'unique:users,email,' . $userId;
+        } else {
+            $rules['email'][] = 'unique:users,email';
+        }
+
+        return $request->validate($rules, $this->validationMessages());
+    }
+
+    private function studentData(array $validated): array
+    {
+        return [
+            'student_id' => $validated['student_id'],
+            'firstname' => $validated['firstname'],
+            'lastname' => $validated['lastname'],
+            'phone' => $validated['phone'],
+            'shirt_size' => $validated['shirt_size'],
+            'address' => $validated['address'],
+            'country' => $validated['country'],
+        ];
     }
 
     private function validationMessages(): array

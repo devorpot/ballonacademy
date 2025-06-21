@@ -13,7 +13,7 @@ class TeacherController extends Controller
 {
     public function index()
     {
-        $teachers = Teacher::with('user')->get();
+        $teachers = Teacher::with(['user.roles'])->get();
 
         return Inertia::render('Admin/Teachers/Index', [
             'teachers' => $teachers
@@ -31,7 +31,7 @@ class TeacherController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            
+
             'teacher_id' => 'required|string|max:255|unique:teachers,teacher_id',
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
@@ -65,7 +65,7 @@ class TeacherController extends Controller
     public function edit(Teacher $teacher)
     {
         return Inertia::render('Admin/Teachers/Edit', [
-            'teacher' => $teacher->load('user')
+            'teacher' => $teacher->load(['user.roles'])
         ]);
     }
 
@@ -110,6 +110,13 @@ class TeacherController extends Controller
         $teacher->delete();
 
         return redirect()->route('admin.teachers.index')->with('success', 'Maestro eliminado exitosamente');
+    }
+
+    public function show(Teacher $teacher)
+    {
+        return Inertia::render('Admin/Teachers/Show', [
+            'teacher' => $teacher->load(['user.roles'])
+        ]);
     }
 
     private function validationMessages(): array

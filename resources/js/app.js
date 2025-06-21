@@ -3,7 +3,9 @@ import { createApp, h } from 'vue'
 
 // Bootstrap y estilos
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap'; // Esto importa los ES modules de Bootstrap
+import * as bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
+window.bootstrap = bootstrap;
+
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../css/app.less'
 

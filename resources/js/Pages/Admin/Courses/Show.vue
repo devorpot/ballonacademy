@@ -1,13 +1,3 @@
-<script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { route } from 'ziggy-js';
-
-const props = defineProps({
-  course: Object
-});
-</script>
-
 <template>
   <Head :title="`Detalles del Curso: ${course.title}`" />
 
@@ -26,62 +16,121 @@ const props = defineProps({
         </div>
       </div>
 
-      <div class="card">
+      <div class="card shadow-sm">
         <div class="card-body">
+          <h5 class="fw-bold mb-3">Información Básica</h5>
           <div class="row">
-            <div class="col-md-6 mb-3">
-              <h5 class="fw-bold">Información Básica</h5>
-              <hr>
-              <div class="mb-3">
-                <label class="form-label text-muted">Título:</label>
-                <p class="form-control-plaintext">{{ course.title }}</p>
-              </div>
-              <div class="mb-3">
-                <label class="form-label text-muted">Nivel:</label>
-                <p class="form-control-plaintext">{{ course.level || 'N/A' }}</p>
-              </div>
-              <div class="mb-3">
-                <label class="form-label text-muted">Fecha de Creación:</label>
-                <p class="form-control-plaintext">{{ new Date(course.created_at).toLocaleString() }}</p>
-              </div>
-            </div>
-
-            <div class="col-md-6 mb-3">
-              <h5 class="fw-bold">Descripción</h5>
-              <hr>
-              <div class="mb-3">
-                <label class="form-label text-muted">Descripción Corta:</label>
-                <p class="form-control-plaintext">{{ course.description_short || 'N/A' }}</p>
-              </div>
-              <div class="mb-3">
-                <label class="form-label text-muted">Descripción Completa:</label>
-                <p class="form-control-plaintext">{{ course.description || 'N/A' }}</p>
-              </div>
-              <div class="mb-3" v-if="course.image_cover">
-                <label class="form-label text-muted">Imagen de Portada:</label>
-                <div>
-                  <img :src="course.image_cover" alt="Cover" class="img-fluid rounded shadow-sm" style="max-height: 200px;">
-                </div>
-              </div>
-              <div class="mb-3" v-if="course.logo">
-                <label class="form-label text-muted">Logo:</label>
-                <div>
-                  <img :src="course.logo" alt="Logo" class="img-fluid rounded shadow-sm" style="max-height: 100px;">
-                </div>
-              </div>
+            <div class="col-md-4 mb-3" v-for="(field, index) in textFields" :key="index">
+              <label class="form-label text-muted">{{ field.label }}</label>
+              <p class="form-control-plaintext">{{ field.value }}</p>
             </div>
           </div>
 
-          <div class="d-flex justify-content-end mt-4">
-            <Link :href="route('admin.courses.edit', course.id)" class="btn btn-warning me-2">
-              <i class="bi bi-pencil-fill me-2"></i>Editar
+          <h5 class="fw-bold mt-4 mb-3">Archivos</h5>
+          <div class="d-flex flex-column align-items-center gap-3">
+            <div v-if="course.image_cover" class="text-center">
+              <label class="form-label text-muted">Imagen de Portada</label><br>
+              <img
+                :src="course.image_cover"
+                alt="Portada"
+                class="img-thumbnail"
+                style="width: 200px; cursor: pointer;"
+                @click="openLightbox(course.image_cover)"
+              >
+            </div>
+            <div v-if="course.logo" class="text-center">
+              <label class="form-label text-muted">Logo</label><br>
+              <img
+                :src="course.logo"
+                alt="Logo"
+                class="img-thumbnail"
+                style="width: 150px; cursor: pointer;"
+                @click="openLightbox(course.logo)"
+              >
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end mt-4 gap-2">
+            <Link :href="route('admin.courses.edit', course.id)" class="btn btn-warning">
+              <i class="bi bi-pencil-fill me-1"></i>Editar
             </Link>
-            <Link :href="route('admin.courses.index')" class="btn btn-secondary">
-              <i class="bi bi-arrow-left me-2"></i>Volver al Listado
+            <Link :href="route('admin.courses.index')" class="btn btn-outline-secondary">
+              <i class="bi bi-list me-1"></i>Listado
             </Link>
           </div>
+        </div>
+      </div>
+
+      <!-- Lightbox -->
+      <div v-if="lightboxSrc" class="lightbox" @click.self="closeLightbox">
+        <div class="lightbox-content">
+          <img :src="lightboxSrc" alt="Vista ampliada">
+          <button type="button" class="btn btn-light btn-close-lightbox" @click="closeLightbox">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
         </div>
       </div>
     </div>
   </AdminLayout>
 </template>
+
+<script setup>
+import { Head, Link } from '@inertiajs/vue3';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { route } from 'ziggy-js';
+import { ref } from 'vue';
+
+const props = defineProps({
+  course: Object
+});
+
+const lightboxSrc = ref(null);
+const openLightbox = (src) => {
+  lightboxSrc.value = src;
+};
+const closeLightbox = () => {
+  lightboxSrc.value = null;
+};
+
+const textFields = [
+  { label: 'Título', value: props.course.title },
+  { label: 'Nivel', value: props.course.level || 'N/A' },
+  { label: 'Descripción Corta', value: props.course.description_short || 'N/A' },
+  { label: 'Descripción Completa', value: props.course.description || 'N/A' },
+  { label: 'Fecha de Inicio', value: props.course.date_start ? new Date(props.course.date_start).toLocaleDateString() : 'N/A' },
+  { label: 'Fecha de Fin', value: props.course.date_end ? new Date(props.course.date_end).toLocaleDateString() : 'N/A' },
+  { label: 'Fecha de Creación', value: new Date(props.course.created_at).toLocaleString() }
+];
+</script>
+
+<style scoped>
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+.lightbox-content {
+  position: relative;
+  text-align: center;
+}
+.lightbox-content img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border: 2px solid #fff;
+}
+.btn-close-lightbox {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 50%;
+  font-size: 1.2rem;
+}
+</style>

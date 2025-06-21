@@ -1,43 +1,41 @@
 <template>
   <Head title="Crear Nuevo Usuario" />
   <AdminLayout>
-    <Breadcrumbs
-      username="admin"
-      :breadcrumbs="[
-        { label: 'Dashboard', route: 'admin.dashboard' },
-        { label: 'Usuarios', route: 'admin.users.index' },
-        { label: 'Crear', route: '' }
-      ]"
-    />
-    <section class="section-heading my-2">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-12">
-            <div v-if="form.hasErrors" class="alert alert-danger">
-              <div v-for="error in Object.values(form.errors).flat()" :key="error">
-                {{ error }}
+    <div class="position-relative">
+      <div :class="{ 'blur-overlay': form.processing }">
+        <Breadcrumbs
+          username="admin"
+          :breadcrumbs="[
+            { label: 'Dashboard', route: 'admin.dashboard' },
+            { label: 'Usuarios', route: 'admin.users.index' },
+            { label: 'Crear', route: '' }
+          ]"
+        />
+
+        <section class="section-heading my-2">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-12 d-flex justify-content-between align-items-center">
+                <ButtonBack label="Volver" icon="bi bi-arrow-left" :href="route('admin.users.index')" />
+                <button
+                  class="btn btn-primary"
+                  :disabled="form.processing || !isFormValid"
+                  @click="submit"
+                >
+                  <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
+                  <i class="bi bi-save me-1"></i> Guardar
+                </button>
               </div>
             </div>
           </div>
-        </div>
-        <div class="row mb-4">
-          <div class="col-12 d-flex justify-content-between align-items-center">
-            <Title :title="'Crear Usuario'" />
-            <ButtonBack label="Volver" icon="bi bi-arrow-left" :href="route('admin.users.index')" />
-          </div>
-        </div>
-      </div>
-    </section>
+        </section>
 
-    <section class="section-form my-2">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-12">
+        <section class="section-form my-2">
+          <div class="container-fluid">
             <form @submit.prevent="submit" novalidate>
               <div class="card">
                 <div class="card-body">
                   <div class="row">
-
                     <!-- Nombre -->
                     <div class="col-md-6 mb-3">
                       <FieldText
@@ -74,7 +72,6 @@
                         id="phone"
                         label="Teléfono"
                         v-model="form.phone"
-                        :required="false"
                         :showValidation="touched.phone"
                         :formError="form.errors.phone"
                         :validateFunction="validatePhone"
@@ -83,7 +80,7 @@
                       />
                     </div>
 
-                    <!-- Contraseña + Confirmación -->
+                    <!-- Contraseña -->
                     <div class="col-md-6 mb-3">
                       <FieldPassword
                         id="password"
@@ -103,57 +100,53 @@
                       />
                     </div>
 
-                    <!-- Roles -->
-                    <div class="col-12 mb-3"> 
+                    <!-- Roles múltiple -->
+                    <div class="col-12 mb-3">
                       <FieldCheckboxes
-                      v-model="form.role_ids"
-                      :items="roles"
-                      label="Roles"
-                      id-prefix="role_"
-                      select-all-id="select_all_roles"
-                      select-all-label="Seleccionar todos los roles"
-                      :showValidation="touched.role_ids"
-                      :formError="form.errors.role_ids || form.errors.role"
-                      :validateFunction="validateRoles"
-                    />
-
+                        v-model="form.role_ids"
+                        :items="roles"
+                        label="Roles (selección múltiple)"
+                        id-prefix="role_"
+                        select-all-id="select_all_roles"
+                        select-all-label="Seleccionar todos los roles"
+                        :multiple="true"
+                        :showValidation="touched.role_ids"
+                        :formError="form.errors.role_ids || form.errors.role"
+                        :validateFunction="validateRoles"
+                        @change="handleRoleChange"
+                      />
                     </div>
-
                   </div>
                 </div>
 
                 <div class="card-footer text-end">
                   <button type="submit" class="btn btn-primary" :disabled="form.processing || !isFormValid">
                     <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
-                    <i class="bi bi-save me-2"></i>Guardar
+                    <i class="bi bi-save me-2"></i> Guardar
                   </button>
                 </div>
-
               </div>
             </form>
           </div>
-        </div>
+        </section>
       </div>
-    </section>
+    </div>
   </AdminLayout>
 </template>
 
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
-import { computed, ref } from 'vue';
+import { ref, computed } from 'vue';
 
-// Components
-import Title from '@/Components/Admin/Ui/Title.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue';
 import FieldPhone from '@/Components/Admin/Fields/FieldPhone.vue';
 import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue';
-
 import FieldCheckboxes from '@/Components/Admin/Fields/FieldCheckboxes.vue';
 
 const props = defineProps({
@@ -169,31 +162,34 @@ const form = useForm({
   role_ids: []
 });
 
-const touched = ref({
-  name: false,
-  email: false,
-  phone: false,
-  password: false,
-  password_confirmation: false,
-  role_ids: false
-});
+const touched = ref({});
 
-const allRolesSelected = computed({
-  get: () => form.role_ids.length === props.roles.length,
-  set: (value) => {
-    form.role_ids = value ? props.roles.map(r => r.id) : [];
-    touched.value.role_ids = true;
-  }
-});
+const handleBlur = (field) => {
+  touched.value[field] = true;
+};
 
-// Validations
-const validateName = () => !form.name.trim() ? 'El nombre es requerido' : (form.name.length < 3 ? 'El nombre debe tener al menos 3 caracteres' : '');
+const handleRoleChange = () => {
+  touched.value.role_ids = true;
+};
+
+const validateName = () => {
+  if (!form.name.trim()) return 'El nombre es requerido';
+  if (form.name.length < 3) return 'El nombre debe tener al menos 3 caracteres';
+  return '';
+};
+
 const validateEmail = () => {
   if (!form.email.trim()) return 'El email es requerido';
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return !regex.test(form.email) ? 'Ingrese un email válido' : '';
+  if (!regex.test(form.email)) return 'Ingrese un email válido';
+  return '';
 };
-const validatePhone = () => form.phone && !/^\d{10}$/.test(form.phone) ? 'Ingrese un teléfono válido de 10 dígitos' : '';
+
+const validatePhone = () => {
+  if (form.phone && !/^\d{10}$/.test(form.phone)) return 'Ingrese un teléfono válido de 10 dígitos';
+  return '';
+};
+
 const validatePassword = () => {
   if (!form.password) return 'La contraseña es requerida';
   if (form.password.length < 8) return 'Debe tener al menos 8 caracteres';
@@ -201,8 +197,16 @@ const validatePassword = () => {
   if (!/[0-9]/.test(form.password)) return 'Debe contener al menos un número';
   return '';
 };
-const validatePasswordConfirmation = () => form.password !== form.password_confirmation ? 'Las contraseñas no coinciden' : '';
-const validateRoles = () => form.role_ids.length === 0 ? 'Seleccione al menos un rol' : '';
+
+const validatePasswordConfirmation = () => {
+  if (form.password !== form.password_confirmation) return 'Las contraseñas no coinciden';
+  return '';
+};
+
+const validateRoles = () => {
+  if (form.role_ids.length === 0) return 'Seleccione al menos un rol';
+  return '';
+};
 
 const isFormValid = computed(() =>
   !validateName() &&
@@ -213,24 +217,24 @@ const isFormValid = computed(() =>
   !validateRoles()
 );
 
-const handleBlur = (field) => {
-  touched.value[field] = true;
-};
-
-const handleRoleChange = () => {
-  touched.value.role_ids = true;
-};
-
 const submit = () => {
-  Object.keys(touched.value).forEach(k => touched.value[k] = true);
+  Object.keys(form).forEach(k => touched.value[k] = true);
   if (isFormValid.value) {
     form.post(route('admin.users.store'), {
       preserveScroll: true,
       onSuccess: () => {
         form.reset();
-        Object.keys(touched.value).forEach(k => touched.value[k] = false);
+        touched.value = {};
       }
     });
   }
 };
 </script>
+
+<style scoped>
+.blur-overlay {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+</style>

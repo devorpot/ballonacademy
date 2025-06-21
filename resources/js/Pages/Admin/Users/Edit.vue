@@ -1,35 +1,34 @@
 <template>
   <Head title="Editar Usuario" />
   <AdminLayout>
-    <Breadcrumbs
-      username="admin"
-      :breadcrumbs="[
-        { label: 'Dashboard', route: 'admin.dashboard' },
-        { label: 'Usuarios', route: 'admin.users.index' },
-        { label: 'Editar', route: '' }
-      ]"
-    />
+    <div class="position-relative">
+      <div :class="{ 'blur-overlay': form.processing }">
+        <Breadcrumbs
+          username="admin"
+          :breadcrumbs="[
+            { label: 'Dashboard', route: 'admin.dashboard' },
+            { label: 'Usuarios', route: 'admin.users.index' },
+            { label: 'Editar', route: '' }
+          ]"
+        />
 
-    <section class="section-heading my-2">
-      <div class="container-fluid">
-        <div class="row mb-4">
-          <div class="col-12 d-flex justify-content-between align-items-center">
-            <Title :title="`Editar Usuario`" />
-            <ButtonBack label="Volver" icon="bi bi-arrow-left" :href="route('admin.users.index')" />
+        <section class="section-heading my-2">
+          <div class="container-fluid">
+            <div class="row mb-4">
+              <div class="col-12 d-flex justify-content-between align-items-center">
+                <Title :title="`Editar Usuario`" />
+                <ButtonBack label="Volver" icon="bi bi-arrow-left" :href="route('admin.users.index')" />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </section>
 
-    <section class="section-form my-2">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-12">
+        <section class="section-form my-2">
+          <div class="container-fluid">
             <form @submit.prevent="submit" novalidate>
               <div class="card">
                 <div class="card-body">
                   <div class="row">
-
                     <!-- Nombre -->
                     <div class="col-md-6 mb-3">
                       <FieldText
@@ -60,12 +59,12 @@
                       />
                     </div>
 
-                    <!-- Password + Confirmación -->
+                    <!-- Contraseña -->
                     <div class="col-md-6 mb-3">
                       <FieldPassword
                         id="password"
                         confirmId="password_confirmation"
-                        label="Contraseña"
+                        label="Contraseña (opcional)"
                         :password="form.password"
                         :passwordConfirmation="form.password_confirmation"
                         :required="false"
@@ -79,64 +78,57 @@
                         @blur="(field) => handleBlur(field)"
                       />
                       <small class="form-text text-muted">
-                        Mínimo 8 caracteres, al menos una mayúscula y un número (si desea cambiar contraseña)
+                        Mínimo 8 caracteres, al menos una mayúscula y un número (si desea cambiar la contraseña)
                       </small>
                     </div>
 
                     <!-- Roles -->
                     <div class="col-12 mb-3">
-                      <!-- Roles -->
-                       
-                        <FieldCheckboxes
-                          v-model="form.role_ids"
-                          :items="roles"
-                          label="Roles"
-                          id-prefix="role_"
-                          select-all-id="select_all_roles"
-                          select-all-label="Seleccionar todos los roles"
-                          :showValidation="touched.role_ids"
-                          :formError="form.errors.role_ids || form.errors.role"
-                          :validateFunction="validateRoles"
-                          @change="handleRoleChange"
-                        />
- 
-
+                      <FieldCheckboxes
+                        v-model="form.role_ids"
+                        :items="roles"
+                        label="Roles"
+                        id-prefix="role_"
+                        select-all-id="select_all_roles"
+                        select-all-label="Seleccionar todos los roles"
+                        :showValidation="touched.role_ids"
+                        :formError="form.errors.role_ids || form.errors.role"
+                        :validateFunction="validateRoles"
+                        @change="handleRoleChange"
+                      />
                     </div>
-
                   </div>
                 </div>
+
                 <div class="card-footer text-end">
                   <button type="submit" class="btn btn-primary" :disabled="form.processing || !isFormValid">
                     <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
-                    <i class="bi bi-save me-2"></i>Guardar
+                    <i class="bi bi-save me-2"></i>Guardar cambios
                   </button>
                 </div>
               </div>
             </form>
           </div>
-        </div>
+        </section>
       </div>
-    </section>
+    </div>
   </AdminLayout>
 </template>
 
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
-import { computed, ref } from 'vue';
+import { ref, computed } from 'vue';
 
-import Title from '@/Components/Admin/Ui/Title.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
+import Title from '@/Components/Admin/Ui/Title.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
-
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue';
 import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue';
-
 import FieldCheckboxes from '@/Components/Admin/Fields/FieldCheckboxes.vue';
-
 
 const props = defineProps({
   user: { type: Object, required: true },
@@ -226,3 +218,11 @@ const submit = () => {
   }
 };
 </script>
+
+<style scoped>
+.blur-overlay {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+</style>

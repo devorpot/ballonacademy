@@ -1,153 +1,164 @@
 <template>
   <Head title="Editar Suscripción" />
   <AdminLayout>
-    <Breadcrumbs
-      username="admin"
-      :breadcrumbs="[
-        { label: 'Dashboard', route: 'admin.dashboard' },
-        { label: 'Suscripciones', route: 'admin.subscriptions.index' },
-        { label: 'Editar', route: '' }
-      ]"
-    />
+    <div class="position-relative">
+      <div :class="{ 'blur-overlay': form.processing }">
+        <Breadcrumbs
+          username="admin"
+          :breadcrumbs="[
+            { label: 'Dashboard', route: 'admin.dashboard' },
+            { label: 'Suscripciones', route: 'admin.subscriptions.index' },
+            { label: 'Editar', route: '' }
+          ]"
+        />
 
-    <section class="section-heading my-2">
-      <div class="container-fluid">
-        <div class="row mb-4">
-          <div class="col-12 d-flex justify-content-between align-items-center">
-            <Title :title="`Editar Suscripción`" />
-            <ButtonBack label="Volver" icon="bi bi-arrow-left" :href="route('admin.subscriptions.index')" />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section-form my-2">
-      <div class="container-fluid">
-        <form @submit.prevent="submit" novalidate>
-          <div class="card">
-            <div class="card-body">
-              <h6 class="text-muted mb-3">Datos de la suscripción</h6>
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Usuario</label>
-                  <select
-                    class="form-control"
-                    v-model="form.user_id"
-                    :class="{ 'is-invalid': touched.user_id && validateField('user_id') }"
-                    @blur="handleBlur('user_id')"
-                  >
-                    <option value="">Seleccione un usuario</option>
-                    <option v-for="user in users" :key="user.id" :value="user.id">
-                      {{ user.name }} ({{ user.email }})
-                    </option>
-                  </select>
-                  <div class="invalid-feedback">
-                    {{ validateField('user_id') }}
-                  </div>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Curso</label>
-                  <select
-                    class="form-control"
-                    v-model="form.course_id"
-                    :class="{ 'is-invalid': touched.course_id && validateField('course_id') }"
-                    @blur="handleBlur('course_id')"
-                  >
-                    <option value="">Seleccione un curso</option>
-                    <option v-for="course in courses" :key="course.id" :value="course.id">
-                      {{ course.title }}
-                    </option>
-                  </select>
-                  <div class="invalid-feedback">
-                    {{ validateField('course_id') }}
-                  </div>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Monto</label>
-                  <input type="number" class="form-control" v-model="form.payment_amount" @blur="handleBlur('payment_amount')"
-                         :class="{ 'is-invalid': touched.payment_amount && validateField('payment_amount') }">
-                  <div class="invalid-feedback">
-                    {{ validateField('payment_amount') }}
-                  </div>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Moneda</label>
-                  <input type="text" class="form-control" v-model="form.payment_currency" @blur="handleBlur('payment_currency')"
-                         :class="{ 'is-invalid': touched.payment_currency && validateField('payment_currency') }">
-                  <div class="invalid-feedback">
-                    {{ validateField('payment_currency') }}
-                  </div>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Descripción</label>
-                  <input type="text" class="form-control" v-model="form.payment_description">
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Tipo de Pago</label>
-                  <input type="text" class="form-control" v-model="form.payment_type">
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Tarjeta</label>
-                  <input type="text" class="form-control" v-model="form.payment_card">
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Tipo de Tarjeta</label>
-                  <input type="text" class="form-control" v-model="form.payment_card_type">
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Marca de Tarjeta</label>
-                  <input type="text" class="form-control" v-model="form.payment_card_brand">
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Banco</label>
-                  <input type="text" class="form-control" v-model="form.payment_bank">
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Fecha de Pago</label>
-                  <input type="date" class="form-control" v-model="form.payment_date">
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Fecha de Reembolso</label>
-                  <input type="date" class="form-control" v-model="form.payment_refund_date">
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Descripción del Reembolso</label>
-                  <input type="text" class="form-control" v-model="form.payment_refund_desc">
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Estado del Pago</label>
-                  <input type="text" class="form-control" v-model="form.payment_status" @blur="handleBlur('payment_status')"
-                         :class="{ 'is-invalid': touched.payment_status && validateField('payment_status') }">
-                  <div class="invalid-feedback">
-                    {{ validateField('payment_status') }}
-                  </div>
-                </div>
+        <section class="section-heading my-2">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-12 d-flex justify-content-between align-items-center">
+                <ButtonBack label="Volver" icon="bi bi-arrow-left" :href="route('admin.subscriptions.index')" />
+                <button
+                  class="btn btn-primary"
+                  :disabled="form.processing || !isFormValid"
+                  @click="submit"
+                >
+                  <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
+                  <i class="bi bi-save me-1"></i> Guardar cambios
+                </button>
               </div>
             </div>
-
-            <div class="card-footer text-end">
-              <button type="submit" class="btn btn-primary" :disabled="form.processing || !isFormValid">
-                <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
-                <i class="bi bi-save me-2"></i>Guardar cambios
-              </button>
-            </div>
           </div>
-        </form>
+        </section>
+
+        <section class="section-form my-2">
+          <div class="container-fluid">
+            <form @submit.prevent="submit" novalidate>
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <FieldSelect
+                        id="user_id"
+                        label="Usuario"
+                        v-model="form.user_id"
+                        :required="true"
+                        :showValidation="touched.user_id"
+                        :formError="form.errors.user_id"
+                        :validateFunction="() => validateField('user_id')"
+                        :options="userOptions"
+                        @blur="() => handleBlur('user_id')"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldSelect
+                        id="course_id"
+                        label="Curso"
+                        v-model="form.course_id"
+                        :required="true"
+                        :showValidation="touched.course_id"
+                        :formError="form.errors.course_id"
+                        :validateFunction="() => validateField('course_id')"
+                        :options="courseOptions"
+                        @blur="() => handleBlur('course_id')"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText
+                        id="payment_amount"
+                        label="Monto"
+                        type="number"
+                        v-model="form.payment_amount"
+                        :required="true"
+                        :showValidation="touched.payment_amount"
+                        :formError="form.errors.payment_amount"
+                        :validateFunction="() => validateField('payment_amount')"
+                        placeholder="Ingrese el monto"
+                        @blur="() => handleBlur('payment_amount')"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText
+                        id="payment_currency"
+                        label="Moneda"
+                        v-model="form.payment_currency"
+                        :required="true"
+                        :showValidation="touched.payment_currency"
+                        :formError="form.errors.payment_currency"
+                        :validateFunction="() => validateField('payment_currency')"
+                        placeholder="Ingrese la moneda"
+                        @blur="() => handleBlur('payment_currency')"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText
+                        id="payment_status"
+                        label="Estado del Pago"
+                        v-model="form.payment_status"
+                        :required="true"
+                        :showValidation="touched.payment_status"
+                        :formError="form.errors.payment_status"
+                        :validateFunction="() => validateField('payment_status')"
+                        placeholder="Ingrese el estado"
+                        @blur="() => handleBlur('payment_status')"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText id="payment_description" label="Descripción" v-model="form.payment_description" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText id="payment_type" label="Tipo de Pago" v-model="form.payment_type" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText id="payment_card" label="Tarjeta" v-model="form.payment_card" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText id="payment_card_type" label="Tipo de Tarjeta" v-model="form.payment_card_type" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText id="payment_card_brand" label="Marca de Tarjeta" v-model="form.payment_card_brand" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText id="payment_bank" label="Banco" v-model="form.payment_bank" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldDate id="payment_date" label="Fecha de Pago" v-model="form.payment_date" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldDate id="payment_refund_date" label="Fecha de Reembolso" v-model="form.payment_refund_date" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText id="payment_refund_desc" label="Descripción del Reembolso" v-model="form.payment_refund_desc" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card-footer text-end">
+                  <button type="submit" class="btn btn-primary" :disabled="form.processing || !isFormValid">
+                    <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
+                    <i class="bi bi-save me-2"></i> Guardar cambios
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
       </div>
-    </section>
+
+      <ToastNotification v-if="toast" :message="toast.message" :type="toast.type" @hidden="toast = null" />
+    </div>
   </AdminLayout>
 </template>
 
@@ -155,12 +166,16 @@
 import { Head } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
-import { computed, ref } from 'vue';
+import { ref, computed } from 'vue';
 
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import Title from '@/Components/Admin/Ui/Title.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
+import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue';
+
+import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
+import FieldText from '@/Components/Admin/Fields/FieldText.vue';
+import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 
 const props = defineProps({
   subscription: { type: Object, required: true },
@@ -169,6 +184,7 @@ const props = defineProps({
 });
 
 const form = useForm({
+  _method: 'PUT',
   user_id: props.subscription.user_id,
   course_id: props.subscription.course_id,
   payment_amount: props.subscription.payment_amount,
@@ -186,28 +202,51 @@ const form = useForm({
 });
 
 const touched = ref({});
+const toast = ref(null);
+
+const userOptions = props.users.map(u => ({ value: u.id, label: `${u.name} (${u.email})` }));
+const courseOptions = props.courses.map(c => ({ value: c.id, label: c.title }));
 
 const handleBlur = (field) => {
   touched.value[field] = true;
 };
 
 const validateField = (field) => {
-  if (!form[field]) return `El campo ${field} es obligatorio`;
+  if (!form[field] || (typeof form[field] === 'string' && !form[field].trim())) {
+    return `El campo ${field.replace('_', ' ')} es obligatorio`;
+  }
   return '';
 };
 
 const isFormValid = computed(() => {
-  return ['user_id', 'course_id', 'payment_amount', 'payment_currency', 'payment_status']
-    .every(f => !validateField(f));
+  return !validateField('user_id') &&
+         !validateField('course_id') &&
+         !validateField('payment_amount') &&
+         !validateField('payment_currency') &&
+         !validateField('payment_status');
 });
 
 const submit = () => {
   Object.keys(form).forEach(key => touched.value[key] = true);
 
   if (isFormValid.value) {
-    form.put(route('admin.subscriptions.update', props.subscription.id), {
-      preserveScroll: true
+   form.post(route('admin.subscriptions.update', props.subscription.id), {
+      preserveScroll: true,
+      onSuccess: () => {
+        toast.value = { message: 'Suscripción actualizada exitosamente', type: 'success' };
+      },
+      onError: () => {
+        toast.value = { message: 'Error al actualizar', type: 'danger' };
+      }
     });
   }
 };
 </script>
+
+<style scoped>
+.blur-overlay {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+</style>
