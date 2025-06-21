@@ -64,22 +64,18 @@ Route::middleware(['auth', 'role:admin'])
 
         // Alumnos
         Route::resource('students', StudentController::class);
-
         // Maestros
         Route::resource('teachers', TeacherController::class);
 
         // Certificados
         Route::resource('certificates', CertificateController::class);
+  
 
         // Cursos
         Route::resource('courses', CourseController::class);
-        Route::delete('courses/{course}/videos/{video}/cover', [VideoController::class, 'deleteCover'])
-            ->name('admin.courses.videos.delete-cover');
+        Route::resource('courses.videos', VideoController::class);
 
-        // Videos relacionados con cursos
-        Route::resource('courses.videos', VideoController::class)
-            ->except(['show']); // 'show' no lo necesitamos en este caso
-
+        Route::post('/courses/{course}/videos/reorder', [VideoController::class, 'reorderVideos']);
         // Suscripciones
         Route::resource('subscriptions', SubscriptionController::class);
 
