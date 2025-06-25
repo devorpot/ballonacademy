@@ -64,6 +64,11 @@
                         <button class="btn btn-outline-danger" @click="prepareDelete(course.id)" :disabled="isDeleting" title="Eliminar">
                           <i class="bi bi-trash-fill"></i>
                         </button>
+
+                        <button class="btn btn-outline-success" @click="openAssignStudentsModal(course)">
+                          <i class="bi bi-person-plus-fill"></i>
+                        </button>
+
                       </div>
                     </td>
                   </tr>
@@ -109,6 +114,18 @@
       @saved="onCreated"
       @close="showCreateModal = false"
     />
+
+
+    <CourseAsignStudentModal
+        :show="showAssignModal"
+        :course="assignCourse"
+        :students="studentsList"
+        @close="showAssignModal = false"
+        @saved="toast = { message: 'Alumnos asignados', type: 'success' }"
+      />
+
+{{ studentsList }}
+
   </AdminLayout>
 </template>
 
@@ -117,6 +134,7 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import { ref, computed, onMounted } from 'vue';
 import { route } from 'ziggy-js';
+import axios from 'axios'; 
 
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
@@ -126,6 +144,8 @@ import ConfirmDeleteModal from '@/Components/Admin/ConfirmDeleteModal.vue';
 import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue';
 import ShowCourseModal from '@/Pages/Admin/Courses/ShowCourseModal.vue';
 import CreateCourseModal from '@/Pages/Admin/Courses/CreateCourseModal.vue';
+
+import CourseAsignStudentModal from '@/Pages/Admin/Courses/CouseAsignStudentModal.vue';
 
 const props = defineProps({
   courses: Array
@@ -146,6 +166,34 @@ const sortKey = ref('id');
 const sortOrder = ref('asc');
 
 const page = usePage();
+
+
+//Modal para agregar alumnos
+
+const showAssignModal = ref(false);
+const assignCourse = ref(null);
+const studentsList = ref([]); // Aquí los alumnos
+
+const openAssignStudentsModal = async (course) => {
+  try {
+    const { data } = await axios.get(route('admin.courses.show', course.id)); // Este endpoint debe incluir la relación con estudiantes
+    assignCourse.value = data.course;
+
+    const studentsResponse = await axios.get(route('admin.students.list'));
+    studentsList.value = studentsResponse.data;
+
+    showAssignModal.value = true;
+  } catch (err) {
+    console.error('Error cargando curso o estudiantes:', err);
+  }
+};
+
+const loadStudents = async () => {
+  const { data } = await axios.get(route('admin.students.list')); // Tu endpoint
+  studentsList.value = data;
+};
+
+
 
 onMounted(() => {
   if (page.props.flash.success) {

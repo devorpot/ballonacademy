@@ -69,8 +69,18 @@ class User extends Authenticatable
     }
     
     public function certificates()
-{
-    return $this->hasMany(Certificate::class);
-}
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'course_user', 'user_id', 'course_id');
+    }
+
+     public function getAssignedCourseIdAttribute()
+    {
+        return $this->courses()->first()?->id;
+    }
     
 }

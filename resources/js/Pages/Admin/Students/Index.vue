@@ -15,7 +15,8 @@ import ShowStudentModal from '@/Pages/Admin/Students/ShowStudentModal.vue';
 import CreateStudentModal from '@/Pages/Admin/Students/CreateStudentModal.vue';
 
 const props = defineProps({
-  students: Array
+  students: Array,
+    courses: Array
 });
 
 const searchQuery = ref('');
@@ -244,11 +245,13 @@ const deleteStudent = () => {
 
     <ToastNotification v-if="toast" :message="toast.message" :type="toast.type" @hidden="toast = null" />
 
-    <CreateStudentModal v-if="showCreateModal"
-      :show="showCreateModal"
-      @saved="onCreated"
-      @close="showCreateModal = false"
-    />
+    <CreateStudentModal
+    v-if="showCreateModal"
+    :courses="props.courses"
+    :show="showCreateModal"
+    @saved="onCreated"
+    @close="showCreateModal = false"
+  />
 
     <ShowStudentModal v-if="showViewModal"
       :show="showViewModal"

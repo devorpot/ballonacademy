@@ -141,7 +141,7 @@ const form = useForm({
   email: props.teacher.user.email,
   password: '',
   password_confirmation: '',
-  teacher_id: props.teacher.teacher_id,
+   
   firstname: props.teacher.firstname,
   lastname: props.teacher.lastname,
   phone: props.teacher.phone,
@@ -152,7 +152,7 @@ const form = useForm({
 
 const touched = ref({});
 const teacherFields = [
-  { key: 'teacher_id', label: 'Clave maestro' },
+ 
   { key: 'firstname', label: 'Nombre' },
   { key: 'lastname', label: 'Apellido' },
   { key: 'phone', label: 'Teléfono' },

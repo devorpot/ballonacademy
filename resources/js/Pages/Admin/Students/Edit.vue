@@ -89,16 +89,14 @@
                   <h6 class="text-muted mt-4 mb-3">Datos del estudiante</h6>
                   <div class="row">
                     <div class="col-md-6 mb-3">
-                      <FieldText
-                        id="student_id"
-                        label="Matrícula"
-                        v-model="form.student_id"
+                     <FieldCheckboxes
+                        label="Cursos asignados"
+                        v-model="form.course_ids"
+                        :items="props.courses.map(c => ({ id: c.id, label: c.title }))"
                         :required="true"
-                        :showValidation="touched.student_id"
-                        :formError="form.errors.student_id"
-                        :validateFunction="() => validateField('student_id')"
-                        placeholder="Ingrese matrícula"
-                        @blur="() => handleBlur('student_id')"
+                        :showValidation="touched.course_ids"
+                        :formError="form.errors.course_ids"
+                        :validateFunction="() => validateField('course_ids')"
                       />
                     </div>
 
@@ -200,6 +198,7 @@
         </section>
       </div>
 
+ 
       <SpinnerOverlay v-if="form.processing" />
     </div>
   </AdminLayout>
@@ -222,9 +221,11 @@ import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue';
 import FieldPhone from '@/Components/Admin/Fields/FieldPhone.vue';
 import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
+import FieldCheckboxes from '@/Components/Admin/Fields/FieldCheckboxes.vue';
 
 const props = defineProps({
-  student: { type: Object, required: true }
+  student: { type: Object, required: true },
+   courses: { type: Array, required: true } // nueva prop
 });
 
 const form = useForm({
@@ -239,7 +240,8 @@ const form = useForm({
   phone: props.student.phone,
   shirt_size: props.student.shirt_size,
   address: props.student.address,
-  country: props.student.country
+  country: props.student.country,
+course_ids: props.student.courses?.map(c => c.id) || []
 });
 
 const shirtSizes = [
@@ -290,7 +292,6 @@ const isFormValid = computed(() => {
          !validateEmail() &&
          !validatePassword() &&
          !validatePasswordConfirmation() &&
-         !validateField('student_id') &&
          !validateField('firstname') &&
          !validateField('lastname') &&
          !validateField('phone') &&

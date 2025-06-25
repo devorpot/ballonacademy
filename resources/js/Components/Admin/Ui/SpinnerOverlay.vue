@@ -35,6 +35,7 @@ const props = defineProps({
 .spinner-border {
   width: 3rem;
   height: 3rem;
+  z-index:10000!important;
 }
 
 .spinner-border.small {

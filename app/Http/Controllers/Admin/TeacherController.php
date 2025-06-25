@@ -32,7 +32,7 @@ class TeacherController extends Controller
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
 
-            'teacher_id' => 'required|string|max:255|unique:teachers,teacher_id',
+            
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'phone' => 'required|string|max:255',
@@ -50,7 +50,7 @@ class TeacherController extends Controller
         $user->assignRole('teacher');
 
         $user->teacher()->create([
-            'teacher_id' => $validated['teacher_id'],
+             
             'firstname' => $validated['firstname'],
             'lastname' => $validated['lastname'],
             'phone' => $validated['phone'],
@@ -76,7 +76,7 @@ class TeacherController extends Controller
             'email' => "required|email|max:255|unique:users,email,{$teacher->user_id}",
             'password' => 'nullable|string|min:8|confirmed',
 
-            'teacher_id' => 'required|string|max:255|unique:teachers,teacher_id,' . $teacher->id,
+            
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'phone' => 'required|string|max:255',
@@ -92,7 +92,7 @@ class TeacherController extends Controller
         ]);
 
         $teacher->update([
-            'teacher_id' => $validated['teacher_id'],
+            
             'firstname' => $validated['firstname'],
             'lastname' => $validated['lastname'],
             'phone' => $validated['phone'],
@@ -129,8 +129,6 @@ class TeacherController extends Controller
             'password.required' => 'La contraseña es obligatoria.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
-            'teacher_id.required' => 'La clave de maestro es obligatoria.',
-            'teacher_id.unique' => 'La clave de maestro ya está registrada.',
             'firstname.required' => 'El nombre del maestro es obligatorio.',
             'lastname.required' => 'El apellido es obligatorio.',
             'phone.required' => 'El teléfono es obligatorio.',
@@ -139,4 +137,18 @@ class TeacherController extends Controller
             'country.required' => 'El país es obligatorio.',
         ];
     }
+
+    public function list()
+        {
+            $teachers = Teacher::with('user')
+                ->get()
+                ->map(function ($teacher) {
+                    return [
+                        'id' => $teacher->id,
+                        'name' => $teacher->firstname . ' ' . $teacher->lastname
+                    ];
+                });
+
+            return response()->json($teachers);
+     }
 }

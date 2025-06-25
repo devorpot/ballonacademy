@@ -9,10 +9,9 @@ use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Admin\CertificateController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\SubscriptionController;
-use App\Http\Controllers\Admin\PaymentController;
+ 
 use App\Http\Controllers\Admin\VideoController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\RegisteredUserController;
+ 
 
 // ----------------------------------
 // Autenticación
@@ -26,16 +25,9 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
-    ->middleware('guest')
-    ->name('password.request');
+ 
 
-Route::get('/register', [RegisteredUserController::class, 'create'])
-    ->middleware('guest')
-    ->name('register');
-
-Route::post('/register', [RegisteredUserController::class, 'store'])
-    ->middleware('guest');
+ 
 
 // ----------------------------------
 // Dashboard redireccionado según rol
@@ -63,22 +55,33 @@ Route::middleware(['auth', 'role:admin'])
             ->name('users.assign-roles');
 
         // Alumnos
+        Route::get('students/list', [StudentController::class, 'list'])->name('students.list');
         Route::resource('students', StudentController::class);
         // Maestros
+
+        Route::get('teachers/list', [TeacherController::class, 'list'])->name('teachers.list');
         Route::resource('teachers', TeacherController::class);
+        
+
+
+
 
         // Certificados
         Route::resource('certificates', CertificateController::class);
   
 
         // Cursos
+        Route::post('courses/{course}/assign-students', [CourseController::class, 'assignStudents'])
+    ->name('courses.assign-students');
         Route::resource('courses', CourseController::class);
         Route::resource('courses.videos', VideoController::class);
 
-        Route::post('/courses/{course}/videos/reorder', [VideoController::class, 'reorderVideos']);
+       Route::post('/courses/{course}/videos/reorder', [VideoController::class, 'reorderVideos'])
+    ->name('courses.videos.reorder');
         // Suscripciones
         Route::resource('subscriptions', SubscriptionController::class);
-
-        // Pagos
-        Route::resource('payments', PaymentController::class)->only(['index']);
+ 
     });
+
+
+ 

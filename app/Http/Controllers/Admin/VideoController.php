@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Storage;
 
 class VideoController extends Controller
 {
-    public function index(Course $course)
-    {
-        return response()->json($course->videos);
-    }
-
+  public function index(Course $course)
+{
+    return response()->json(
+        $course->videos()->orderBy('order')->get()
+    );
+}
     public function store(Request $request, Course $course)
     {
         $validated = $this->validateData($request);
@@ -66,6 +67,7 @@ class VideoController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'description_short' => 'nullable|string|max:255',
+            'teacher_id' => 'required|integer|max:255',
             'comments' => 'nullable|string',
             'image_cover' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048',
             'video_url' => 'required|string|max:255',
@@ -77,5 +79,19 @@ class VideoController extends Controller
         if ($video->course_id !== $course->id) {
             abort(403, 'El video no pertenece a este curso');
         }
+    }
+
+        public function reorderVideos(Request $request, Course $course)
+    {
+        $validated = $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'integer'
+        ]);
+
+        foreach ($validated['order'] as $index => $videoId) {
+            $course->videos()->where('id', $videoId)->update(['order' => $index + 1]);
+        }
+
+        return response()->json(['success' => true]);
     }
 }

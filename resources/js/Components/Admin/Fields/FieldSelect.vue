@@ -26,7 +26,7 @@ export default {
   props: {
     id: { type: String, required: true },
     label: { type: String, required: true },
-    modelValue: { type: String, default: "" },
+     modelValue: { type: [String, Number], default: '' },
     placeholder: { type: String, default: "" },
     required: { type: Boolean, default: false },
     showValidation: { type: Boolean, default: false },

@@ -84,6 +84,7 @@
         <!-- Componente de videos -->
         <CourseVideos :course-id="props.course.id" :videos="props.videos" />
 
+        <!-- Spinner de carga -->
         <SpinnerOverlay v-if="form.processing" />
       </div>
     </div>
@@ -104,6 +105,9 @@ import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
 import CourseVideos from '@/Pages/Admin/Courses/CourseVideosTable.vue';
+
+
+
 
 const props = defineProps({
   course: { type: Object, required: true },

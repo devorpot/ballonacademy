@@ -137,7 +137,7 @@ const form = useForm({
   email: '',
   password: '',
   password_confirmation: '',
-  teacher_id: '',
+ 
   firstname: '',
   lastname: '',
   phone: '',
@@ -147,7 +147,7 @@ const form = useForm({
 });
 
 const teacherFields = [
-  { key: 'teacher_id', label: 'Clave maestro', component: FieldText, placeholder: 'Ingrese la clave' },
+  
   { key: 'firstname', label: 'Nombre', component: FieldText, placeholder: 'Ingrese el nombre' },
   { key: 'lastname', label: 'Apellido', component: FieldText, placeholder: 'Ingrese el apellido' },
   { key: 'phone', label: 'Teléfono', component: FieldPhone, placeholder: 'Ingrese el teléfono' },

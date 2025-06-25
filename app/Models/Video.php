@@ -14,6 +14,7 @@ class Video extends Model
         'title',
         'description',
         'description_short',
+        'teacher_id',
         'comments',
         'image_cover',
         'video_url',
@@ -23,4 +24,11 @@ class Video extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class);
+    }
+
+
 }

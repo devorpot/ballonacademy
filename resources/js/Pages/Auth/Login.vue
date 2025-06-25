@@ -84,9 +84,7 @@ const submit = () => {
                     </div>
 
                     <div class="mt-3 text-center">
-                        <Link :href="route('password.request')" class="text-decoration-none">
-                            ¿Olvidaste tu contraseña?
-                        </Link>
+                        
                     </div>
                 </form>
             </div>
@@ -95,7 +93,7 @@ const submit = () => {
         <div class="text-center mt-4">
             <p class="text-muted">
                 ¿No tienes una cuenta? 
-                <Link :href="route('register')" class="text-decoration-none">Regístrate</Link>
+                
             </p>
         </div>
     </GuestLayout>

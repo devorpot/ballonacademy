@@ -85,6 +85,19 @@
 
                 <h6 class="text-muted mt-4 mb-3">Datos del estudiante</h6>
                 <div class="row">
+
+<div class="col-md-12 mb-3">
+  <FieldCheckboxes
+    label="Cursos asignados"
+    v-model="form.course_ids"
+    :items="props.courses.map(c => ({ id: c.id, label: c.title }))"
+    :required="true"
+    :showValidation="touched.course_ids"
+    :formError="form.errors.course_ids"
+    :validateFunction="() => validateField('course_ids')"
+  />
+</div>
+                
                   <div v-for="field in studentFields" :key="field.key" class="col-md-6 mb-3">
                     <component
                       :is="field.component"
@@ -136,19 +149,26 @@ import FieldPhone from '@/Components/Admin/Fields/FieldPhone.vue';
 import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
 import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 
+
+
+const props = defineProps({
+  courses: Array
+});
+
 const form = useForm({
   name: '',
   email: '',
   password: '',
   password_confirmation: '',
-  student_id: '',
   firstname: '',
   lastname: '',
   phone: '',
   shirt_size: '',
   address: '',
-  country: ''
+  country: '',
+  course_ids: [] // <-- array de cursos
 });
+
 
 const shirtSizes = [
   { value: 'c', label: 'Chica' },
@@ -157,14 +177,27 @@ const shirtSizes = [
   { value: 'xl', label: 'Extragrande' }
 ];
 
+const courseOptions = props.courses.map(course => ({
+  value: course.id,
+  label: course.title
+}));
+
 const studentFields = [
-  { key: 'student_id', label: 'Matrícula', component: FieldText, placeholder: 'Ingrese matrícula' },
+  
   { key: 'firstname', label: 'Nombre(s)', component: FieldText, placeholder: 'Ingrese nombre' },
   { key: 'lastname', label: 'Apellido', component: FieldText, placeholder: 'Ingrese apellido' },
   { key: 'phone', label: 'Teléfono', component: FieldPhone, placeholder: 'Ingrese teléfono' },
   { key: 'shirt_size', label: 'Talla camiseta', component: FieldSelect, options: shirtSizes },
   { key: 'address', label: 'Dirección', component: FieldTextarea, placeholder: 'Ingrese dirección' },
-  { key: 'country', label: 'País', component: FieldText, placeholder: 'Ingrese país' }
+  { key: 'country', label: 'País', component: FieldText, placeholder: 'Ingrese país' },
+  { 
+      key: 'course_id',
+      label: 'Curso',
+      component: FieldSelect,
+      options: courseOptions,
+      placeholder: 'Seleccione un curso'
+    }
+
 ];
 
 const touched = ref({});
@@ -198,9 +231,9 @@ const validatePasswordConfirmation = () => {
 };
 
 const validateField = (field) => {
-  if (!form[field] || (typeof form[field] === 'string' && !form[field].trim())) {
-    return `El campo ${field.replace('_', ' ')} es obligatorio`;
-  }
+  const value = form[field];
+  if (Array.isArray(value) && value.length === 0) return `Debe seleccionar al menos un valor en ${field}`;
+  if (!value || (typeof value === 'string' && !value.trim())) return `El campo ${field} es obligatorio`;
   return '';
 };
 

@@ -19,6 +19,7 @@ class CourseController extends Controller
 
         $courses = Course::orderBy($sortBy, $sortDir)->get();
 
+
         return Inertia::render('Admin/Courses/Index', [
             'courses' => $courses,
             'filters' => [
@@ -55,12 +56,14 @@ class CourseController extends Controller
     }
 
     public function edit(Course $course)
-    {
-        return Inertia::render('Admin/Courses/Edit', [
-            'course' => $course,
-            'videos' => $course->videos
-        ]);
-    }
+        {
+            $course->load('students'); // ← importante
+
+            return Inertia::render('Admin/Courses/Edit', [
+                'course' => $course,
+                'videos' => $course->videos
+            ]);
+        }
 
     public function update(Request $request, Course $course)
     {
@@ -169,4 +172,34 @@ class CourseController extends Controller
             Storage::disk('public')->delete($filePath);
         }
     }
+
+    public function show(Course $course)
+{
+    $course->load('students'); // Carga los estudiantes asignados
+
+    return response()->json([ 
+        'course' => $course
+    ]);
+}
+
+
+public function assignStudents(Request $request, Course $course)
+{
+    logger()->info('Estudiantes recibidos:', $request->all());
+
+    $validated = $request->validate([
+        'students' => 'required|array',
+        'students.*' => 'exists:users,id',
+    ]);
+
+    $course->students()->sync($validated['students']);
+
+    return response()->json(['message' => 'Alumnos asignados']);
+}
+
+
+
+
+
+
 }
