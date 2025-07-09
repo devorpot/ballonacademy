@@ -1,86 +1,114 @@
-<script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { route } from 'ziggy-js';
-
-const props = defineProps({
-  course: Object,
-  video: Object
-});
-</script>
-
 <template>
-  <Head :title="`Detalles del Video: ${video.title}`" />
+  <Head :title="`Ver Video: ${video.title}`" />
 
   <AdminLayout>
-    <div class="container-fluid py-4">
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="d-flex justify-content-between align-items-center">
-            <h1 class="h3 mb-0">
-              <i class="bi bi-film me-2"></i>Detalles del Video: {{ video.title }}
-            </h1>
-            <Link :href="route('admin.videos.index', course.id)" class="btn btn-secondary">
-              <i class="bi bi-arrow-left me-2"></i>Volver a Videos
-            </Link>
+    <div class="position-relative">
+      <Breadcrumbs
+        username="admin"
+        :breadcrumbs="[
+          { label: 'Dashboard', route: 'admin.dashboard' },
+          { label: 'Cursos', route: 'admin.courses.index' },
+          { label: 'Videos', route: 'admin.videos.index' },
+          { label: 'Detalle', route: '' }
+        ]"
+      />
+
+      <section class="section-heading my-2">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+              <ButtonBack label="Volver" icon="bi bi-arrow-left" :href="route('admin.videos.index')" />
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="card">
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <h5 class="fw-bold">Información Básica</h5>
-              <hr>
-              <div class="mb-3">
-                <label class="form-label text-muted">Título:</label>
-                <p class="form-control-plaintext">{{ video.title }}</p>
-              </div>
-              <div class="mb-3">
-                <label class="form-label text-muted">URL del Video:</label>
-                <p class="form-control-plaintext">{{ video.video_url }}</p>
-              </div>
-              <div class="mb-3">
-                <label class="form-label text-muted">Fecha de Creación:</label>
-                <p class="form-control-plaintext">{{ new Date(video.created_at).toLocaleString() }}</p>
-              </div>
-            </div>
+      <section class="section-form my-2">
+        <div class="container-fluid">
+          <div class="card">
+            <div class="card-body">
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <strong class="d-block text-muted">Título</strong>
+                  <p>{{ video.title }}</p>
+                </div>
 
-            <div class="col-md-6 mb-3">
-              <h5 class="fw-bold">Detalles</h5>
-              <hr>
-              <div class="mb-3">
-                <label class="form-label text-muted">Descripción Corta:</label>
-                <p class="form-control-plaintext">{{ video.description_short || 'N/A' }}</p>
-              </div>
-              <div class="mb-3">
-                <label class="form-label text-muted">Descripción:</label>
-                <p class="form-control-plaintext">{{ video.description || 'N/A' }}</p>
-              </div>
-              <div class="mb-3" v-if="video.comments">
-                <label class="form-label text-muted">Comentarios:</label>
-                <p class="form-control-plaintext">{{ video.comments }}</p>
-              </div>
-              <div class="mb-3" v-if="video.image_cover">
-                <label class="form-label text-muted">Imagen de Portada:</label>
-                <div>
-                  <img :src="video.image_cover" alt="Cover" class="img-fluid rounded shadow-sm" style="max-height: 200px;">
+                <div class="col-md-6">
+                  <strong class="d-block text-muted">URL del video</strong>
+                  <p>{{ video.video_url }}</p>
+                </div>
+
+                <div class="col-md-6">
+                  <strong class="d-block text-muted">Descripción</strong>
+                  <p>{{ video.description || '—' }}</p>
+                </div>
+
+                <div class="col-md-6">
+                  <strong class="d-block text-muted">Descripción corta</strong>
+                  <p>{{ video.description_short || '—' }}</p>
+                </div>
+
+                <div class="col-md-6">
+                  <strong class="d-block text-muted">Comentarios</strong>
+                  <p>{{ video.comments || '—' }}</p>
+                </div>
+
+                <div class="col-md-6">
+                  <strong class="d-block text-muted">Curso</strong>
+                  <p>{{ courseName }}</p>
+                </div>
+
+                <div class="col-md-6">
+                  <strong class="d-block text-muted">Profesor</strong>
+                  <p>{{ teacherName }}</p>
+                </div>
+
+                <div class="col-md-6">
+                  <strong class="d-block text-muted">Imagen de portada</strong>
+                  <div v-if="video.image_cover" class="border p-2 rounded bg-light">
+                    <img :src="'/storage/' + video.image_cover" class="img-fluid rounded" style="max-height: 200px;" />
+                  </div>
+                  <div v-else>
+                    <em>No hay imagen</em>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div class="d-flex justify-content-end mt-4">
-            <Link :href="route('admin.videos.edit', [course.id, video.id])" class="btn btn-warning me-2">
-              <i class="bi bi-pencil-fill me-2"></i>Editar
-            </Link>
-            <Link :href="route('admin.videos.index', course.id)" class="btn btn-secondary">
-              <i class="bi bi-arrow-left me-2"></i>Volver al Listado
-            </Link>
+            <div class="card-footer text-end">
+              <Link :href="route('admin.videos.edit', video.id)" class="btn btn-outline-primary">
+                <i class="bi bi-pencil-square me-1"></i> Editar
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   </AdminLayout>
 </template>
+
+<script setup>
+import { Head, Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { route } from 'ziggy-js';
+
+import AdminLayout from '@/Layouts/AdminLayout.vue';
+import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
+import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
+
+const props = defineProps({
+  video: Object,
+  courses: Array,
+  teachers: Array
+});
+
+const courseName = computed(() => {
+  const course = props.courses.find(c => c.id === props.video.course_id);
+  return course ? course.title : '—';
+});
+
+const teacherName = computed(() => {
+  const teacher = props.teachers.find(t => t.id === props.video.teacher_id);
+  return teacher ? `${teacher.firstname} ${teacher.lastname}` : '—';
+});
+</script>

@@ -82,5 +82,10 @@ class User extends Authenticatable
     {
         return $this->courses()->first()?->id;
     }
+
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
     
 }

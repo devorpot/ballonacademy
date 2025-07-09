@@ -27,10 +27,11 @@
       <div class="container-fluid">
         <div class="card">
           <div class="card-body p-0">
-            <div class="table-responsive">
+           <div class="table-responsive">
               <table class="table table-striped table-hover align-middle mb-0">
                 <thead class="table-light">
                   <tr>
+                    <th></th>
                     <th @click="sortBy('id')" style="cursor: pointer;">
                       ID
                       <i :class="sortKey === 'id' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
@@ -44,42 +45,80 @@
                       <i :class="sortKey === 'level' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
                     </th>
                     <th>Descripción corta</th>
+                    <th>Activo</th>
+                    <th @click="sortBy('videos_count')" style="cursor: pointer;">
+                      Videos
+                      <i :class="sortKey === 'videos_count' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
+                    </th>
                     <th class="text-end pe-4">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="course in paginatedCourses" :key="course.id">
+                    <td>
+                    <img
+                      :src="course.image_cover ? `/storage/${course.image_cover}` : '/images/default-cover.jpg'"
+                      alt="Cover"
+                      class="img-thumbnail"
+                      style="max-height: 60px; max-width: 100px;"
+                    />
+                  </td>
                     <td>{{ course.id }}</td>
                     <td>{{ course.title }}</td>
                     <td>{{ course.level }}</td>
                     <td>{{ course.description_short }}</td>
+                    <td>
+                      <span class="badge" :class="course.active ? 'bg-success' : 'bg-secondary'">
+                        {{ course.active ? 'Activo' : 'Inactivo' }}
+                      </span>
+                    </td>
+                    <td>{{ course.videos_count }}</td>
                     <td class="text-end pe-4">
-                      <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-info" @click="openViewModal(course)" title="Ver">
-                          <i class="bi bi-eye-fill"></i>
-                        </button>
-                        <Link :href="route('admin.courses.edit', course.id)" class="btn btn-outline-warning" title="Editar">
-                          <i class="bi bi-pencil-fill"></i>
+                      <div class="d-flex justify-content-end flex-wrap gap-1">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Acciones del curso">
+                          <button class="btn btn-outline-info" @click="openViewModal(course)" title="Ver curso">
+                            <i class="bi bi-eye-fill"></i>
+                          </button>
+                          <Link :href="route('admin.courses.edit', course.id)" class="btn btn-outline-warning" title="Editar curso">
+                            <i class="bi bi-pencil-fill"></i>
+                          </Link>
+                          <button class="btn btn-outline-danger" @click="prepareDelete(course.id)" :disabled="isDeleting" title="Eliminar curso">
+                            <i class="bi bi-trash-fill"></i>
+                          </button>
+                        </div>
+
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Gestión de estudiantes">
+                          <button class="btn btn-outline-success" @click="openAssignStudentsModal(course)" title="Asignar estudiantes">
+                            <i class="bi bi-person-plus-fill"></i>
+                          </button>
+                          <Link
+                            class="btn btn-outline-secondary"
+                            :href="route('admin.courses.students', course.id)"
+                            title="Ver estudiantes asignados"
+                          >
+                            <i class="bi bi-people-fill"></i>
+                          </Link>
+                        </div>
+
+                        <Link
+                          :href="route('admin.courses.videos.panel', course.id)"
+                          class="btn btn-outline-primary btn-sm"
+                          title="Gestionar videos del curso"
+                        >
+                          <i class="bi bi-play-circle me-1"></i> Videos
                         </Link>
-                        <button class="btn btn-outline-danger" @click="prepareDelete(course.id)" :disabled="isDeleting" title="Eliminar">
-                          <i class="bi bi-trash-fill"></i>
-                        </button>
-
-                        <button class="btn btn-outline-success" @click="openAssignStudentsModal(course)">
-                          <i class="bi bi-person-plus-fill"></i>
-                        </button>
-
                       </div>
                     </td>
                   </tr>
                   <tr v-if="sortedCourses.length === 0">
-                    <td colspan="5" class="text-center py-4 text-muted">
+                    <td colspan="7" class="text-center py-4 text-muted">
                       <i class="bi bi-exclamation-circle me-2"></i>No se encontraron cursos
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
+
           </div>
         </div>
       </div>

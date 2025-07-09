@@ -14,15 +14,14 @@
             <div :class="{ 'blur-overlay': form.processing }">
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <FieldSelect
+                  <FieldUserSearch
                     id="user_id"
-                    label="Usuario"
+                    label="Alumno"
                     v-model="form.user_id"
                     :required="true"
                     :showValidation="touched.user_id"
                     :formError="form.errors.user_id"
-                    :validateFunction="() => validateField('user_id')"
-                    :options="props.users.map(u => ({ value: u.id, label: `${u.name} (${u.email})` }))"
+                    fetch-url="/admin/students/search"
                     @blur="() => handleBlur('user_id')"
                   />
                 </div>
@@ -42,31 +41,31 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <FieldText
-                    id="payment_amount"
-                    label="Monto"
-                    v-model="form.payment_amount"
-                    :required="true"
-                    :showValidation="touched.payment_amount"
-                    :formError="form.errors.payment_amount"
-                    :validateFunction="() => validateField('payment_amount')"
-                    placeholder="Monto del pago"
-                    @blur="() => handleBlur('payment_amount')"
-                  />
+                  <FieldMoney
+                      id="payment_amount"
+                      label="Monto"
+                      v-model="form.payment_amount"
+                      :required="true"
+                      :showValidation="touched.payment_amount"
+                      :formError="form.errors.payment_amount"
+                      placeholder="Ingrese el monto"
+                      @blur="() => handleBlur('payment_amount')"
+                    />
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <FieldText
-                    id="payment_currency"
-                    label="Moneda"
-                    v-model="form.payment_currency"
-                    :required="true"
-                    :showValidation="touched.payment_currency"
-                    :formError="form.errors.payment_currency"
-                    :validateFunction="() => validateField('payment_currency')"
-                    placeholder="Moneda del pago"
-                    @blur="() => handleBlur('payment_currency')"
-                  />
+                  <FieldSelect
+                  id="payment_currency"
+                  label="Moneda"
+                  v-model="form.payment_currency"
+                  :required="true"
+                  :showValidation="touched.payment_currency"
+                  :formError="form.errors.payment_currency"
+                  :validateFunction="() => validateField('payment_currency')"
+                  :options="currencyOptions"
+                  @blur="() => handleBlur('payment_currency')"
+                />
+
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -176,16 +175,18 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { onMounted,computed, ref, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
+import axios from 'axios'
 
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
-
+import FieldUserSearch from '@/Components/Admin/Fields/FieldUserSearch.vue';
+import FieldMoney from '@/Components/Admin/Fields/FieldMoney.vue';
 const props = defineProps({
   show: Boolean,
   users: { type: Array, default: () => [] },
@@ -247,6 +248,22 @@ const submit = () => {
     });
   }
 };
+
+
+watch(() => form.course_id, (newCourseId) => {
+  const selectedCourse = props.courses.find(course => course.id === newCourseId);
+  if (selectedCourse) {
+    form.payment_amount = selectedCourse.price;
+  }
+});
+
+const currencyOptions = ref([])
+
+onMounted(async () => {
+  const res = await axios.get('/admin/options/currencies')
+  currencyOptions.value = res.data
+})
+
 </script>
 
 <style scoped>

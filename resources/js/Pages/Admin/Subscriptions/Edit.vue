@@ -75,6 +75,7 @@
                         :formError="form.errors.payment_amount"
                         :validateFunction="() => validateField('payment_amount')"
                         placeholder="Ingrese el monto"
+                        :readonly="true"
                         @blur="() => handleBlur('payment_amount')"
                       />
                     </div>
@@ -157,22 +158,24 @@
         </section>
       </div>
 
-      <ToastNotification v-if="toast" :message="toast.message" :type="toast.type" @hidden="toast = null" />
+      <SpinnerOverlay v-if="form.processing" />
+ 
     </div>
   </AdminLayout>
 </template>
+
 
 <script setup>
 import { Head } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
-import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue';
-
+ 
+import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
 import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
@@ -231,16 +234,18 @@ const submit = () => {
 
   if (isFormValid.value) {
    form.post(route('admin.subscriptions.update', props.subscription.id), {
+         forceFormData: true,
       preserveScroll: true,
-      onSuccess: () => {
-        toast.value = { message: 'Suscripción actualizada exitosamente', type: 'success' };
-      },
-      onError: () => {
-        toast.value = { message: 'Error al actualizar', type: 'danger' };
-      }
     });
   }
 };
+
+watch(() => form.course_id, (newCourseId) => {
+  const selectedCourse = props.courses.find(course => course.id === newCourseId);
+  if (selectedCourse) {
+    form.payment_amount = selectedCourse.price;
+  }
+});
 </script>
 
 <style scoped>

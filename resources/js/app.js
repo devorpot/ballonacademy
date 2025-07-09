@@ -8,6 +8,7 @@ window.bootstrap = bootstrap;
 
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../css/app.less'
+import '../css/frontend.less'
 
 // Bootstrap JS (incluye Popper)
  

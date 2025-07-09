@@ -117,6 +117,7 @@
           </div>
         </section>
       </div>
+            <SpinnerOverlay v-if="form.processing" />
     </div>
   </AdminLayout>
 </template>
@@ -131,7 +132,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
-
+import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
 const props = defineProps({
   teacher: { type: Object, required: true }
 });

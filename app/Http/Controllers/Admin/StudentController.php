@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Student;
-use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -15,21 +14,15 @@ class StudentController extends Controller
     public function index()
     {
         $students = Student::with('user')->get();
-          $courses = \App\Models\Course::select('id', 'title')->get();
 
         return Inertia::render('Admin/Students/Index', [
-            'courses' => $courses,
             'students' => $students
         ]); 
     }
 
     public function create()
     {
-           $courses = \App\Models\Course::select('id', 'title')->get();
-
-            return Inertia::render('Admin/Students/Create', [
-                'courses' => $courses
-            ]);
+        return Inertia::render('Admin/Students/Create');
     }
 
     public function store(Request $request)
@@ -37,14 +30,10 @@ class StudentController extends Controller
         $validated = $this->validateData($request);
 
         $user = User::create([
-             'name' => $validated['name'],
-             'email' => $validated['email'],
+            'name' => $validated['name'],
+            'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
         ]);
-
-       if ($request->filled('course_ids')) {
-                $user->courses()->sync($request->course_ids);
-            }
 
         $user->assignRole('student');
 
@@ -53,46 +42,36 @@ class StudentController extends Controller
         return redirect()->route('admin.students.index')->with('success', 'Estudiante creado exitosamente');
     }
 
-public function edit(Student $student)
-{
-    $student->load(['user.courses']); // <<-- importante aquí
+    public function edit(Student $student)
+    {
+        $student->load(['user.profile']);
 
-    $courses = Course::all(['id', 'title']);
-
-
-
-
-    return Inertia::render('Admin/Students/Edit', [
-        'student' => array_merge(
-            $student->toArray(),
-            ['courses' => $student->user->courses]
-        ),
-        'courses' => $courses,
-    ]);
-}
-
+        return Inertia::render('Admin/Students/Edit', [
+            'student' => $student,
+        ]);
+    }
 
     public function update(Request $request, Student $student)
-    {
-        $validated = $this->validateData($request, false, $student->user_id);
+{
+    $validated = $this->validateData($request, false, $student->user_id);
 
-        $student->user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => !empty($validated['password'])
-                ? Hash::make($validated['password'])
-                : $student->user->password,
-        ]);
+    // Actualizar usuario (credenciales)
+    $student->user->update([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => !empty($validated['password'])
+            ? Hash::make($validated['password'])
+            : $student->user->password,
+    ]);
 
-        if ($request->filled('course_ids')) {
-            $student->user->courses()->sync($request->course_ids);
-        }
+    // Actualizar datos del estudiante
+    $student->update($this->studentData($validated));
 
+    // Reutilizar el ProfileController para actualizar el perfil
+    app(ProfileController::class)->update($request, $student->user);
 
-        $student->update($this->studentData($validated));
-
-        return redirect()->route('admin.students.index')->with('success', 'Estudiante actualizado correctamente');
-    }
+    return redirect()->route('admin.students.index')->with('success', 'Estudiante actualizado correctamente');
+}
 
     public function destroy(Student $student)
     {
@@ -102,19 +81,19 @@ public function edit(Student $student)
         return redirect()->route('admin.students.index')->with('success', 'Estudiante eliminado exitosamente');
     }
 
- public function list()
-{
-    $students = Student::with('user')
-        ->get()
-        ->map(function ($student) {
-            return [
-                'id' => $student->user->id, // ← Usar el ID correcto
-                'name' => $student->firstname . ' ' . $student->lastname
-            ];
-        });
+    public function list()
+    {
+        $students = Student::with('user')
+            ->get()
+            ->map(function ($student) {
+                return [
+                    'id' => $student->user->id,
+                    'name' => $student->firstname . ' ' . $student->lastname
+                ];
+            });
 
-    return response()->json($students);
-}
+        return response()->json($students);
+    }
 
     private function validateData(Request $request, $isStore = true, $userId = null): array
     {
@@ -142,17 +121,45 @@ public function edit(Student $student)
     private function studentData(array $validated): array
     {
         return [
-            
             'firstname' => $validated['firstname'],
             'lastname' => $validated['lastname'],
             'phone' => $validated['phone'],
             'shirt_size' => $validated['shirt_size'],
             'address' => $validated['address'],
             'country' => $validated['country'],
-            'course_ids' => 'required|array|min:1',
-            'course_ids.*' => 'exists:courses,id',  
         ];
     }
+
+    public function search(Request $request)
+{
+    $search = $request->input('search');
+
+    $students = Student::with('user')
+        ->whereHas('user', function ($query) use ($search) {
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+        })
+        ->limit(20)
+        ->get()
+        ->map(fn($student) => [
+            'label' => "{$student->user->name} ({$student->user->email})",
+            'value' => $student->user_id
+        ]);
+
+    return response()->json($students);
+}
+
+public function searchById($id)
+{
+    $student = Student::with('user')->where('user_id', $id)->firstOrFail();
+
+    return response()->json([
+        'value' => $student->user_id,
+        'label' => "{$student->user->name} ({$student->user->email})"
+    ]);
+}
+
+
 
     private function validationMessages(): array
     {
@@ -171,8 +178,6 @@ public function edit(Student $student)
             'shirt_size.required' => 'La talla de camiseta es obligatoria.',
             'address.required' => 'La dirección es obligatoria.',
             'country.required' => 'El país es obligatorio.',
-            'course_ids' => 'required|array|min:1',
-            'course_ids.*' => 'exists:courses,id',
         ];
     }
 }

@@ -48,18 +48,4 @@ export default {
 };
 </script>
 
-
-<!-- 
-
-<FieldSwitch
-  id="activeSwitch"
-  label="Activo"
-  v-model="form.active"
-  :required="false"
-  :disabled="false"
-  :showValidation="touched.active"
-  :formError="form.errors.active"
-  :validateFunction="() => validateField('active')"
-/>
-
-->
+ 

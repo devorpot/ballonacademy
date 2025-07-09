@@ -111,6 +111,7 @@
           </div>
         </section>
       </div>
+      <SpinnerOverlay v-if="form.processing" />
     </div>
   </AdminLayout>
 </template>
@@ -125,6 +126,8 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import Title from '@/Components/Admin/Ui/Title.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
+import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
+
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue';
 import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue';

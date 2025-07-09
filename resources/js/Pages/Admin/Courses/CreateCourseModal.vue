@@ -65,6 +65,64 @@
                     @blur="() => handleBlur('description')"
                   />
                 </div>
+                <!-- Curso activo -->
+                  <div class="col-md-6 mb-3">
+                    <FieldSwitch
+                      id="active"
+                      label="Curso activo"
+                      v-model="form.active"
+                      :required="false"
+                      :disabled="false"
+                      :showValidation="touched.active"
+                      :formError="form.errors.active"
+                      :validateFunction="() => validateField('active')"
+                      @blur="() => handleBlur('active')"
+                    />
+
+                  </div>
+
+                  <!-- Precio -->
+                  <div class="col-md-6 mb-3">
+                    <FieldText
+                      id="price"
+                      label="Precio"
+                      v-model="form.price"
+                      :required="false"
+                      :showValidation="touched.price"
+                      :formError="form.errors.price"
+                      :validateFunction="() => validateField('price')"
+                      placeholder="Ej. 1000.00"
+                      @blur="() => handleBlur('price')"
+                    />
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                       <FieldSelectApi
+                        id="currency_id"
+                        label="Moneda"
+                        v-model="form.currency_id"
+                        :formError="form.errors.currency_id"
+                        :showValidation="touched.currency_id"
+                        api-url="/admin/options/currencies"
+                        @blur="() => handleBlur('currency_id')"
+                      />
+                    </div>
+
+                  <!-- Link de pago -->
+                  <div class="col-md-6 mb-3">
+                    <FieldText
+                      id="payment_link"
+                      label="Link de pago"
+                      v-model="form.payment_link"
+                      :required="false"
+                      :showValidation="touched.payment_link"
+                      :formError="form.errors.payment_link"
+                      :validateFunction="() => validateField('payment_link')"
+                      placeholder="https://pago.ejemplo.com/..."
+                      @blur="() => handleBlur('payment_link')"
+                    />
+                  </div>
+
 
                 <div class="col-md-6 mb-3">
                   <FieldImage
@@ -134,6 +192,8 @@ import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
 import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
+import FieldSelectApi from '@/Components/Admin/Fields/FieldSelectApi.vue';
+import FieldSwitch from '@/Components/Admin/Fields/FieldSwitch.vue';
 
 const props = defineProps({
   show: Boolean
@@ -151,9 +211,13 @@ const form = useForm({
   image_cover: null,
   logo: null,
   date_start: today,
-  date_end: today
-});
+  date_end: today,
+  active: true,  
+  price: '',  
+  payment_link: '' ,
+  currency_id: null
 
+});
 const touched = ref({});
 
 const handleBlur = (field) => {
@@ -163,6 +227,9 @@ const handleBlur = (field) => {
 const validateField = (field) => {
   if (field === 'title' && !form.title.trim()) return 'El título es obligatorio';
   if (field === 'description' && !form.description.trim()) return 'La descripción es obligatoria';
+  if (field === 'price' && form.price && isNaN(parseFloat(form.price))) return 'El precio debe ser un número';
+  if (field === 'payment_link' && form.payment_link && form.payment_link.length > 255) return 'El link de pago es muy largo';
+
   return '';
 };
 
@@ -172,6 +239,9 @@ const isFormValid = computed(() => {
 
 const submit = () => {
   Object.keys(form).forEach(key => touched.value[key] = true);
+
+ 
+  form.active = form.active === 'true' || form.active === true;
 
   if (isFormValid.value) {
     form.post(route('admin.courses.store'), {
@@ -185,6 +255,7 @@ const submit = () => {
     });
   }
 };
+
 </script>
 
 <style scoped>

@@ -101,6 +101,57 @@
                       @blur="() => handleBlur('date_end')"
                     />
                   </div>
+                  <div class="col-md-6 mb-3">
+                       <FieldMoney
+                          id="price"
+                          label="Precio"
+                          v-model="form.price"
+                          :required="true"
+                          :showValidation="touched.price"
+                          :formError="form.errors.price"
+                          placeholder="Ingrese el precio"
+                          @blur="() => handleBlur('price')"
+                        />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                       <FieldSelectApi
+                        id="currency_id"
+                        label="Moneda"
+                        v-model="form.currency_id"
+                        :formError="form.errors.currency_id"
+                        :showValidation="touched.currency_id"
+                        api-url="/admin/options/currencies"
+                        @blur="() => handleBlur('currency_id')"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldUrl
+                        id="payment_link"
+                        label="Enlace de pago"
+                        v-model="form.payment_link"
+                        :required="false"
+                        :showValidation="touched.payment_link"
+                        :formError="form.errors.payment_link"
+                        placeholder="URL de pago (opcional)"
+                        @blur="() => handleBlur('payment_link')"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldSwitch
+                      id="active"
+                      label="Curso activo"
+                      v-model="form.active"
+                      :required="false"
+                      :disabled="false"
+                      :showValidation="touched.active"
+                      :formError="form.errors.active"
+                      :validateFunction="() => validateField('active')"
+                      @blur="() => handleBlur('active')"
+                    />se">No</option>
+                      </select>
+                    </div>
 
                   <div class="col-md-6 mb-3">
                     <FieldImage
@@ -149,10 +200,14 @@ import { ref, computed } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
-
+import FieldUrl from '@/Components/Admin/Fields/FieldUrl.vue';
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
+import FieldUserSearch from '@/Components/Admin/Fields/FieldUserSearch.vue';
+import FieldMoney from '@/Components/Admin/Fields/FieldMoney.vue';
+import FieldSwitch from '@/Components/Admin/Fields/FieldSwitch.vue';
+ 
 
 const today = new Date().toISOString().split('T')[0];
 
@@ -164,8 +219,13 @@ const form = useForm({
   date_start: today,
   date_end: today,
   image_cover: null,
-  logo: null
+  logo: null,
+  active: true,
+  price: '',
+  payment_link: '',
+  currency_id: null
 });
+
 
 const touched = ref({});
 
@@ -176,6 +236,9 @@ const handleBlur = (field) => {
 const validateField = (field) => {
   if (field === 'title' && !form.title.trim()) return 'El título es obligatorio';
   if (field === 'description' && !form.description.trim()) return 'La descripción es obligatoria';
+    if (field === 'price' && (form.price === '' || isNaN(parseFloat(form.price)))) {
+    return 'El precio es obligatorio y debe ser un número válido';
+  }
   if (field === 'date_end' && form.date_start && form.date_end && form.date_end < form.date_start) {
     return 'La fecha de fin no puede ser anterior a la fecha de inicio';
   }
@@ -185,7 +248,8 @@ const validateField = (field) => {
 const isFormValid = computed(() => {
   return !validateField('title') &&
          !validateField('description') &&
-         !validateField('date_end');
+         !validateField('date_end') && 
+         !validateField('price');
 });
 
 const submit = () => {

@@ -23,7 +23,7 @@
                   @click="submit"
                 >
                   <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
-                  <i class="bi bi-save me-1"></i> Guardar cambios
+                  <i class="bi bi-save me-2"></i> Guardar cambios
                 </button>
               </div>
             </div>
@@ -61,6 +61,57 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
+                      <FieldMoney
+                        id="price"
+                        label="Precio"
+                        v-model="form.price"
+                        :required="true"
+                        :showValidation="touched.price"
+                        :formError="form.errors.price"
+                        placeholder="Ingrese el precio"
+                        @blur="() => handleBlur('price')"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldSelectApi
+                        id="currency_id"
+                        label="Moneda"
+                        v-model="form.currency_id"
+                        :formError="form.errors.currency_id"
+                        :showValidation="touched.currency_id"
+                        api-url="/admin/options/currencies"
+                        @blur="() => handleBlur('currency_id')"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText
+                        id="payment_link"
+                        label="Enlace de pago"
+                        v-model="form.payment_link"
+                        :showValidation="touched.payment_link"
+                        :formError="form.errors.payment_link"
+                        placeholder="URL de pago"
+                        @blur="() => handleBlur('payment_link')"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldSwitch
+                        id="active"
+                        label="Curso activo"
+                        v-model="form.active"
+                        :required="false"
+                        :disabled="false"
+                        :showValidation="touched.active"
+                        :formError="form.errors.active"
+                        :validateFunction="() => validateField('active')"
+                        @blur="() => handleBlur('active')"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
                       <FieldImage id="image_cover" label="Imagen cover" v-model="form.image_cover" :showValidation="touched.image_cover" :formError="form.errors.image_cover" :initialPreview="imageCoverPreview" @blur="() => handleBlur('image_cover')" />
                     </div>
 
@@ -81,12 +132,9 @@
           </div>
         </section>
 
-        <!-- Componente de videos -->
-        <CourseVideos :course-id="props.course.id" :videos="props.videos" />
-
-        <!-- Spinner de carga -->
-        <SpinnerOverlay v-if="form.processing" />
+        <CourseVideosTable :course-id="props.course.id" :videos="props.videos" />
       </div>
+      <SpinnerOverlay v-if="form.processing" />
     </div>
   </AdminLayout>
 </template>
@@ -104,10 +152,10 @@ import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
-import CourseVideos from '@/Pages/Admin/Courses/CourseVideosTable.vue';
-
-
-
+import FieldMoney from '@/Components/Admin/Fields/FieldMoney.vue';
+import FieldSwitch from '@/Components/Admin/Fields/FieldSwitch.vue';
+import FieldSelectApi from '@/Components/Admin/Fields/FieldSelectApi.vue';
+import CourseVideosTable from '@/Pages/Admin/Courses/CourseVideosTable.vue';
 
 const props = defineProps({
   course: { type: Object, required: true },
@@ -122,8 +170,12 @@ const form = useForm({
   level: props.course.level,
   date_start: props.course.date_start,
   date_end: props.course.date_end,
-  image_cover: '',
-  logo: ''
+  image_cover: null,
+  logo: null,
+  active: props.course.active ?? true,
+  price: props.course.price ?? '',
+  payment_link: props.course.payment_link ?? '',
+  currency_id: props.course.currency_id ?? null,
 });
 
 const imageCoverPreview = props.course.image_cover ? '/storage/' + props.course.image_cover : null;
@@ -138,6 +190,9 @@ const handleBlur = (field) => {
 const validateField = (field) => {
   if (field === 'title' && !form.title.trim()) return 'El título es obligatorio';
   if (field === 'description' && !form.description.trim()) return 'La descripción es obligatoria';
+  if (field === 'price' && (form.price === '' || isNaN(parseFloat(form.price)))) {
+    return 'El precio es obligatorio y debe ser un número válido';
+  }
   if (field === 'date_end' && form.date_start && form.date_end && form.date_end < form.date_start) {
     return 'La fecha de fin no puede ser anterior a la fecha de inicio';
   }
@@ -147,6 +202,7 @@ const validateField = (field) => {
 const isFormValid = computed(() => {
   return !validateField('title') &&
          !validateField('description') &&
+         !validateField('price') &&
          !validateField('date_end');
 });
 
@@ -156,7 +212,8 @@ const submit = () => {
   if (isFormValid.value) {
     form.post(route('admin.courses.update', props.course.id), {
       forceFormData: true,
-      preserveScroll: true
+      preserveScroll: true,
+      onError: (errors) => console.error('Errores al guardar:', errors),
     });
   }
 };

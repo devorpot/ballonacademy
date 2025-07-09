@@ -18,12 +18,18 @@ class Course extends Model
         'logo',
         'date_start',
         'date_end',
+        'active',
+        'price',
+        'payment_link',
+        'currency_id'
     ];
 
     public function videos()
     {
         return $this->hasMany(Video::class);
     }
+
+    
     public function subscriptions()
     {
         return $this->hasMany(Subscription::class);
@@ -31,15 +37,21 @@ class Course extends Model
 
 
 
-      public function students()
-{
-    return $this->belongsToMany(User::class, 'course_user', 'course_id', 'user_id');
-}
+    public function students()
+        {
+            return $this->belongsToMany(User::class, 'course_user', 'course_id', 'user_id');
+        }
 
 
-public function users()
-{
-    return $this->belongsToMany(User::class, 'course_user', 'course_id', 'user_id');
-}
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'course_user', 'course_id', 'user_id');
+    }
+
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
+    }
 
 }

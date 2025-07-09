@@ -11,53 +11,105 @@ use Inertia\Inertia;
 
 class SubscriptionController extends Controller
 {
-   public function index()
+public function index()
 {
     return Inertia::render('Admin/Subscriptions/Index', [
         'subscriptions' => Subscription::with(['user', 'course'])->get(),
-        'users' => User::role('student')->get(),
+        'users' => User::whereHas('roles', function ($query) {
+                        $query->where('name', 'student');
+                    })
+                    ->withCount('roles')
+                    ->having('roles_count', 1)
+                    ->get(),
         'courses' => Course::all(),
     ]);
 }
 
-    public function create()
-    {
-        return Inertia::render('Admin/Subscriptions/Create', [
-            'users' => User::role('student')->get(),
-            'courses' => Course::all()
-        ]);
-    }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate($this->validationRules());
+public function create()
+{
+    return Inertia::render('Admin/Subscriptions/Create', [
+        'users' => User::whereHas('roles', function ($query) {
+                        $query->where('name', 'student');
+                    })
+                    ->withCount('roles')
+                    ->having('roles_count', 1)
+                    ->get(),
+        'courses' => Course::all()
+    ]);
+}
+  public function store(Request $request)
+{
+    $validated = $request->validate($this->validationRules());
 
-        Subscription::create($validated);
+    $user = User::findOrFail($validated['user_id']);
+    $courseId = $validated['course_id'];
 
+    // Verificar si ya está inscrito en el curso
+    if ($user->courses()->where('courses.id', $courseId)->exists()) {
         return redirect()
-            ->route('admin.subscriptions.index')
-            ->with('success', 'Suscripción creada exitosamente');
+            ->back()
+            ->withErrors(['user_id' => 'El estudiante ya está inscrito en este curso.']);
     }
 
-    public function edit(Subscription $subscription)
-    {
-        return Inertia::render('Admin/Subscriptions/Edit', [
-            'subscription' => $subscription->load(['user', 'course']),
-            'users' => User::role('student')->get(),
-            'courses' => Course::all()
-        ]);
-    }
+    // Crear suscripción
+    $subscription = Subscription::create($validated);
 
-    public function update(Request $request, Subscription $subscription)
-    {
-        $validated = $request->validate($this->validationRules());
+    // Relacionar en tabla pivote
+    $user->courses()->attach($courseId);
 
-        $subscription->update($validated);
+    return redirect()
+        ->route('admin.subscriptions.index')
+        ->with('success', 'Suscripción creada exitosamente');
+}
 
+public function edit(Subscription $subscription)
+{
+    $studentUsers = User::whereHas('roles', function ($query) {
+                            $query->where('name', 'student');
+                        })
+                        ->withCount('roles')
+                        ->having('roles_count', 1);
+
+    return Inertia::render('Admin/Subscriptions/Edit', [
+        'subscription' => $subscription->load(['user', 'course']),
+        'users' => $studentUsers
+                    ->orWhere('id', $subscription->user_id) // incluir el usuario actual aunque ya no cumpla filtro
+                    ->get(),
+        'courses' => Course::all()
+    ]);
+}
+
+public function update(Request $request, Subscription $subscription)
+{
+    $validated = $request->validate($this->validationRules());
+
+    $user = User::findOrFail($validated['user_id']);
+    $courseId = $validated['course_id'];
+
+    // Verifica si ya existe otra suscripción del mismo usuario al mismo curso
+    $alreadySubscribed = Subscription::where('user_id', $validated['user_id'])
+        ->where('course_id', $courseId)
+        ->where('id', '!=', $subscription->id)
+        ->exists();
+
+    if ($alreadySubscribed) {
         return redirect()
-            ->route('admin.subscriptions.index')
-            ->with('success', 'Suscripción actualizada correctamente');
+            ->back()
+            ->withErrors(['user_id' => 'Este estudiante ya está inscrito en este curso.']);
     }
+
+    $subscription->update($validated);
+
+    // Relación pivote, evita duplicados
+    if (! $user->courses->contains($courseId)) {
+        $user->courses()->attach($courseId);
+    }
+
+    return redirect()
+        ->route('admin.subscriptions.index')
+        ->with('success', 'Suscripción actualizada correctamente');
+}
 
     public function destroy(Subscription $subscription)
     {

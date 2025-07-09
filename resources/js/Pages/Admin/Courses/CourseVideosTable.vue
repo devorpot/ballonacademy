@@ -4,9 +4,12 @@
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0">Videos del Curso</h5>
+         
+     
           <button class="btn btn-sm btn-success" :disabled="loading" @click="addVideo">
             <i class="bi bi-plus-lg me-1"></i> Agregar Video
           </button>
+           
         </div>
 
         <div class="card-body p-0">
@@ -72,7 +75,10 @@
         </div>
       </div>
     </div>
-<pre>{{ teachers }}</pre>
+
+
+
+ 
     <CourseVideoAddModal
       :show="showVideoModal"
       :courseId="courseId"
@@ -124,8 +130,10 @@ const loadTeachers = async () => {
 const loadVideos = async () => {
   loading.value = true;
   try {
-    const { data } = await axios.get(route('admin.courses.videos.index', props.courseId));
+    const { data } = await axios.get(route('admin.courses.videos.list', props.courseId));
     videos.value = data;
+
+ 
   } catch (err) {
     showToast('Error al cargar los videos', 'error');
   } finally {
@@ -173,7 +181,9 @@ const updateOrder = async () => {
 };
 
 onMounted(() => {
+  console.log('Course  ID:', props.courseId);
   loadVideos();
+
 });
 </script>
 

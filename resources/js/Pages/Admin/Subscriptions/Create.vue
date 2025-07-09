@@ -37,17 +37,19 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-6 mb-3">
-                      <FieldSelect
-                        id="user_id"
-                        label="Usuario"
-                        v-model="form.user_id"
-                        :required="true"
-                        :showValidation="touched.user_id"
-                        :formError="form.errors.user_id"
-                        :validateFunction="() => validateField('user_id')"
-                        :options="userOptions"
-                        @blur="() => handleBlur('user_id')"
-                      />
+                    
+                   <FieldUserSearch
+                    id="user_id"
+                    label="Alumno"
+                    v-model="form.user_id"
+                    :required="true"
+                    :showValidation="touched.user_id"
+                    :formError="form.errors.user_id"
+                    fetch-url="/admin/students/search"
+                    @blur="() => handleBlur('user_id')"
+                  />
+
+
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -171,6 +173,7 @@ import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
 
 import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
+import FieldUserSearch from '@/Components/Admin/Fields/FieldUserSearch.vue';
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 

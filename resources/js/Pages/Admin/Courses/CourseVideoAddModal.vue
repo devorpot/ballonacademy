@@ -127,6 +127,7 @@ const teacherOptions = computed(() => {
 const submit = async () => {
   processing.value = true;
   const formData = new FormData();
+  formData.append('course_id', props.courseId); 
   formData.append('title', form.value.title);
   formData.append('description', form.value.description || '');
   formData.append('description_short', form.value.description_short || '');

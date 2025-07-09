@@ -207,7 +207,7 @@ const submit = () => {
     form.post(route('admin.certificates.update', props.certificate.id), {
       _method: 'put',
       forceFormData: true,
-      preserveScroll: true
+      preserveScroll: true,
     });
   }
 };

@@ -6,11 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Teacher;
+use App\Models\Student;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
+
+
 
 class UserController extends Controller
 {
@@ -41,33 +45,62 @@ class UserController extends Controller
     }
 
 
-    public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate(
-                $this->validationRules(),
-                $this->validationMessages()
-            );
+ 
+public function store(Request $request)
+{
+    try {
+        $validated = $request->validate(
+            $this->validationRules(),
+            $this->validationMessages()
+        );
 
-            $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        $user->syncRoles($validated['role_ids'] ?? []);
+
+        // Obtener los nombres de los roles asignados
+        $roleNames = Role::whereIn('id', $validated['role_ids'] ?? [])->pluck('name')->toArray();
+
+        // Si tiene rol de maestro, crear perfil de maestro si no existe
+        if (in_array('teacher', $roleNames) && !$user->teacher) {
+            $user->teacher()->create([
+                'firstname' => $user->name,
+                'lastname' => '',
+                'phone' => '',
+                'specialty' => '',
+                'address' => '',
+                'country' => '',
             ]);
-
-            $user->syncRoles($validated['role_ids'] ?? []);
-
-            return redirect()->route('admin.users.index')->with('success', 'Usuario creado exitosamente');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'Validation Error',
-                    'errors' => $e->errors(),
-                ], 422);
-            }
-            throw $e;
         }
+
+        // Si tiene rol de estudiante, crear perfil de estudiante si no existe
+        if (in_array('student', $roleNames) && !$user->student) {
+            $user->student()->create([
+                'firstname' => $user->name,
+                'lastname' => '',
+                'phone' => '',
+                'shirt_size' => '',
+                'address' => '',
+                'country' => '',
+            ]);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'Usuario creado exitosamente');
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+        throw $e;
     }
+}
+
 
 
    public function show(User $user)

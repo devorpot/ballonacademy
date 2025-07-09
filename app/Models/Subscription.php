@@ -18,7 +18,7 @@ class Subscription extends Model
         'payment_type',
         'payment_card',
         'payment_card_type',
-        'payment_card_brand',
+        'payment_card_brand', 
         'payment_bank',
         'payment_date',
         'payment_refund_date',

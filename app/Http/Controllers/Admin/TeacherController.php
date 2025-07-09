@@ -31,8 +31,6 @@ class TeacherController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-
-            
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'phone' => 'required|string|max:255',

@@ -108,6 +108,9 @@ const submit = async () => {
   formData.append('description_short', form.value.description_short || '');
   formData.append('comments', form.value.comments || '');
   formData.append('video_url', form.value.video_url);
+  formData.append('course_id', props.courseId);
+  formData.append('teacher_id', 1); // reemplaza por el ID real
+
   if (form.value.image_cover) {
     formData.append('image_cover', form.value.image_cover);
   }
@@ -122,14 +125,20 @@ const submit = async () => {
     } else {
       await axios.post(route('admin.courses.videos.store', props.courseId), formData);
     }
+
     emit('saved');
     emit('close');
   } catch (err) {
-    console.error(err);
+    if (err.response?.status === 422) {
+      console.error('Errores de validación:', err.response.data.errors);
+    } else {
+      console.error(err);
+    }
   } finally {
     processing.value = false;
   }
 };
+
 
 // Inicializar el formulario al abrir el modal
 watch(() => props.show, (newVal) => {

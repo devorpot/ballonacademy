@@ -17,7 +17,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <section  class="section-breadcrumbs  w-100 d-block my-3">
+  <section class="section-breadcrumbs w-100 d-block my-3">
     <div class="container-fluid">
       <div class="row align-items-center">
         <div class="col-12 col-md-6">
@@ -35,7 +35,10 @@ const props = defineProps({
                   <span v-if="index === breadcrumbs.length - 1">
                     {{ item.label }}
                   </span>
-                  <Link v-else :href="route(item.route)">
+                  <Link
+                    v-else
+                    :href="item.params ? route(item.route, item.params) : route(item.route)"
+                  >
                     {{ item.label }}
                   </Link>
                 </li>
@@ -51,5 +54,5 @@ const props = defineProps({
         </div>
       </div>
     </div>
-  </section >
+  </section>
 </template>
