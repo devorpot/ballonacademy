@@ -18,12 +18,22 @@ class Subscription extends Model
         'payment_type',
         'payment_card',
         'payment_card_type',
-        'payment_card_brand', 
+        'payment_card_brand',
         'payment_bank',
         'payment_date',
         'payment_refund_date',
         'payment_refund_desc',
         'payment_status',
+        'payment_stripe_id',
+        'payment_refund',
+        'used_coupon',
+        'coupon_id',
+        'coupon_discount',
+    ];
+
+    protected $casts = [
+        'used_coupon' => 'boolean',
+        'payment_refund' => 'boolean',
     ];
 
     public function user()
