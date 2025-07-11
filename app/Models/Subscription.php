@@ -45,4 +45,8 @@ class Subscription extends Model
     {
         return $this->belongsTo(Course::class);
     }
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class, 'payment_currency');
+    }
 }

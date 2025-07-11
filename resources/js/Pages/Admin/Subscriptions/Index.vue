@@ -137,6 +137,8 @@ const deleteSubscription = () => {
   });
 };
 
+
+
 const openViewModal = (subscription) => {
   selectedSubscription.value = subscription;
   showViewModal.value = true;
@@ -194,7 +196,7 @@ const onCreated = () => {
                     <td>{{ subscription.user.name }}</td>
                     <td>{{ subscription.course.title }}</td>
                     <td>{{ subscription.payment_amount }}</td>
-                    <td>{{ subscription.payment_currency }}</td>
+                    <td>{{ subscription.currency?.code || 'N/A' }}</td>
                     <td>{{ subscription.payment_status }}</td>
                     <td class="text-end pe-4">
                       <div class="btn-group btn-group-sm">

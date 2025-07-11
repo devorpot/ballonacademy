@@ -1,5 +1,5 @@
 <template>
-  <Head title="Crear Video" />
+  <Head title="Crear Nuevo Video" />
   <AdminLayout>
     <div class="position-relative">
       <div :class="{ 'blur-overlay': form.processing }">
@@ -7,7 +7,7 @@
           username="admin"
           :breadcrumbs="[
             { label: 'Dashboard', route: 'admin.dashboard' },
-            { label: 'Videos', route: 'admin.videos.index' },
+            { label: 'Cursos',  route: 'admin.courses.index' },
             { label: 'Crear', route: '' }
           ]"
         />
@@ -23,7 +23,7 @@
                   @click="submit"
                 >
                   <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
-                  <i class="bi bi-save me-1"></i> Crear video
+                  <i class="bi bi-save me-1"></i> Guardar video
                 </button>
               </div>
             </div>
@@ -36,25 +36,34 @@
               <div class="card">
                 <div class="card-body">
                   <div class="row">
-
                     <div class="col-md-6 mb-3">
                       <FieldText
                         id="title"
-                        label="Título del video"
+                        label="Título"
                         v-model="form.title"
                         :required="true"
                         :showValidation="touched.title"
                         :formError="form.errors.title"
                         :validateFunction="() => validateField('title')"
-                        placeholder="Ej: Introducción al curso"
+                        placeholder="Título del video"
                         @blur="() => handleBlur('title')"
                       />
                     </div>
-
+                    <div class="col-md-6 mb-3">
+                      <FieldVideo
+                        id="video_path"
+                        label="Subir video"
+                        :required="true"
+                        :form-error="form.errors.video_path"
+                        :show-validation="touched.video_path"
+                        @update:modelValue="form.video_path = $event"
+                        @blur="() => handleBlur('video_path')"
+                      />
+                    </div>
                     <div class="col-md-6 mb-3">
                       <FieldText
                         id="video_url"
-                        label="URL del video o archivo"
+                        label="URL del video"
                         v-model="form.video_url"
                         :required="true"
                         :showValidation="touched.video_url"
@@ -73,7 +82,6 @@
                         :showValidation="touched.description"
                         :formError="form.errors.description"
                         @blur="() => handleBlur('description')"
-                        placeholder="Descripción completa"
                       />
                     </div>
 
@@ -85,7 +93,17 @@
                         :showValidation="touched.description_short"
                         :formError="form.errors.description_short"
                         @blur="() => handleBlur('description_short')"
-                        placeholder="Breve descripción"
+                      />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <FieldText
+                        id="comments"
+                        label="Comentarios"
+                        v-model="form.comments"
+                        :showValidation="touched.comments"
+                        :formError="form.errors.comments"
+                        @blur="() => handleBlur('comments')"
                       />
                     </div>
 
@@ -95,16 +113,16 @@
                         label="Curso"
                         v-model="form.course_id"
                         :required="true"
+                        :options="courseOptions"
                         :showValidation="touched.course_id"
                         :formError="form.errors.course_id"
                         :validateFunction="() => validateField('course_id')"
-                        :options="courseOptions"
                         @blur="() => handleBlur('course_id')"
                       />
                     </div>
 
                     <div class="col-md-6 mb-3">
-                       <FieldSelect
+                      <FieldSelect
                         id="teacher_id"
                         label="Profesor"
                         v-model="form.teacher_id"
@@ -116,30 +134,19 @@
                         @blur="() => handleBlur('teacher_id')"
                       />
                     </div>
- 
-                    <div class="col-md-6 mb-3">
-                      <FieldText
-                        id="comments"
-                        label="Comentarios"
-                        v-model="form.comments"
-                        :showValidation="touched.comments"
-                        :formError="form.errors.comments"
-                        @blur="() => handleBlur('comments')"
-                        placeholder="Comentarios opcionales"
-                      />
-                    </div>
 
                     <div class="col-md-6 mb-3">
                       <FieldImage
                         id="image_cover"
                         label="Imagen de portada"
                         v-model="form.image_cover"
+                        :required="true"
                         :showValidation="touched.image_cover"
                         :formError="form.errors.image_cover"
+                        :validateFunction="() => validateField('image_cover')"
                         @blur="() => handleBlur('image_cover')"
                       />
                     </div>
-
                   </div>
                 </div>
 
@@ -161,24 +168,24 @@
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3';
-import { useForm } from '@inertiajs/vue3';
-import { route } from 'ziggy-js';
+import { Head, useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import { route } from 'ziggy-js';
 
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
 import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
 
-import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
+import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
+import FieldFile from '@/Components/Admin/Fields/FieldFile.vue';
+import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue';
 
 const props = defineProps({
   courses: Array,
-  teachers: Array,
-  course_id: Number
+  teachers: Array
 });
 
 const form = useForm({
@@ -187,9 +194,10 @@ const form = useForm({
   description_short: '',
   comments: '',
   video_url: '',
-  course_id: props.course_id || '',
+  course_id: '',
   teacher_id: '',
-  image_cover: ''
+  image_cover: null,
+  video_path: null
 });
 
 const touched = ref({});
@@ -204,6 +212,7 @@ const teacherOptions = computed(() =>
     label: `${t.firstname} ${t.lastname}`
   }))
 );
+
 const handleBlur = (field) => {
   touched.value[field] = true;
 };
@@ -219,15 +228,19 @@ const isFormValid = computed(() => {
   return !validateField('title') &&
          !validateField('video_url') &&
          !validateField('course_id') &&
-         !validateField('teacher_id');
+         !validateField('teacher_id') &&
+         !validateField('video_path') &&
+         !validateField('image_cover');
 });
 
 const submit = () => {
   Object.keys(form).forEach(key => touched.value[key] = true);
+
   if (isFormValid.value) {
     form.post(route('admin.videos.store'), {
       forceFormData: true,
       preserveScroll: true,
+      onSuccess: () => form.reset()
     });
   }
 };

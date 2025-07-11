@@ -1,16 +1,17 @@
 <template>
   <div class="form-group" :class="classObject">
     <div class="form-floating">
-      <input
-        :id="id"
-        type="text"
-        class="form-control"
-        v-model="displayValue"
-        :placeholder="placeholder"
-        :class="{ 'is-invalid': showValidation && formError }"
-        @input="onInput"
-        @blur="onBlur"
-      />
+     <input
+          :id="id"
+          type="text"
+          class="form-control"
+          v-model="displayValue"
+          :placeholder="placeholder"
+          :readonly="readonly"
+          :class="{ 'is-invalid': showValidation && formError }"
+          @input="onInput"
+          @blur="onBlur"
+        />
       <label :for="id">
         {{ label }} <strong v-if="required">*</strong>
       </label>
@@ -33,7 +34,12 @@ const props = defineProps({
   formError: String,
   showValidation: Boolean,
   classObject: String,
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
 })
+
 
 const emit = defineEmits(['update:modelValue', 'blur'])
 

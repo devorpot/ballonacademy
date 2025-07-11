@@ -88,9 +88,7 @@
                         </div>
 
                         <div class="btn-group btn-group-sm" role="group" aria-label="Gestión de estudiantes">
-                          <button class="btn btn-outline-success" @click="openAssignStudentsModal(course)" title="Asignar estudiantes">
-                            <i class="bi bi-person-plus-fill"></i>
-                          </button>
+                       
                           <Link
                             class="btn btn-outline-secondary"
                             :href="route('admin.courses.students', course.id)"

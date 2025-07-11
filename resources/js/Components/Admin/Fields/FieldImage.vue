@@ -69,7 +69,7 @@ export default {
     initialPreview: { type: [String, Array], default: null },
     multiple: { type: Boolean, default: false }
   },
-  emits: ['update:modelValue', 'blur'],
+  emits: ['update:modelValue', 'update:keep', 'blur'],
   data() {
     return {
       previews: Array.isArray(this.initialPreview)
@@ -86,23 +86,31 @@ export default {
       return this.validateFunction ? this.validateFunction() : '';
     }
   },
-  methods: {
-     reset() {
-    this.files = [];
-    this.previews = [];
-    if (this.$refs.fileInput) {
-      this.$refs.fileInput.value = null;
+  mounted() {
+    if (this.previews.length > 0) {
+      this.$emit('update:keep', true);
     }
   },
-  onFileChange(event) {
-    const selectedFiles = Array.from(event.target.files);
-    const validFiles = selectedFiles.filter(file => file.type.startsWith('image/'));
+  methods: {
+    reset() {
+      this.files = [];
+      this.previews = [];
+      if (this.$refs.fileInput) {
+        this.$refs.fileInput.value = null;
+      }
+      this.$emit('update:modelValue', null);
+      this.$emit('update:keep', false);
+    },
+    onFileChange(event) {
+      const selectedFiles = Array.from(event.target.files);
+      const validFiles = selectedFiles.filter(file => file.type.startsWith('image/'));
 
-    this.files = this.multiple ? validFiles : validFiles.slice(0, 1);
-    this.previews = this.files.map(file => URL.createObjectURL(file));
+      this.files = this.multiple ? validFiles : validFiles.slice(0, 1);
+      this.previews = this.files.map(file => URL.createObjectURL(file));
 
-    this.$emit('update:modelValue', this.multiple ? this.files : this.files[0] || null);
-  },
+      this.$emit('update:modelValue', this.multiple ? this.files : this.files[0] || null);
+      this.$emit('update:keep', false);
+    },
     onBlur() {
       this.$emit('blur');
     },
@@ -114,6 +122,7 @@ export default {
       if (this.files.length === 0) {
         this.$refs.fileInput.value = null;
         this.$emit('update:modelValue', null);
+        this.$emit('update:keep', false);
       } else {
         this.$emit('update:modelValue', this.multiple ? this.files : this.files[0]);
       }

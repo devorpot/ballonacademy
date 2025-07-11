@@ -14,6 +14,8 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\VideoController;
 
 use App\Http\Controllers\Admin\CurrencyController;
+use App\Http\Controllers\Admin\PaymentTypeController;
+use App\Http\Controllers\Admin\PaymentStatusController;
 
 use App\Http\Controllers\Frontend\DashboardController;
 use App\Http\Controllers\Frontend\CoursesController;
@@ -41,19 +43,29 @@ Route::middleware(['auth', 'role:admin'])
 
     // Cursos
     Route::resource('courses', CourseController::class);
+    
     Route::get('courses/{course}/students', [CourseController::class, 'students'])->name('courses.students');
     Route::post('courses/{course}/assign-students', [CourseController::class, 'assignStudents'])->name('courses.assign-students');
 
     // Videos por curso
  
-    Route::get('courses/{course}/videos-panel', [VideoController::class, 'panel'])->name('courses.videos.panel');
+    Route::get('courses/{course}/videos-panel', [VideoController::class, 'videosPanel'])->name('courses.videos.panel');
+
     Route::get('courses/{course}/videos/videos-list', [VideoController::class, 'list'])->name('courses.videos.list');
+
     Route::post('courses/{course}/videos/reorder', [VideoController::class, 'reorderVideos'])->name('courses.videos.reorder');
 
 
-    Route::resource('courses.videos', VideoController::class);
+// En routes/web.php
+Route::delete('courses/{course}/videos/{video}', [VideoController::class, 'deleteVideo'])->name('courses.videos.delete');
+
+
+
+    //Route::resource('courses.videos', VideoController::class);
 
     // Otros recursos
+    Route::get('videos/{video}/stream', [VideoController::class, 'stream'])->name('videos.stream');
+
     Route::resource('videos', VideoController::class);
 
 
@@ -84,6 +96,8 @@ Route::middleware(['auth', 'role:admin'])
     //Currency
 
     Route::get('options/currencies', [CurrencyController::class, 'options']);
+    Route::get('options/payment_type', [PaymentTypeController::class, 'options']);
+    Route::get('options/payment_status', [PaymentStatusController::class, 'options']);
 
 
 });

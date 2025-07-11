@@ -11,7 +11,7 @@
             { label: 'Editar', route: '' }
           ]"
         />
-
+ 
         <section class="section-heading my-2">
           <div class="container-fluid">
             <div class="row mb-2">
@@ -112,7 +112,13 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                      <FieldImage id="image_cover" label="Imagen cover" v-model="form.image_cover" :showValidation="touched.image_cover" :formError="form.errors.image_cover" :initialPreview="imageCoverPreview" @blur="() => handleBlur('image_cover')" />
+                      <FieldImage id="image_cover" 
+                      label="Imagen cover" 
+                      v-model="form.image_cover" 
+                      :showValidation="touched.image_cover" 
+                      :formError="form.errors.image_cover" 
+                      :initialPreview="imageCoverPreview" 
+                      @blur="() => handleBlur('image_cover')" />
                     </div>
 
                     <div class="col-md-6 mb-3">

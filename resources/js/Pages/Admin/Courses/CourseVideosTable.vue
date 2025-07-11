@@ -159,7 +159,7 @@ const deleteVideo = async (video) => {
   if (!confirm(`¿Eliminar video: ${video.title}?`)) return;
   deletingId.value = video.id;
   try {
-    await axios.delete(route('admin.courses.videos.destroy', [props.courseId, video.id]));
+    await axios.delete(route('admin.courses.videos.delete', [props.courseId, video.id]));
     await loadVideos();
     showToast('Video eliminado', 'success');
   } catch (err) {

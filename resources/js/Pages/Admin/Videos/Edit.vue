@@ -50,8 +50,20 @@
                         @blur="() => handleBlur('title')"
                       />
                     </div>
+                     <div class="col-md-6 mb-3">
 
-                    <div class="col-md-6 mb-3">
+                        <FieldVideo
+                            id="video_path"
+                            label="Reemplazar video (opcional)"
+                            :initial-path="props.video.video_path"
+                            :form-error="form.errors.video_path"
+                            :show-validation="true"
+                            @update:modelValue="form.video_path = $event"
+                            @update:keep="form.keep_video = $event"
+                          />
+
+                      </div>
+                       <div class="col-md-6 mb-3">
                       <FieldText
                         id="video_url"
                         label="URL del video"
@@ -127,15 +139,17 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                      <FieldImage
-                        id="image_cover"
-                        label="Imagen de portada"
-                        v-model="form.image_cover"
-                        :showValidation="touched.image_cover"
-                        :formError="form.errors.image_cover"
-                        @blur="() => handleBlur('image_cover')"
-                        :initialPreview="imagePreview"
-                      />
+                     <FieldImage
+                      id="image_cover"
+                      label="Imagen de portada"
+                      v-model="form.image_cover"
+                      :showValidation="touched.image_cover"
+                      :formError="form.errors.image_cover"
+                      :initialPreview="imagePreview"
+                      @blur="() => handleBlur('image_cover')"
+                      @update:keep="form.keep_image = $event"
+                    />
+
                     </div>
                   </div>
                 </div>
@@ -170,6 +184,8 @@ import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
+import FieldFile from '@/Components/Admin/Fields/FieldFile.vue';
+import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue';
 
 const props = defineProps({
   video: Object,
@@ -186,11 +202,14 @@ const form = useForm({
   video_url: props.video.video_url,
   course_id: props.video.course_id,
   teacher_id: props.video.teacher_id,
-  image_cover: null
+  image_cover: null,     // si suben una nueva
+  video_path: null,      // si suben un nuevo video
+  keep_image: !!props.video.image_cover,
+  keep_video: !!props.video.video_path
 });
 
-const touched = ref({});
 const imagePreview = props.video.image_cover ? '/storage/' + props.video.image_cover : null;
+const touched = ref({});
 
 const courseOptions = computed(() =>
   props.courses.map(c => ({ value: c.id, label: c.title }))
@@ -223,6 +242,7 @@ const isFormValid = computed(() => {
 
 const submit = () => {
   Object.keys(form).forEach(key => touched.value[key] = true);
+
   if (isFormValid.value) {
     form.post(route('admin.videos.update', props.video.id), {
       forceFormData: true,

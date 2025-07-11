@@ -1,0 +1,8 @@
+tengo las tablas 
+
+suscriptions
+users (con rol de student)
+course
+course_user
+
+Lo que quiero es que cuando cree una suscripcion, asigne el usuario al curso , esta relacion ya la hace por que tengo user_id y course_id dentro de subscriptions y se agregan esos valores a course_user , pero cuando elimino la suscripcion no se borra el usuario de course user 

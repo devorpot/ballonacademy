@@ -6,10 +6,15 @@
         v-model="inputValue"
         class="form-control"
         :class="{ 'is-invalid': (showValidation && validationMessage) || formError }"
+        :disabled="readonly"
         @blur="onBlur"
       >
         <option value="">Seleccione una opción</option>
-        <option v-for="option in options" :key="option.value" :value="option.value">
+        <option
+          v-for="option in options"
+          :key="option.value"
+          :value="option.value"
+        >
           {{ option.label }}
         </option>
       </select>
@@ -26,16 +31,20 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
 const props = defineProps({
-  id: { type: String, required: true },
-  label: { type: String, required: true },
+  id: String,
+  label: String,
   modelValue: [String, Number],
-  required: { type: Boolean, default: false },
-  placeholder: { type: String, default: '' },
-  showValidation: { type: Boolean, default: false },
-  formError: { type: String, default: '' },
-  validateFunction: { type: Function, default: null },
-  apiUrl: { type: String, required: true }, // 👈 URL para obtener opciones
-  classObject: { type: String, default: '' },
+  required: Boolean,
+  placeholder: String,
+  showValidation: Boolean,
+  formError: String,
+  validateFunction: Function,
+  apiUrl: String,
+  classObject: String,
+  readonly: {
+    type: Boolean,
+    default: false,
+  }
 })
 
 const emit = defineEmits(['update:modelValue', 'blur'])
@@ -43,26 +52,22 @@ const emit = defineEmits(['update:modelValue', 'blur'])
 const options = ref([])
 
 const inputValue = computed({
-  get() {
-    return props.modelValue
-  },
-  set(val) {
-    emit('update:modelValue', val)
+  get: () => props.modelValue,
+  set: (val) => {
+    if (!props.readonly) emit('update:modelValue', val)
   }
 })
 
-const validationMessage = computed(() => {
-  return props.validateFunction ? props.validateFunction() : ''
-})
+const validationMessage = computed(() =>
+  props.validateFunction ? props.validateFunction() : ''
+)
 
-const onBlur = () => {
-  emit('blur')
-}
+const onBlur = () => emit('blur')
 
 onMounted(async () => {
   try {
     const response = await axios.get(props.apiUrl)
-    options.value = response.data // espera un array de { value, label }
+    options.value = response.data
   } catch (error) {
     console.error('Error al cargar opciones desde API:', error)
   }

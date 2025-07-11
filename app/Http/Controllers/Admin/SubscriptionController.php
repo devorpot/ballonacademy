@@ -14,7 +14,7 @@ class SubscriptionController extends Controller
     public function index()
     {
         return Inertia::render('Admin/Subscriptions/Index', [
-            'subscriptions' => Subscription::with(['user', 'course'])->get(),
+            'subscriptions' => Subscription::with(['user', 'course','currency'])->get(),
             'users' => User::whereHas('roles', fn ($q) => $q->where('name', 'student'))
                             ->withCount('roles')
                             ->having('roles_count', 1)
@@ -98,19 +98,29 @@ class SubscriptionController extends Controller
     }
 
     public function destroy(Subscription $subscription)
-    {
-        $subscription->delete();
+{
+    $user = $subscription->user;
+    $courseId = $subscription->course_id;
 
-        return redirect()->route('admin.subscriptions.index')
-                         ->with('success', 'Suscripción eliminada exitosamente');
-    }
+    // Eliminar relación en la tabla pivote course_user
+    $user->courses()->detach($courseId);
 
-    public function show(Subscription $subscription)
-    {
-        return Inertia::render('Admin/Subscriptions/Show', [
-            'subscription' => $subscription->load(['user', 'course']),
-        ]);
-    }
+    // Eliminar la suscripción
+    $subscription->delete();
+
+    return redirect()->route('admin.subscriptions.index')
+                     ->with('success', 'Suscripción eliminada exitosamente');
+}
+
+
+  public function show(Subscription $subscription)
+{
+    return Inertia::render('Admin/Subscriptions/Show', [
+        'subscriptions' => Subscription::with(['user', 'course', 'currency'])->get(),
+        'subscription' => $subscription->load(['user', 'course', 'currency']),
+        'courses' => Course::all(),
+    ]);
+}
 
     private function validationRules(): array
     {
@@ -118,8 +128,9 @@ class SubscriptionController extends Controller
             'user_id' => 'required|exists:users,id',
             'course_id' => 'required|exists:courses,id',
             'payment_amount' => 'required|numeric|min:0',
-            'payment_currency' => 'required|string|max:10',
+            'payment_currency' => 'required|numeric|max:10',
             'payment_description' => 'nullable|string|max:2000',
+            'payment_type_id' => 'required|exists:payment_types,id',
             'payment_type' => 'nullable|string|max:50',
             'payment_card' => 'nullable|string|max:50',
             'payment_card_type' => 'nullable|string|max:50',
@@ -128,7 +139,8 @@ class SubscriptionController extends Controller
             'payment_date' => 'nullable|date',
             'payment_refund_date' => 'nullable|date',
             'payment_refund_desc' => 'nullable|string|max:2000',
-            'payment_status' => 'required|string|max:50',
+            'payment_status' => 'nullable|string|max:50',
+            'payment_status_id' => 'required|exists:payment_statuses,id',
             'payment_stripe_id' => 'required|string|max:50',
             'payment_refund' => 'nullable|boolean',
             'used_coupon' => 'nullable|boolean',

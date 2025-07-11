@@ -21,7 +21,7 @@
             <!--<button class="btn btn-sm btn-primary" @click="showAddModal = true">
               <i class="bi bi-person-plus-fill me-1"></i> Agregar alumno
             </button>    -->
-          </div>
+          </div> 
 
         </div>
       </div>
@@ -67,9 +67,7 @@
                         <button class="btn btn-outline-primary" @click="viewStudent(student)">
                           <i class="bi bi-eye-fill"></i>
                         </button>
-                      <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(student.id)">
-                        <i class="bi bi-x-circle"></i>
-                      </button>
+                       
                     </td>
                   </tr>
                   <tr v-if="visibleStudents.length === 0">

@@ -53,13 +53,14 @@ const textFields = computed(() => [
   { label: 'Usuario', value: `${props.subscription.user.name} (${props.subscription.user.email})` },
   { label: 'Curso', value: props.subscription.course.title },
   { label: 'Monto', value: props.subscription.payment_amount },
-  { label: 'Moneda', value: props.subscription.payment_currency },
+  { label: 'Moneda', value: props.subscription.currency?.code || '-' }, // <- aquí el cambio
   { label: 'Estado del Pago', value: props.subscription.payment_status },
   { label: 'Fecha de Pago', value: props.subscription.payment_date || '-' },
   { label: 'Fecha de Reembolso', value: props.subscription.payment_refund_date || '-' },
   { label: 'Descripción del Reembolso', value: props.subscription.payment_refund_desc || '-' },
   { label: 'Fecha de Creación', value: props.subscription.created_at ? new Date(props.subscription.created_at).toLocaleString() : '-' }
 ]);
+
 
 const paymentFields = computed(() => [
   { label: 'Tipo de Pago', value: props.subscription.payment_type || '-' },

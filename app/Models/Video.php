@@ -18,6 +18,7 @@ class Video extends Model
         'comments',
         'image_cover',
         'video_url',
+        'video_path',
     ];
 
     public function course()
