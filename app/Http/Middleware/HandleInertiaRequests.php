@@ -9,27 +9,41 @@ use Illuminate\Support\Facades\Auth;
 class HandleInertiaRequests extends Middleware
 {
     public function share(Request $request): array
-    {
-        return array_merge(parent::share($request), [
-            'auth' => [
-                'user' => $request->user() ? [
-                    'id' => $request->user()->id,
-                    'name' => $request->user()->name,
-                    'email' => $request->user()->email,
-                    // Añade cualquier otro campo necesario
+{
+    $user = $request->user();
+
+    return array_merge(parent::share($request), [
+        'auth' => [
+            'user' => $user ? [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                // Aquí cargamos el perfil relacionado
+                'profile' => $user->profile ? [
+                    'id' => $user->profile->id,
+                    'user_id' => $user->profile->user_id,
+                    'firstname' => $user->profile->firstname,
+                    'lastname' => $user->profile->lastname,
+                    'profile_image' => $user->profile->profile_image,
+                    'cover_image' => $user->profile->cover_image,
+                    'whatsapp' => $user->profile->whatsapp,
+                    'nickname' => $user->profile->nickname,
+                     'country' => $user->profile->country,
+                   
                 ] : null,
-            ],
-            'flash' => [
-                'message' => fn () => $request->session()->get('message'),
-                'success' => fn () => $request->session()->get('success'),
-                'error' => fn () => $request->session()->get('error'),
-            ],
-            // Otros datos globales que necesites
-            'app' => [
-                'name' => config('app.name'),
-                'env' => config('app.env'),
-                'url' => config('app.url'),
-            ],
-        ]);
-    }
+            ] : null,
+        ],
+        'flash' => [
+            'message' => fn () => $request->session()->get('message'),
+            'success' => fn () => $request->session()->get('success'),
+            'error' => fn () => $request->session()->get('error'),
+        ],
+        'app' => [
+            'name' => config('app.name'),
+            'env' => config('app.env'),
+            'url' => config('app.url'),
+        ],
+    ]);
+}
+
 }

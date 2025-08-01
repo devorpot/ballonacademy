@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 use Inertia\Inertia;
 
+use App\Models\Activity;
+use App\Enums\ActivityType; 
 
 class VideoController extends Controller
 {
@@ -50,43 +52,88 @@ class VideoController extends Controller
     }
 
 
- public function store(Request $request)
-    {
-        $validated = $this->validateData($request);
+public function store(Request $request)
+{
+    $validated = $this->validateData($request);
 
-        $validated['image_cover'] = $this->handleUpload($request, 'image_cover', 'videos/image_covers');
-        $validated['video_path'] = $this->handleUpload($request, 'video_path', 'videos');
+    $validated['image_cover'] = $this->handleUpload($request, 'image_cover', 'videos/image_covers');
+    $validated['video_path'] = $this->handleUpload($request, 'video_path', 'videos');
 
-        Video::create($validated);
+    // Obtener el siguiente valor de orden en el curso
+    $maxOrder = Video::where('course_id', $validated['course_id'])->max('order');
+    $validated['order'] = $maxOrder ? $maxOrder + 1 : 1;
 
-        return redirect()->route('admin.videos.index')->with('success', 'Video creado correctamente.');
+
+    $videoFile = $request->file('video_path');
+
+    if ($videoFile) {
+        $validated['video_path'] = $videoFile->store('videos', 'public');
+
+        // Calcular el tamaño en MB
+        $validated['size'] = round($videoFile->getSize() / 1048576, 2) . ' MB';
+
+        // Intentar extraer duración con FFmpeg si tienes instalado, o usa un valor por defecto
+        $validated['duration'] = $this->getDurationFromFile($videoFile->getRealPath()) ?? '00:00:00';
     }
 
-    public function edit(Video $video)
-        {
-            $courses = Course::select('id', 'title')->get();
-            $teachers = Teacher::select('id', 'firstname', 'lastname')->get();
 
-            return Inertia::render('Admin/Videos/Edit', [
-                'video' => $video,
-                'courses' => $courses,
-                'teachers' => $teachers,
-            ]);
-        }
+$video = Video::create($validated);
 
- 
-    public function update(Request $request, Video $video)
-    {
-        $validated = $this->validateData($request, false);
+   // return redirect()->route('admin.videos.index')->with('success', 'Video creado correctamente.');
+      return redirect()->route('admin.courses.videos.panel', ['course' => $video->course_id])
+        ->with('success', 'Video creado correctamente.');
+}
 
-        $video->fill($validated);
-        $video->image_cover = $this->updateFile($request, $video->image_cover, 'image_cover', 'videos/image_covers');
-        $video->video_path = $this->updateFile($request, $video->video_path, 'video_path', 'videos');
-        $video->save();
+public function edit(Video $video)
+{
+    $courses = Course::select('id', 'title')->get();
+    $teachers = Teacher::select('id', 'firstname', 'lastname')->get();
+    $course = $video->course; // Relación en el modelo Video
 
-        return redirect()->route('admin.videos.index')->with('success', 'Video actualizado correctamente.');
+    return Inertia::render('Admin/Videos/Edit', [
+        'video' => [
+            ...$video->toArray(),
+            'stream_url' => route('admin.videos.stream', ['video' => $video->id])
+        ],
+        'courses' => $courses,
+        'teachers' => $teachers,
+        'course' => $course // Aquí pasas el curso completo
+    ]);
+}
+
+public function update(Request $request, Video $video)
+{
+    $validated = $this->validateData($request, false);
+    $video->fill($validated);
+
+    // Imagen
+    if ($request->hasFile('image_cover')) {
+        $this->deleteFile($video->image_cover);
+        $video->image_cover = $request->file('image_cover')->store('videos/image_covers', 'public');
+    } elseif (!$request->boolean('keep_image')) {
+        $this->deleteFile($video->image_cover);
+        $video->image_cover = null;
     }
 
+    // Video (ya lo tienes bien)
+    if ($request->hasFile('video_path')) {
+        $this->deleteFile($video->video_path);
+        $file = $request->file('video_path');
+        $video->video_path = $file->store('videos', 'public');
+        $video->size = round($file->getSize() / 1048576, 2) . ' MB';
+        $video->duration = $this->getDurationFromFile($file->getRealPath()) ?? '00:00:00';
+    } elseif (!$request->boolean('keep_video')) {
+        $this->deleteFile($video->video_path);
+        $video->video_path = null;
+        $video->size = null;
+        $video->duration = null;
+    }
+
+    $video->save();
+
+    return redirect()->route('admin.courses.videos.panel', ['course' => $video->course_id])
+        ->with('success', 'Video actualizado correctamente.');
+}
 
 
 
@@ -94,7 +141,6 @@ class VideoController extends Controller
     {
         
         $this->checkOwnership($course, $video);
-
         if ($video->video_path) {
             Storage::disk('public')->delete($video->video_path);
         }
@@ -112,17 +158,14 @@ class VideoController extends Controller
    public function destroy(Course $course, Video $video)
     {
         
-        
-
         $this->deleteFile($video->image_cover);
         $this->deleteFile($video->video_path);
- 
         $video->delete();
 
       return redirect()->route('admin.videos.index')->with('success', 'Video eliminado exitosamente');
     }
 
-      public function videosPanel(Course $course)
+    public function videosPanel(Course $course)
             {
                 $course->load('videos');
 
@@ -130,37 +173,40 @@ class VideoController extends Controller
                     'course' => $course,
                     'videos' => $course->videos,
                 ]);
-            }
-
-    public function stream(Video $video): StreamedResponse
-{
-    if (!$video->video_path || !Storage::disk('private')->exists($video->video_path)) {
-        abort(404, 'Video no encontrado');
     }
 
-    return response()->stream(function () use ($video) {
-        $stream = Storage::disk('private')->readStream($video->video_path);
-        fpassthru($stream);
-    }, 200, [
-        'Content-Type' => 'video/mp4',
-        'Content-Disposition' => 'inline; filename="' . basename($video->video_path) . '"',
-        'Accept-Ranges' => 'bytes',
-        'Cache-Control' => 'no-cache',
-    ]);
-} 
-
-public function list(Course $course)
-{
-    $videos = $course->videos()
-        ->with(['teacher:id,firstname,lastname', 'course:id,title'])
-        ->orderBy('order')
-        ->get();
-
-    return response()->json($videos);
-}
-
-        public function reorderVideos(Request $request, Course $course)
+    public function stream(Video $video): StreamedResponse
     {
+        if (!$video->video_path || !Storage::disk('public')->exists($video->video_path)) {
+            abort(404, 'Video no encontrado');
+        }
+
+        return response()->stream(function () use ($video) {
+            $stream = Storage::disk('public')->readStream($video->video_path);
+            fpassthru($stream);
+        }, 200, [
+            'Content-Type' => 'video/mp4',
+            'Content-Disposition' => 'inline; filename="' . basename($video->video_path) . '"',
+            'Accept-Ranges' => 'bytes',
+            'Cache-Control' => 'no-cache',
+        ]);
+    } 
+
+    public function list(Course $course)
+    {
+        $videos = $course->videos()
+            ->with(['teacher:id,firstname,lastname', 'course:id,title'])
+            ->orderBy('order')
+            ->get();
+
+        return response()->json($videos);
+    }
+
+  public function reorderVideos(Request $request, Course $course)
+    {
+
+
+          \Log::info('Reordenando videos', $request->all());
         $validated = $request->validate([
             'order' => 'required|array',
             'order.*' => 'integer'
@@ -170,7 +216,7 @@ public function list(Course $course)
             $course->videos()->where('id', $videoId)->update(['order' => $index + 1]);
         }
 
-        return response()->json(['success' => true]);
+           return response()->json($request->all(), 200);
     }
 
 
@@ -186,9 +232,12 @@ private function validateData(Request $request, $includeFiles = true)
         'teacher_id' => 'required|integer',
         'course_id' => 'required|exists:courses,id',
         'comments' => 'nullable|string',
-        'video_url' => 'nullable|string|max:255',
+         
+        
         'keep_image' => 'nullable|boolean',
         'keep_video' => 'nullable|boolean',
+        'size' => 'nullable|string|max:20',
+        'duration' => 'nullable|string|max:20',
     ];
 
     if ($includeFiles) {
@@ -197,7 +246,7 @@ private function validateData(Request $request, $includeFiles = true)
         }
 
         if (!$request->boolean('keep_video') || $request->hasFile('video_path')) {
-            $rules['video_path'] = 'nullable|file|mimetypes:video/mp4,video/quicktime,video/x-m4v|max:51200';
+            $rules['video_path'] = 'nullable|file|mimetypes:video/mp4,video/quicktime,video/x-m4v|max:511200';
         }
     }
 
@@ -236,6 +285,27 @@ private function validateData(Request $request, $includeFiles = true)
             Storage::disk('public')->delete($filePath);
         }
     }
+
+    private function getDurationFromFile($filePath)
+{
+    try {
+        $output = shell_exec("ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"$filePath\"");
+        $seconds = floatval($output);
+
+        if ($seconds > 0) {
+            $hours = floor($seconds / 3600);
+            $minutes = floor(($seconds % 3600) / 60);
+            $seconds = floor($seconds % 60);
+
+            return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+        }
+    } catch (\Exception $e) {
+        // Log error si lo deseas
+    }
+
+    return null;
+}
+
 
 
 }

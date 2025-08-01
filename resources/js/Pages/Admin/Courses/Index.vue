@@ -56,12 +56,9 @@
                 <tbody>
                   <tr v-for="course in paginatedCourses" :key="course.id">
                     <td>
-                    <img
-                      :src="course.image_cover ? `/storage/${course.image_cover}` : '/images/default-cover.jpg'"
-                      alt="Cover"
-                      class="img-thumbnail"
-                      style="max-height: 60px; max-width: 100px;"
-                    />
+                        
+                      <ImageThumb :src="`/storage/${course.image_cover}`" size="thumb" />
+                     
                   </td>
                     <td>{{ course.id }}</td>
                     <td>{{ course.title }}</td>
@@ -88,7 +85,6 @@
                         </div>
 
                         <div class="btn-group btn-group-sm" role="group" aria-label="Gestión de estudiantes">
-                       
                           <Link
                             class="btn btn-outline-secondary"
                             :href="route('admin.courses.students', course.id)"
@@ -116,7 +112,6 @@
                 </tbody>
               </table>
             </div>
-
           </div>
         </div>
       </div>
@@ -151,18 +146,6 @@
       @saved="onCreated"
       @close="showCreateModal = false"
     />
-
-
-    <CourseAsignStudentModal
-        :show="showAssignModal"
-        :course="assignCourse"
-        :students="studentsList"
-        @close="showAssignModal = false"
-        @saved="toast = { message: 'Alumnos asignados', type: 'success' }"
-      />
-
-{{ studentsList }}
-
   </AdminLayout>
 </template>
 
@@ -171,18 +154,22 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import { Inertia } from '@inertiajs/inertia';
 import { ref, computed, onMounted } from 'vue';
 import { route } from 'ziggy-js';
-import axios from 'axios'; 
 
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import CrudFilters from '@/Components/Admin/Ui/CrudFilters.vue';
-import CrudPagination from '@/Components/Admin/Ui/CrudPagination.vue';
-import ConfirmDeleteModal from '@/Components/Admin/ConfirmDeleteModal.vue';
 import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue';
-import ShowCourseModal from '@/Pages/Admin/Courses/ShowCourseModal.vue';
-import CreateCourseModal from '@/Pages/Admin/Courses/CreateCourseModal.vue';
+import CrudPagination from '@/Components/Admin/Ui/CrudPagination.vue';
+import ImageThumb from '@/Components/Admin/Ui/ImageThumb.vue';
 
-import CourseAsignStudentModal from '@/Pages/Admin/Courses/CouseAsignStudentModal.vue';
+
+import ConfirmDeleteModal from '@/Components/Admin/ConfirmDeleteModal.vue';
+
+import ShowCourseModal from '@/Components/Admin/Courses/ShowCourseModal.vue';
+import CreateCourseModal from '@/Components/Admin/Courses/CreateCourseModal.vue';
+
+
+
 
 const props = defineProps({
   courses: Array
@@ -203,34 +190,6 @@ const sortKey = ref('id');
 const sortOrder = ref('asc');
 
 const page = usePage();
-
-
-//Modal para agregar alumnos
-
-const showAssignModal = ref(false);
-const assignCourse = ref(null);
-const studentsList = ref([]); // Aquí los alumnos
-
-const openAssignStudentsModal = async (course) => {
-  try {
-    const { data } = await axios.get(route('admin.courses.show', course.id)); // Este endpoint debe incluir la relación con estudiantes
-    assignCourse.value = data.course;
-
-    const studentsResponse = await axios.get(route('admin.students.list'));
-    studentsList.value = studentsResponse.data;
-
-    showAssignModal.value = true;
-  } catch (err) {
-    console.error('Error cargando curso o estudiantes:', err);
-  }
-};
-
-const loadStudents = async () => {
-  const { data } = await axios.get(route('admin.students.list')); // Tu endpoint
-  studentsList.value = data;
-};
-
-
 
 onMounted(() => {
   if (page.props.flash.success) {

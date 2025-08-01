@@ -17,8 +17,11 @@ class Video extends Model
         'teacher_id',
         'comments',
         'image_cover',
-        'video_url',
+ 
         'video_path',
+        'order',
+        'duration',
+        'size'
     ];
 
     public function course()

@@ -1,38 +1,36 @@
 <template>
   <StudentLayout>
-    <section class="section-panel">
-        <div class="container-fluid ">
-          <SectionHeader :title="course.title" />
+     <SectionHeader title="Videos " />
+    <section v-if="course && videos.length" class="container py-4">
+      <h1 class="h4 mb-4">Videos del curso: {{ course.title }}</h1>
 
-          <div class="row">
-            <div class="col-12 col-md-12">
-              <div class="row">
-                <div
-                  v-for="video in videos"
-                  :key="video.id"
-                  class="col-12 col-md-6 mb-4"
-                >
-                  <CardVideoThumbList
-                    :video="video"
-                    :course-id="course.id"
-                    :is-accessible="true"
-                  />
-                </div>
-              </div>
-            </div>
+      <div class="container">
+        <div class="row">
+          <div
+            class="col-12"
+            v-for="video in videos"
+            :key="video.id"
+          >
+         <VideoListItem
+          :video="video"
+          :courseId="course.id"
+          :isAccessible="video.is_accessible"
+        />
+
+
           </div>
         </div>
+      </div>
     </section>
   </StudentLayout>
 </template>
 
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue'
+import VideoListItem from '@/Components/Dashboard/Video/VideoListItem.vue'
 import SectionHeader from '@/Components/Dashboard/SectionHeader.vue'
-import CardVideoThumbList from '@/Components/Dashboard/Cards/CardVideoThumbList.vue'
-
-defineProps({
+const props = defineProps({
   course: Object,
-  videos: Array,
+  videos: Array
 })
 </script>

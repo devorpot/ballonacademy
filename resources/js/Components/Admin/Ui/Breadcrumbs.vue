@@ -32,7 +32,7 @@ const props = defineProps({
                   :class="{ active: index === breadcrumbs.length - 1 }"
                   aria-current="page"
                 >
-                  <span v-if="index === breadcrumbs.length - 1">
+                  <span v-if="index === breadcrumbs.length - 1 || !item.route">
                     {{ item.label }}
                   </span>
                   <Link
@@ -42,6 +42,7 @@ const props = defineProps({
                     {{ item.label }}
                   </Link>
                 </li>
+
               </ol>
             </nav>
           </div>

@@ -66,6 +66,7 @@
                       ID
                       <i :class="sortIcon('id')" class="ms-1" />
                     </th>
+                    <th>Portada</th>
                     <th @click="sortBy('course')" style="cursor: pointer;">
                       Curso
                       <i :class="sortIcon('course')" class="ms-1" />
@@ -82,6 +83,15 @@
                 <tbody>
                   <tr v-for="video in paginatedVideos" :key="video.id">
                     <td>{{ video.id }}</td>
+                    <td>
+                       <img
+                      v-if="video.image_cover"
+                      :src="`/storage/${video.image_cover}`"
+                      class="img-thumbnail"
+                      style="max-width: 80px;"
+                    />
+                    <span v-else class="text-muted">N/A</span>
+                    </td>
                     <td>{{ video.course?.title ?? 'Sin curso' }}</td>
                     <td>{{ video.title }}</td>
                     <td>{{ video.description_short }}</td>

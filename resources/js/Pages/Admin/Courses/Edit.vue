@@ -101,7 +101,8 @@
                       <FieldSwitch
                         id="active"
                         label="Curso activo"
-                        v-model="form.active"
+                        :modelValue="!!form.active"
+                        @update:modelValue="val => form.active = val ? 1 : 0"
                         :required="false"
                         :disabled="false"
                         :showValidation="touched.active"
@@ -109,20 +110,40 @@
                         :validateFunction="() => validateField('active')"
                         @blur="() => handleBlur('active')"
                       />
+
                     </div>
 
                     <div class="col-md-6 mb-3">
-                      <FieldImage id="image_cover" 
-                      label="Imagen cover" 
-                      v-model="form.image_cover" 
-                      :showValidation="touched.image_cover" 
-                      :formError="form.errors.image_cover" 
-                      :initialPreview="imageCoverPreview" 
-                      @blur="() => handleBlur('image_cover')" />
+                     <FieldImage
+                        id="image_cover"
+                        label="Imagen cover"
+                        v-model="form.image_cover"
+                        :showValidation="touched.image_cover"
+                        :formError="form.errors.image_cover"
+                        :initialPreview="imageCoverPreview"
+                        @blur="() => handleBlur('image_cover')"
+                        @image-removed="() => {
+                          form.remove_image_cover = true;
+                          form.image_cover = null; // Asegura que no mandas archivo
+                        }"
+                      />
                     </div>
 
                     <div class="col-md-6 mb-3">
-                      <FieldImage id="logo" label="Logo" v-model="form.logo" :showValidation="touched.logo" :formError="form.errors.logo" :initialPreview="logoPreview" @blur="() => handleBlur('logo')" />
+                     
+                   <FieldImage
+                    id="logo"
+                    label="Logo"
+                    v-model="form.logo"
+                    :showValidation="touched.logo"
+                    :formError="form.errors.logo"
+                    :initialPreview="logoPreview"
+                    @blur="() => handleBlur('logo')"
+                    @image-removed="() => {
+                      form.remove_logo = true;
+                      form.logo = null; // Asegura que no mandas archivo
+                    }"
+                  />
                     </div>
                   </div>
                 </div>
@@ -137,8 +158,11 @@
             </form>
           </div>
         </section>
-
-        <CourseVideosTable :course-id="props.course.id" :videos="props.videos" />
+<CourseVideosTable
+  :course-id="props.course.id"
+  :videos="props.videos"
+  :courses="props.courses ?? []"
+/>
       </div>
       <SpinnerOverlay v-if="form.processing" />
     </div>
@@ -151,34 +175,41 @@ import { useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import { ref, computed } from 'vue';
 
+// UI Components
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
 import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
+
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
 import FieldMoney from '@/Components/Admin/Fields/FieldMoney.vue';
 import FieldSwitch from '@/Components/Admin/Fields/FieldSwitch.vue';
 import FieldSelectApi from '@/Components/Admin/Fields/FieldSelectApi.vue';
-import CourseVideosTable from '@/Pages/Admin/Courses/CourseVideosTable.vue';
+import CourseVideosTable from '@/Components/Admin/Courses/CourseVideosTable.vue';
 
+// --- PROPS ---
 const props = defineProps({
   course: { type: Object, required: true },
-  videos: { type: Array, default: () => [] }
+  videos: { type: Array, default: () => [] },
+  courses: { type: Array, default: () => [] } // Solo si usas esto en el videos-table/modal
 });
 
+// --- FORM ---
 const form = useForm({
   _method: 'PUT',
-  title: props.course.title,
-  description: props.course.description,
-  description_short: props.course.description_short,
-  level: props.course.level,
-  date_start: props.course.date_start,
-  date_end: props.course.date_end,
-  image_cover: null,
-  logo: null,
-  active: props.course.active ?? true,
+  title: props.course.title ?? '',
+  description: props.course.description ?? '',
+  description_short: props.course.description_short ?? '',
+  level: props.course.level ?? '',
+  date_start: props.course.date_start ?? '',
+  date_end: props.course.date_end ?? '',
+  image_cover: null, // file nuevo
+  logo: null,        // file nuevo
+  remove_image_cover: false, // flag para backend
+  remove_logo: false,        // flag para backend
+  active: Boolean(props.course.active ?? 1),
   price: props.course.price ?? '',
   payment_link: props.course.payment_link ?? '',
   currency_id: props.course.currency_id ?? null,
@@ -189,6 +220,7 @@ const logoPreview = props.course.logo ? '/storage/' + props.course.logo : null;
 
 const touched = ref({});
 
+// --- HANDLERS / VALIDACIONES ---
 const handleBlur = (field) => {
   touched.value[field] = true;
 };
@@ -216,7 +248,11 @@ const submit = () => {
   Object.keys(form).forEach(key => touched.value[key] = true);
 
   if (isFormValid.value) {
-    form.post(route('admin.courses.update', props.course.id), {
+    form.transform(data => ({
+      ...data,
+      active: data.active ? 1 : 0,
+    }))
+    .post(route('admin.courses.update', props.course.id), {
       forceFormData: true,
       preserveScroll: true,
       onError: (errors) => console.error('Errores al guardar:', errors),
@@ -224,6 +260,7 @@ const submit = () => {
   }
 };
 </script>
+
 
 <style scoped>
 .blur-overlay {

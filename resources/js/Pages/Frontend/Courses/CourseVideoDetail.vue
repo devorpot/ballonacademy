@@ -11,7 +11,7 @@
             <h1 class="h5 mb-1">{{ course.title }}</h1>
             <p class="mb-0 text-muted small">Profesor: {{ course.teacher?.name || 'Sin asignar' }}</p>
           </div>
-          <img :src="course.image_cover || 'https://placehold.co/80x80'" alt="Curso" class="rounded-circle" width="60" height="60" />
+           
         </div>
       </div>
     </section>
@@ -21,15 +21,21 @@
          <div class="row">
            <div class="col-12 col-md-10 mx-auto">
                 <div class="card">
+                <div @contextmenu.prevent>
                    <video-player
-                     :src="route('dashboard.videos.secure', video.video_url)"
+                     :src="'/storage/' + video.video_path"
                       :poster="'/storage/' + video.image_cover"
                       controls
                       :loop="true"
                       :volume="0.6"
                       class="video_player"
+                       controlsList="nodownload"
+                        disablePictureInPicture
+                        playsinline
    
                     />
+
+                  </div>
 
                     <div class="card-body">
                             <h2 class="h5 fw-bold">{{ video.title }}</h2>
@@ -66,6 +72,7 @@ defineProps({
 <style scoped>
   .video_player{
     width:100%;
+    height: 80vh;
 
   }
 .ratio {

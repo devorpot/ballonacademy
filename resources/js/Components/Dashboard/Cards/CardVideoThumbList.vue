@@ -24,7 +24,7 @@
           <div class="text-end mt-2">
             <Link
               v-if="isAccessible"
-              :href="route('dashboard.courses.videos.show', {
+              :href="route('dashboard.videos.video.show', {
                 course: courseId,
                 video: video.id,
               })"

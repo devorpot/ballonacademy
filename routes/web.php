@@ -6,20 +6,30 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdministratorController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\StudentController;
-use App\Http\Controllers\Admin\TeacherController;
+use App\Http\Controllers\Admin\TeacherController; 
 use App\Http\Controllers\Admin\CertificateController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\ProfileController;
-use App\Http\Controllers\Admin\VideoController;
+use App\Http\Controllers\Admin\VideoController; 
 
 use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\PaymentTypeController;
 use App\Http\Controllers\Admin\PaymentStatusController;
 
-use App\Http\Controllers\Frontend\DashboardController;
-use App\Http\Controllers\Frontend\CoursesController;
+use App\Http\Controllers\Admin\VideoMaterialController;
 
+
+use App\Http\Controllers\Frontend\DashboardController as FrontendDashboardController;
+use App\Http\Controllers\Frontend\CoursesController as FrontendCoursesController;
+use App\Http\Controllers\Frontend\VideoController as FrontendVideoController;
+use App\Http\Controllers\Frontend\ProfileController as FrontendProfileController;
+
+use App\Http\Controllers\Frontend\EvaluationController as FrontendEvaluationController;
+
+use App\Http\Controllers\Api\VideoActivityController;
+use App\Http\Controllers\Api\ActivityController;
+ 
 // ----------------------------------
 // Autenticación
 // ----------------------------------
@@ -55,9 +65,7 @@ Route::middleware(['auth', 'role:admin'])
 
     Route::post('courses/{course}/videos/reorder', [VideoController::class, 'reorderVideos'])->name('courses.videos.reorder');
 
-
-// En routes/web.php
-Route::delete('courses/{course}/videos/{video}', [VideoController::class, 'deleteVideo'])->name('courses.videos.delete');
+    Route::delete('courses/{course}/videos/{video}', [VideoController::class, 'deleteVideo'])->name('courses.videos.delete');
 
 
 
@@ -67,6 +75,24 @@ Route::delete('courses/{course}/videos/{video}', [VideoController::class, 'delet
     Route::get('videos/{video}/stream', [VideoController::class, 'stream'])->name('videos.stream');
 
     Route::resource('videos', VideoController::class);
+
+
+
+
+
+// Listar materiales de un video (usada por fetchMaterials)
+Route::get('/videos/{video}/materials', [VideoMaterialController::class, 'index'])
+    ->name('videos.materials.index');
+
+// Guardar uno o varios materiales (usada por addMaterial)
+Route::post('/videos/{video}/materials', [VideoMaterialController::class, 'store'])
+    ->name('videos.materials.store');
+
+// Eliminar material individual (usada por removeMaterial)
+Route::delete('/videos/{video}/materials/{material}', [VideoMaterialController::class, 'destroy'])
+    ->name('videos.materials.destroy');
+
+ Route::put('/videos/{video}/materials/{material}', [VideoMaterialController::class, 'update'])->name('videos.materials.update');
 
 
     Route::resource('users', UserController::class);
@@ -101,36 +127,81 @@ Route::delete('courses/{course}/videos/{video}', [VideoController::class, 'delet
 
 
 });
-
+ 
 // ----------------------------------
 // Panel del estudiante (solo student)
 // ----------------------------------
+
 
 Route::middleware(['auth', 'role:student'])
     ->prefix('frontend')
     ->name('dashboard.')
     ->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('index');
-        Route::get('/courses', [CoursesController::class, 'index'])->name('courses.index');
-        Route::get('/courses/{id}', [CoursesController::class, 'show'])->name('courses.show');
-        Route::get('/courses/{course}/videos/{video}', [CoursesController::class, 'videoDetail'])->name('courses.videos.show');
+        
+        Route::get('/courses', [FrontendCoursesController::class, 'index'])->name('courses.index');
+
+        Route::get('/courses/{id}', [FrontendCoursesController::class, 'show'])->name('courses.show');
+        
+        Route::get('/courses/{course}/videos/{video}', [FrontendCoursesController::class, 'videoDetail'])->name('courses.videos.show');
+
+
+
+
+
+        Route::get('/videos/{course}/video/{video}', [FrontendVideoController::class, 'show'])->name('videos.video.show');
 
         // Ruta para servir videos protegidos
-        Route::get('/videos/secure/{filename}', function ($filename) {
-            $user = auth()->user();
-            $video = \App\Models\Video::where('video_url', $filename)->firstOrFail();
+        Route::get('/videos/secure/{filename}', [FrontendCoursesController::class, 'streamProtectedVideo'])
+            ->name('videos.secure');
 
-            // Verifica si el estudiante está inscrito en el curso
-            if (!$user->courses->contains($video->course_id)) {
-                abort(403);
-            }
+        // Perfil del estudiante
+        Route::get('/profile', [FrontendProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [FrontendProfileController::class, 'update'])->name('profile.update');
 
-            $path = storage_path("app/videos/{$filename}");
 
-            if (!file_exists($path)) {
-                abort(404);
-            }
+       Route::post('/video-activity', [VideoActivityController::class, 'store'])->name('video.activity');
 
-            return response()->file($path);
-        })->name('videos.secure');
+
+       Route::get('/videos/{course}/list', [FrontendVideoController::class, 'listCourseVideos'])->name('videos.list');
+
+
+ 
+
+
+ 
+
+        Route::post('/courses/course-activity', [ActivityController::class, 'courseEnded'])
+            ->name('courses.activity');
+
+
+        Route::post('/courses/video-activity', [ActivityController::class, 'videoEnded'])
+            ->name('video.activity');
+
+
+      Route::get('/courses/{course}/evaluations', [FrontendEvaluationController::class, 'index'])
+    ->name('courses.evaluations.index');
+
+Route::post('/courses/{course}/evaluations', [FrontendEvaluationController::class, 'store'])
+    ->name('courses.evaluations.store');
+
+Route::get('/courses/{course}/evaluations/create', [FrontendEvaluationController::class, 'create'])
+    ->name('courses.evaluations.create');
+
+Route::get('/courses/{course}/evaluations/{evaluation}/edit', [FrontendEvaluationController::class, 'edit'])
+    ->name('courses.evaluations.edit');
+
+Route::put('/courses/{course}/evaluations/{evaluation}', [FrontendEvaluationController::class, 'update'])
+    ->name('courses.evaluations.update');
+
+Route::get('/courses/{course}/evaluations/{evaluation}', [FrontendEvaluationController::class, 'show'])
+    ->name('courses.evaluations.show');
+
+Route::delete('/courses/{course}/evaluations/{evaluation}', [FrontendEvaluationController::class, 'destroy'])
+    ->name('courses.evaluations.destroy');
+
+Route::get('/courses/{course}/evaluations/{evaluation}/download', [FrontendEvaluationController::class, 'download'])
+    ->name('courses.evaluations.download');
+
+
     });

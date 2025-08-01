@@ -45,7 +45,7 @@
         controls
         class="w-100"
         style="max-height: 300px;"
-        :src="`/storage/${initialPath}`"
+        :src="initialPath"
       />
       <button
         type="button"
@@ -73,7 +73,7 @@ export default {
       type: String,
       default: 'video/mp4,video/x-m4v,video/quicktime'
     },
-    initialPath: { type: String, default: '' } // ejemplo: "videos/video.mp4"
+    initialPath: { type: String, default: '' } // Puede ser URL absoluta
   },
   emits: ['update:modelValue', 'update:keep', 'blur'],
   data() {
@@ -94,21 +94,21 @@ export default {
         this.videoUrl = URL.createObjectURL(file);
         this.hideInitial = true;
         this.$emit('update:modelValue', file);
-        this.$emit('update:keep', false); // ← indica que ya no se debe conservar el anterior
+        this.$emit('update:keep', false);
       }
     },
     removeNewFile() {
       if (this.videoUrl) URL.revokeObjectURL(this.videoUrl);
       this.videoUrl = null;
       this.$emit('update:modelValue', null);
-      this.$emit('update:keep', false); // ← sigue indicando que no se conservará ninguno
+      this.$emit('update:keep', false);
       const input = document.getElementById(this.id);
       if (input) input.value = '';
     },
     removeExistingVideo() {
       this.hideInitial = true;
       this.$emit('update:modelValue', null);
-      this.$emit('update:keep', false); // ← quitar video actual
+      this.$emit('update:keep', false);
     },
     onBlur() {
       this.$emit('blur');

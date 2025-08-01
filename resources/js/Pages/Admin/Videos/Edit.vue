@@ -7,11 +7,11 @@
           username="admin"
           :breadcrumbs="[
             { label: 'Dashboard', route: 'admin.dashboard' },
-            { label: 'Cursos',  route: 'admin.courses.index' },
-            
-            { label: 'Editar', route: '' }
+            { label: 'Cursos', route: 'admin.courses.index' },
+            { label: `Videos - ${props.course.title}`, route: 'admin.courses.videos.panel', params: props.course.id },
+            { label: `Editar - ${props.video.title}` } // Último breadcrumb solo con label, sin route
           ]"
-        />
+        /> 
 
         <section class="section-heading my-2">
           <div class="container-fluid">
@@ -37,7 +37,22 @@
               <div class="card">
                 <div class="card-body">
                   <div class="row">
-                    <div class="col-md-6 mb-3">
+                    
+                     <div class="col-md-12 mb-3">
+
+                      
+                        <FieldVideo
+                          id="video_path"
+                          label="Reemplazar video (opcional)"
+                          :initial-path="props.video.stream_url"
+                          :form-error="form.errors.video_path"
+                          :show-validation="true"
+                          @update:modelValue="form.video_path = $event"
+                          @update:keep="form.keep_video = $event"
+                      />
+
+                      </div>
+                      <div class="col-md-6 mb-3">
                       <FieldText
                         id="title"
                         label="Título"
@@ -50,32 +65,7 @@
                         @blur="() => handleBlur('title')"
                       />
                     </div>
-                     <div class="col-md-6 mb-3">
-
-                        <FieldVideo
-                            id="video_path"
-                            label="Reemplazar video (opcional)"
-                            :initial-path="props.video.video_path"
-                            :form-error="form.errors.video_path"
-                            :show-validation="true"
-                            @update:modelValue="form.video_path = $event"
-                            @update:keep="form.keep_video = $event"
-                          />
-
-                      </div>
-                       <div class="col-md-6 mb-3">
-                      <FieldText
-                        id="video_url"
-                        label="URL del video"
-                        v-model="form.video_url"
-                        :required="true"
-                        :showValidation="touched.video_url"
-                        :formError="form.errors.video_url"
-                        :validateFunction="() => validateField('video_url')"
-                        placeholder="video.mp4"
-                        @blur="() => handleBlur('video_url')"
-                      />
-                    </div>
+                       
 
                     <div class="col-md-6 mb-3">
                       <FieldText
@@ -148,7 +138,9 @@
                       :initialPreview="imagePreview"
                       @blur="() => handleBlur('image_cover')"
                       @update:keep="form.keep_image = $event"
+     
                     />
+          
 
                     </div>
                   </div>
@@ -164,6 +156,21 @@
             </form>
           </div>
         </section>
+
+        <section class="section-materials my-3">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-box-seam me-1"></i> Materiales del video</span>
+      
+    </div>
+    <div class="card-body">
+     <VideoMaterialRow :video-id="props.video.id" />
+
+    </div>
+  </div>
+</section>
+
+
       </div>
 
       <SpinnerOverlay v-if="form.processing" />
@@ -181,16 +188,26 @@ import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
 import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
 
+
+
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
 import FieldFile from '@/Components/Admin/Fields/FieldFile.vue';
 import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue';
 
+
+import VideoMaterialRow from '@/Components/Admin/Videos/VideoMaterialRow.vue';
+
 const props = defineProps({
   video: Object,
   courses: Array,
-  teachers: Array
+  teachers: Array,
+  course:Object,
+  initialMaterials: {
+    type: Array,
+    default: () => []
+  }
 });
 
 const form = useForm({
@@ -199,7 +216,7 @@ const form = useForm({
   description: props.video.description,
   description_short: props.video.description_short,
   comments: props.video.comments,
-  video_url: props.video.video_url,
+ 
   course_id: props.video.course_id,
   teacher_id: props.video.teacher_id,
   image_cover: null,     // si suben una nueva
@@ -222,6 +239,30 @@ const teacherOptions = computed(() =>
   }))
 );
 
+
+ 
+ 
+
+const breadcrumbs = computed(() => {
+  // Si course no está listo, usa textos genéricos y evita acceder a sus props
+  if (!props.course) {
+    return [
+      { label: 'Dashboard', route: route('admin.dashboard') },
+      { label: 'Cursos', route: route('admin.courses.index') },
+      { label: 'Videos', route: '' },
+      { label: 'Editar', route: '' }
+    ];
+  }
+  // Cuando course ya existe
+  return [
+    { label: 'Dashboard', route: route('admin.dashboard') },
+    { label: 'Cursos', route: route('admin.courses.index') },
+    { label: `Videos - ${props.course.title}`, route: route('admin.courses.videos.panel', props.course.id) },
+    { label: 'Editar', route: '' }
+  ];
+});
+
+
 const handleBlur = (field) => {
   touched.value[field] = true;
 };
@@ -235,7 +276,7 @@ const validateField = (field) => {
 
 const isFormValid = computed(() => {
   return !validateField('title') &&
-         !validateField('video_url') &&
+ 
          !validateField('course_id') &&
          !validateField('teacher_id');
 });

@@ -7,7 +7,11 @@
 
       <!-- Mostrar nombre del usuario -->
       <span>{{ user.name }}</span>
-      <i class="bi bi-person-circle"></i>
+     
+
+       <Link :href="route('dashboard.profile.edit')"   class="btn btn-sm btn-light text-dark">
+        <i class="bi bi-person-circle"></i>
+      </Link>
 
       <!-- Cerrar sesión -->
       <Link :href="route('logout')" method="post" as="button" class="btn btn-sm btn-light text-dark">

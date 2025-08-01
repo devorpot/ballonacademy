@@ -2,21 +2,8 @@
   <Head :title="`Dashboard`" />
 
   <StudentLayout>
-    <!-- VIDEOS RECIENTES -->
-    <section class="section-panel py-3">
-      <div class="container-fluid">
-        <div class="row my-3">
-          <div class="col-12">
-            <SectionHeader title="Videos Recientes" link="/videos" />
-          </div>
-        </div>
-        <div class="row my-3">
-          <div class="col-12 col-md-3" v-for="n in 4" :key="n">
-            <CardVideoThumb />
-          </div>
-        </div>
-      </div>
-    </section>
+
+ 
 
     <!-- MIS CURSOS -->
     <section class="section-panel py-3" v-if="courses && courses.length">
@@ -32,10 +19,11 @@
             v-for="course in courses"
             :key="course.id"
           >
+ 
             <CardCourseThumb
               :title="course.title"
               :videosCount="course.videos_count"
-              :image="course.image_cover"
+               :image="course.image_cover ? `/storage/${course.image_cover}` : '/images/default-cover.jpg'"
               :detailsUrl="route('dashboard.courses.show', course.id)"
             />
           </div>
@@ -49,6 +37,23 @@
         <p class="text-muted mb-0">Aún no estás inscrito en ningún curso.</p>
       </div>
     </section>
+
+ 
+    <section class="section-panel py-3">
+      <div class="container-fluid">
+        <div class="row my-3">
+          <div class="col-12">
+            <SectionHeader title="Videos Vistos" link="/videos" />
+          </div>
+        </div>
+        <div class="row my-3">
+          <div class="col-12 col-md-3" v-for="n in 4" :key="n">
+            <CardVideoThumb />
+          </div>
+        </div>
+      </div>
+    </section>
+
 
     <!-- BLOG DE GLOBOFLEXIA -->
     <section class="section-panel py-3">
@@ -73,7 +78,8 @@
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head } fro m '@inertiajs/vue3';
+import axios from 'axios';
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import CardVideoThumb from '@/Components/Dashboard/Cards/CardVideoThumb.vue';
 import CardCourseThumb from '@/Components/Dashboard/Cards/CardCourseThumb.vue';
@@ -84,6 +90,10 @@ import { route } from 'ziggy-js';
 // Props que vienen desde el backend
 defineProps({
   courses: {
+    type: Array,
+    default: () => [],
+  },
+  videos: {
     type: Array,
     default: () => [],
   },

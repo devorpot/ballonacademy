@@ -73,6 +73,8 @@ class ProfileController extends Controller
     {
         return $request->validate([
             // Fiscales
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
             'rfc' => 'nullable|string|max:13',
             'business_name' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',

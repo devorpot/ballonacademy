@@ -15,13 +15,13 @@ import Footer from '@/Components/Admin/Footer.vue'
 
         <Navbar />
  
-<Transition name="fade" mode="out-in">
-  <div :key="$page.component">
-    <main class="main">
-      <slot />
-    </main>
-  </div>
-</Transition>
+          <Transition name="fade" mode="out-in">
+            <div :key="$page.component">
+              <main class="main">
+                <slot />
+              </main>
+            </div>
+          </Transition>
 
        <Footer />
     </div>

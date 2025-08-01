@@ -36,7 +36,19 @@
               <div class="card">
                 <div class="card-body">
                   <div class="row">
-                    <div class="col-md-6 mb-3">
+                   
+                    <div class="col-md-12 mb-3">
+                      <FieldVideo
+                        id="video_path"
+                        label="Subir video"
+                        :required="true"
+                        :form-error="form.errors.video_path"
+                        :show-validation="touched.video_path"
+                        @update:modelValue="form.video_path = $event"
+                        @blur="() => handleBlur('video_path')"
+                      />
+                    </div>
+                     <div class="col-md-6 mb-3">
                       <FieldText
                         id="title"
                         label="Título"
@@ -50,28 +62,7 @@
                       />
                     </div>
                     <div class="col-md-6 mb-3">
-                      <FieldVideo
-                        id="video_path"
-                        label="Subir video"
-                        :required="true"
-                        :form-error="form.errors.video_path"
-                        :show-validation="touched.video_path"
-                        @update:modelValue="form.video_path = $event"
-                        @blur="() => handleBlur('video_path')"
-                      />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <FieldText
-                        id="video_url"
-                        label="URL del video"
-                        v-model="form.video_url"
-                        :required="true"
-                        :showValidation="touched.video_url"
-                        :formError="form.errors.video_url"
-                        :validateFunction="() => validateField('video_url')"
-                        placeholder="video.mp4"
-                        @blur="() => handleBlur('video_url')"
-                      />
+                       
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -193,7 +184,7 @@ const form = useForm({
   description: '',
   description_short: '',
   comments: '',
-  video_url: '',
+ 
   course_id: '',
   teacher_id: '',
   image_cover: null,
@@ -226,7 +217,7 @@ const validateField = (field) => {
 
 const isFormValid = computed(() => {
   return !validateField('title') &&
-         !validateField('video_url') &&
+        
          !validateField('course_id') &&
          !validateField('teacher_id') &&
          !validateField('video_path') &&

@@ -64,13 +64,30 @@ class CourseController extends Controller
             'videos' => $course->videos
         ]);
     }
-    public function update(Request $request, Course $course)
+public function update(Request $request, Course $course)
 {
     $validated = $this->validateData($request, false);
 
     $course->fill($validated);
-    $course->image_cover = $this->updateFile($request, $course->image_cover, 'image_cover', 'courses/covers');
-    $course->logo = $this->updateFile($request, $course->logo, 'logo', 'courses/logos');
+
+    // Imagen de portada
+    if ($request->hasFile('image_cover')) {
+        $this->deleteFile($course->image_cover);
+        $course->image_cover = $request->file('image_cover')->store('courses/covers', 'public');
+    } elseif ($request->boolean('remove_image_cover')) {
+        $this->deleteFile($course->image_cover);
+        $course->image_cover = null;
+    }
+
+    // Logo
+    if ($request->hasFile('logo')) {
+        $this->deleteFile($course->logo);
+        $course->logo = $request->file('logo')->store('courses/logos', 'public');
+    } elseif ($request->boolean('remove_logo')) {
+        $this->deleteFile($course->logo);
+        $course->logo = null;
+    }
+
     $course->save();
 
     return redirect()->route('admin.courses.index')->with('success', 'Curso actualizado exitosamente');

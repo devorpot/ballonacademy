@@ -13,7 +13,7 @@ defineProps({
   },
   link: {
     type: String,
-    required: true
+     default: null // ahora es opcional
   }
 });
 </script>

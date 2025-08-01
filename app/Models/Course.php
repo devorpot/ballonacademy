@@ -35,6 +35,11 @@ class Course extends Model
         return $this->hasMany(Subscription::class);
     }
 
+    public function evaluations()
+    {
+        return $this->hasMany(\App\Models\Evaluation::class);
+    }
+
 
 
     public function students()

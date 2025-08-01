@@ -1,10 +1,11 @@
 <template>
   <Head title="Mis Cursos" />
-
+<!--/frontend/courses-->
   <StudentLayout>
+     <SectionHeader title="Cursos Inscritos" />
     <section class="section-panel py-3">
       <div class="container-fluid">
-        <SectionHeader title="Cursos Inscritos" />
+       
 
         <div v-if="courses.length === 0" class="alert alert-info">
           No estás inscrito en ningún curso por el momento.
@@ -12,12 +13,13 @@
 
         <div v-else class="row">
           <div v-for="course in courses" :key="course.id" class="col-12 col-md-6 col-lg-4 mb-4">
-              {{course.id}}
-            <CardCourseThumb
+               
+               <CardCourseThumb
               :title="course.title"
-              :description="course.description_short"
-              :image="course.image_cover"
-               />
+              :videosCount="course.videos_count"
+              :image="course.image_cover ? `/storage/${course.image_cover}` : '/images/default-cover.jpg'"
+              :detailsUrl="route('dashboard.courses.show', course.id)"
+            />
           </div>
         </div>
       </div>

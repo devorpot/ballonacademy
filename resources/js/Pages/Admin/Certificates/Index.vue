@@ -255,12 +255,12 @@ const deleteCertificate = () => {
     />
 
 
-<ShowCertificateModal
-  v-if="showViewModal"
-  :show="showViewModal"
-  :certificate="selectedCertificate"
-  @close="showViewModal = false"
-/>
+    <ShowCertificateModal
+      v-if="showViewModal"
+      :show="showViewModal"
+      :certificate="selectedCertificate"
+      @close="showViewModal = false"
+    />
 
   </AdminLayout>
 </template>

@@ -56,85 +56,103 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    id: { type: String, required: true },
-    label: { type: String, required: true },
-    required: { type: Boolean, default: false },
-    showValidation: { type: Boolean, default: false },
-    formError: { type: String, default: '' },
-    validateFunction: { type: Function, default: null },
-    classObject: { type: String, default: '' },
-    initialPreview: { type: [String, Array], default: null },
-    multiple: { type: Boolean, default: false }
-  },
-  emits: ['update:modelValue', 'update:keep', 'blur'],
-  data() {
-    return {
-      previews: Array.isArray(this.initialPreview)
-        ? this.initialPreview
-        : this.initialPreview
-        ? [this.initialPreview]
-        : [],
-      files: [],
-      lightboxSrc: null
-    };
-  },
-  computed: {
-    validationMessage() {
-      return this.validateFunction ? this.validateFunction() : '';
-    }
-  },
-  mounted() {
-    if (this.previews.length > 0) {
-      this.$emit('update:keep', true);
-    }
-  },
-  methods: {
-    reset() {
-      this.files = [];
-      this.previews = [];
-      if (this.$refs.fileInput) {
-        this.$refs.fileInput.value = null;
-      }
-      this.$emit('update:modelValue', null);
-      this.$emit('update:keep', false);
-    },
-    onFileChange(event) {
-      const selectedFiles = Array.from(event.target.files);
-      const validFiles = selectedFiles.filter(file => file.type.startsWith('image/'));
+<script setup>
+import { ref, watch, computed } from 'vue';
 
-      this.files = this.multiple ? validFiles : validFiles.slice(0, 1);
-      this.previews = this.files.map(file => URL.createObjectURL(file));
+const props = defineProps({
+  id: { type: String, required: true },
+  label: { type: String, required: true },
+  required: { type: Boolean, default: false },
+  showValidation: { type: Boolean, default: false },
+  formError: { type: String, default: '' },
+  validateFunction: { type: Function, default: null },
+  classObject: { type: String, default: '' },
+  initialPreview: { type: [String, Array], default: null },
+  multiple: { type: Boolean, default: false }
+});
 
-      this.$emit('update:modelValue', this.multiple ? this.files : this.files[0] || null);
-      this.$emit('update:keep', false);
-    },
-    onBlur() {
-      this.$emit('blur');
-    },
-    removeImage(index) {
-      URL.revokeObjectURL(this.previews[index]); // libera memoria
-      this.files.splice(index, 1);
-      this.previews.splice(index, 1);
+const emit = defineEmits([
+  'update:modelValue',
+  'update:keep',
+  'blur',
+  'image-removed'
+]);
 
-      if (this.files.length === 0) {
-        this.$refs.fileInput.value = null;
-        this.$emit('update:modelValue', null);
-        this.$emit('update:keep', false);
-      } else {
-        this.$emit('update:modelValue', this.multiple ? this.files : this.files[0]);
-      }
-    },
-    openLightbox(src) {
-      this.lightboxSrc = src;
-    },
-    closeLightbox() {
-      this.lightboxSrc = null;
+const fileInput = ref(null);
+const previews = ref(
+  Array.isArray(props.initialPreview)
+    ? props.initialPreview
+    : props.initialPreview
+    ? [props.initialPreview]
+    : []
+);
+const files = ref([]);
+const lightboxSrc = ref(null);
+
+const validationMessage = computed(() =>
+  props.validateFunction ? props.validateFunction() : ''
+);
+
+// Actualiza previews si cambia initialPreview desde el padre
+watch(
+  () => props.initialPreview,
+  (newVal) => {
+    previews.value = Array.isArray(newVal)
+      ? newVal
+      : newVal
+      ? [newVal]
+      : [];
+    if (previews.value.length > 0) {
+      emit('update:keep', true);
+    } else {
+      emit('update:keep', false);
     }
+    files.value = [];
+    if (fileInput.value) fileInput.value.value = null;
   }
-};
+);
+
+function onFileChange(event) {
+  const selectedFiles = Array.from(event.target.files);
+  const validFiles = selectedFiles.filter(file => file.type.startsWith('image/'));
+
+  files.value = props.multiple ? validFiles : validFiles.slice(0, 1);
+  previews.value = files.value.map(file => URL.createObjectURL(file));
+
+  emit('update:modelValue', props.multiple ? files.value : files.value[0] || null);
+  emit('update:keep', false);
+}
+
+function onBlur() {
+  emit('blur');
+}
+
+function removeImage(index) {
+  // Libera memoria
+  if (previews.value[index]?.startsWith('blob:')) {
+    URL.revokeObjectURL(previews.value[index]);
+  }
+  files.value.splice(index, 1);
+  previews.value.splice(index, 1);
+
+  // Limpia el input siempre
+  if (fileInput.value) fileInput.value.value = null;
+
+  if (files.value.length === 0 && previews.value.length === 0) {
+    emit('update:modelValue', null);
+    emit('update:keep', false);
+    emit('image-removed');
+  } else {
+    emit('update:modelValue', props.multiple ? files.value : files.value[0]);
+  }
+}
+
+function openLightbox(src) {
+  lightboxSrc.value = src;
+}
+function closeLightbox() {
+  lightboxSrc.value = null;
+}
 </script>
 
 <style scoped>
@@ -158,7 +176,6 @@ export default {
 .img-thumbnail:hover {
   transform: scale(1.05);
 }
-
 .lightbox {
   position: fixed;
   top: 0;
