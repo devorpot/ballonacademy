@@ -16,9 +16,9 @@ use App\Http\Controllers\Admin\VideoController;
 use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\PaymentTypeController;
 use App\Http\Controllers\Admin\PaymentStatusController;
-
+use App\Http\Controllers\Admin\EvaluationController;
 use App\Http\Controllers\Admin\VideoMaterialController;
-
+use App\Http\Controllers\Admin\EvaluationQuestionController;
 
 use App\Http\Controllers\Frontend\DashboardController as FrontendDashboardController;
 use App\Http\Controllers\Frontend\CoursesController as FrontendCoursesController;
@@ -113,6 +113,12 @@ Route::delete('/videos/{video}/materials/{material}', [VideoMaterialController::
     Route::resource('certificates', CertificateController::class);
     Route::resource('subscriptions', SubscriptionController::class);
 
+
+     
+    Route::resource('evaluations', EvaluationController::class);
+
+  
+
     Route::get('/students/{user}/profile', [ProfileController::class, 'show'])->name('profiles.show');
     Route::get('/students/{user}/profile/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
     Route::put('/students/{user}/profile', [ProfileController::class, 'update'])->name('profiles.update');
@@ -124,6 +130,26 @@ Route::delete('/videos/{video}/materials/{material}', [VideoMaterialController::
     Route::get('options/currencies', [CurrencyController::class, 'options']);
     Route::get('options/payment_type', [PaymentTypeController::class, 'options']);
     Route::get('options/payment_status', [PaymentStatusController::class, 'options']);
+
+    //Evaluations
+
+
+
+   
+
+
+    Route::prefix('evaluations/{evaluation}/questions')->name('evaluation-questions.')->group(function () {
+        Route::get('/', [EvaluationQuestionController::class, 'index'])->name('index');
+        Route::get('create', [EvaluationQuestionController::class, 'create'])->name('create');
+        Route::post('/', [EvaluationQuestionController::class, 'store'])->name('store');
+        Route::get('{question}/edit', [EvaluationQuestionController::class, 'edit'])->name('edit');
+        Route::put('{question}', [EvaluationQuestionController::class, 'update'])->name('update');
+        Route::delete('{question}', [EvaluationQuestionController::class, 'destroy'])->name('destroy');
+        Route::post('reorder', [EvaluationQuestionController::class, 'reorder'])->name('reorder');
+        Route::get('preview', [EvaluationQuestionController::class, 'preview'])->name('preview');
+
+
+    });
 
 
 });
@@ -137,7 +163,7 @@ Route::middleware(['auth', 'role:student'])
     ->prefix('frontend')
     ->name('dashboard.')
     ->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('index');
+        Route::get('/', [FrontendDashboardController::class, 'index'])->name('index');
         
         Route::get('/courses', [FrontendCoursesController::class, 'index'])->name('courses.index');
 
@@ -202,6 +228,10 @@ Route::delete('/courses/{course}/evaluations/{evaluation}', [FrontendEvaluationC
 
 Route::get('/courses/{course}/evaluations/{evaluation}/download', [FrontendEvaluationController::class, 'download'])
     ->name('courses.evaluations.download');
+
+
+
+
 
 
     });

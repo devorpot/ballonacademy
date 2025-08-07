@@ -9,6 +9,7 @@
       :class="{ 'is-invalid': (showValidation && validationMessage) || formError }"
       @change="onFileChange"
       @blur="onBlur"
+      :disabled="readonly"
     />
     <div v-if="(showValidation && validationMessage) || formError" class="invalid-feedback">
       {{ formError || validationMessage }}
@@ -17,7 +18,12 @@
     <div v-if="fileName" class="mt-2">
       <div class="d-flex align-items-center">
         <span class="me-2">{{ fileName }}</span>
-        <button type="button" class="btn btn-sm btn-outline-danger" @click="removeFile">
+        <button 
+          v-if="!readonly"
+          type="button"
+          class="btn btn-sm btn-outline-danger"
+          @click="removeFile"
+        >
           <i class="bi bi-x-circle"></i> Eliminar archivo
         </button>
       </div>
@@ -35,7 +41,8 @@ export default {
     formError: { type: String, default: '' },
     validateFunction: { type: Function, default: null },
     classObject: { type: String, default: '' },
-    accept: { type: String, default: '.pdf,.doc,.docx' }  // formatos por defecto
+    accept: { type: String, default: '.pdf,.doc,.docx' },
+    readonly: { type: Boolean, default: false }, // <-- agregado aquí
   },
   emits: ['update:modelValue', 'blur'],
   data() {
@@ -50,6 +57,7 @@ export default {
   },
   methods: {
     onFileChange(event) {
+      if (this.readonly) return; // Previene cambios si es solo lectura
       const file = event.target.files[0];
       if (file) {
         this.fileName = file.name;
@@ -62,6 +70,7 @@ export default {
       this.$emit('blur');
     },
     removeFile() {
+      if (this.readonly) return; // Previene eliminar si es solo lectura
       this.fileName = null;
       this.$emit('update:modelValue', null);
       const input = document.getElementById(this.id);

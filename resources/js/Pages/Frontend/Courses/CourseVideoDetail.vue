@@ -3,7 +3,7 @@
 
   <StudentLayout>
     <!-- Encabezado con logo y profesor -->
-     
+  
     <section class="bg-light border-bottom py-3 mb-4">
       <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center">

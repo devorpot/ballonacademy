@@ -13,6 +13,7 @@
       :class="{ 'is-invalid': (showValidation && validationMessage) || formError }"
       @change="onFileChange"
       @blur="onBlur"
+      :disabled="readonly"
     />
 
     <!-- Errores -->
@@ -30,6 +31,7 @@
         :src="videoUrl"
       />
       <button
+        v-if="!readonly"
         type="button"
         class="btn btn-sm btn-outline-danger mt-2"
         @click="removeNewFile"
@@ -48,6 +50,7 @@
         :src="initialPath"
       />
       <button
+        v-if="!readonly"
         type="button"
         class="btn btn-sm btn-outline-danger mt-2"
         @click="removeExistingVideo"
@@ -73,7 +76,8 @@ export default {
       type: String,
       default: 'video/mp4,video/x-m4v,video/quicktime'
     },
-    initialPath: { type: String, default: '' } // Puede ser URL absoluta
+    initialPath: { type: String, default: '' }, // Puede ser URL absoluta
+    readonly: { type: Boolean, default: false }, // <-- añadido aquí
   },
   emits: ['update:modelValue', 'update:keep', 'blur'],
   data() {
@@ -89,6 +93,7 @@ export default {
   },
   methods: {
     onFileChange(event) {
+      if (this.readonly) return; // Previene cambios si readonly
       const file = event.target.files[0];
       if (file && file.type.startsWith('video/')) {
         this.videoUrl = URL.createObjectURL(file);
@@ -98,6 +103,7 @@ export default {
       }
     },
     removeNewFile() {
+      if (this.readonly) return; // Previene eliminar si readonly
       if (this.videoUrl) URL.revokeObjectURL(this.videoUrl);
       this.videoUrl = null;
       this.$emit('update:modelValue', null);
@@ -106,6 +112,7 @@ export default {
       if (input) input.value = '';
     },
     removeExistingVideo() {
+      if (this.readonly) return; // Previene eliminar si readonly
       this.hideInitial = true;
       this.$emit('update:modelValue', null);
       this.$emit('update:keep', false);

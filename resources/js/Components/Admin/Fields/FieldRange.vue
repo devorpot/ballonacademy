@@ -11,7 +11,7 @@
         :min="min"
         :max="max"
         :step="step"
-        :disabled="disabled"
+        :disabled="disabled || readonly"  <!-- Aquí -->
         :value="modelValue"
         @input="onInput"
       >
@@ -35,6 +35,7 @@ export default {
     step: { type: [Number, String], default: 1 },
     required: { type: Boolean, default: false },
     disabled: { type: Boolean, default: false },
+    readonly: { type: Boolean, default: false }, // <-- Añadido
     showValidation: { type: Boolean, default: false },
     formError: { type: String, default: "" },
     validateFunction: { type: Function, default: null },
@@ -48,24 +49,9 @@ export default {
   },
   methods: {
     onInput(event) {
+      if (this.readonly) return; // Evita cambios si es readonly
       this.$emit("update:modelValue", event.target.value);
     }
   }
 };
 </script>
-
-
-<!-- 
-<FieldRange
-  id="range1"
-  label="Selecciona un valor"
-  v-model="form.rangeValue"
-  :min="0"
-  :max="10"
-  :step="0.5"
-  :required="true"
-  :showValidation="touched.rangeValue"
-  :formError="form.errors.rangeValue"
-  :validateFunction="() => validateField('rangeValue')"
-/>
--->

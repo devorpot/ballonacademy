@@ -1,10 +1,10 @@
 <template>
-  <Head :title="`Dashboard`" />
-
-  <StudentLayout>
+ <StudentLayout>
 
  
-
+         <Breadcrumbs username="estudiante" :breadcrumbs="[
+            { label: 'Dashboard', route: '' }
+          ]" />
     <!-- MIS CURSOS -->
     <section class="section-panel py-3" v-if="courses && courses.length">
       <div class="container-fluid">
@@ -78,14 +78,16 @@
 </template>
 
 <script setup>
-import { Head } fro m '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import axios from 'axios';
+import { route } from 'ziggy-js';
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import CardVideoThumb from '@/Components/Dashboard/Cards/CardVideoThumb.vue';
 import CardCourseThumb from '@/Components/Dashboard/Cards/CardCourseThumb.vue';
 import CourseBlogPost from '@/Components/Dashboard/Cards/CardBlogPost.vue';
 import SectionHeader from '@/Components/Dashboard/SectionHeader.vue';
-import { route } from 'ziggy-js';
+import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
+
 
 // Props que vienen desde el backend
 defineProps({

@@ -88,7 +88,7 @@ function registerActivity(event, second) {
   }).then(() => {
     console.log(`📡 ${event} registrado en ${second}s`)
   }).catch(error => {
-    console.error('❌ Error al registrar actividad:', error)
+    console.error(' Error al registrar actividad:', error)
   })
 }
 

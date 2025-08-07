@@ -43,9 +43,7 @@
 
     <!-- Curso actual -->
     <div class="current-course w-100 mt-auto pt-4 border-top text-center">
-      <small class="text-muted">Cursando</small>
-      <h6 class="fw-bold text-uppercase mt-1">PBA</h6>
-      <small class="text-muted">Video 2</small>
+     
     </div>
   </aside>
 </template>

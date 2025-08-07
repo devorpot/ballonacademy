@@ -7,7 +7,7 @@
         role="switch"
         :id="id"
         :checked="modelValue"
-        :disabled="disabled"
+        :disabled="disabled || readonly"
         @change="onChange"
       >
       <label class="form-check-label" :for="id">
@@ -29,6 +29,7 @@ export default {
     label: { type: String, required: true },
     required: { type: Boolean, default: false },
     disabled: { type: Boolean, default: false },
+    readonly: { type: Boolean, default: false }, // <-- añadido aquí
     showValidation: { type: Boolean, default: false },
     formError: { type: String, default: "" },
     validateFunction: { type: Function, default: null },
@@ -42,10 +43,9 @@ export default {
   },
   methods: {
     onChange(event) {
+      if (this.readonly) return; // evita cambio si readonly
       this.$emit("update:modelValue", event.target.checked);
     }
   }
 };
 </script>
-
- 

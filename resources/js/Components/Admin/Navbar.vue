@@ -21,9 +21,7 @@ function logout() {
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <Link class="nav-link" :href="route('admin.users.index')">
-                                <i class="bi bi-people me-1"></i> Usuarios
-                            </Link>
+                             
                         </li>
                          
                     </ul>
@@ -71,6 +69,11 @@ function logout() {
                         <li class="nav-item">
                             <Link class="nav-link" :href="route('admin.teachers.index')">
                                 <i class="bi bi-people me-1"></i> Maestros
+                            </Link>
+                        </li>
+                         <li class="nav-item">
+                            <Link class="nav-link" :href="route('admin.evaluations.index')">
+                                <i class="bi bi-people me-1"></i> Evaluciones
                             </Link>
                         </li>
                         <li class="nav-item">

@@ -46,6 +46,7 @@ export default {
         return this.modelValue;
       },
       set(val) {
+        // Evita editar si es readonly
         if (!this.readonly) {
           this.$emit("update:modelValue", val);
         }

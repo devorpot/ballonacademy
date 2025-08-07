@@ -7,6 +7,8 @@
         v-model="inputValue"
         class="form-control"
         :placeholder="placeholder"
+        :readonly="readonly"
+        :disabled="readonly"
         :class="{ 'is-invalid': (showValidation && validationMessage) || formError }"
         @blur="onBlur"
       />
@@ -30,6 +32,7 @@ export default {
     formError: String,
     validateFunction: Function,
     classObject: String,
+    readonly: { type: Boolean, default: false }, // <-- añadido
   },
   emits: ["update:modelValue", "blur"],
   computed: {
@@ -46,4 +49,3 @@ export default {
   }
 };
 </script>
- 

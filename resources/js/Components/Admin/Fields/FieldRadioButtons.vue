@@ -10,7 +10,7 @@
           :id="idPrefix + item.id"
           :value="item.id"
           :checked="modelValue === item.id"
-          :disabled="item.disabled || disabled"
+          :disabled="item.disabled || disabled || readonly"  <!-- agregado -->
           autocomplete="off"
           @change="onChange(item.id)"
         >
@@ -39,6 +39,7 @@ export default {
     idPrefix: { type: String, default: "btnradio_" }, 
     required: { type: Boolean, default: false },
     disabled: { type: Boolean, default: false }, 
+    readonly: { type: Boolean, default: false }, // <-- añadido aquí
     showValidation: { type: Boolean, default: false },
     formError: { type: String, default: "" },
     validateFunction: { type: Function, default: null },
@@ -52,28 +53,9 @@ export default {
   },
   methods: {
     onChange(id) {
+      if (this.readonly) return; // no permite cambio si es readonly
       this.$emit("update:modelValue", id);
     }
   }
 };
 </script>
-
-
-<!-- 
-
-<FieldRadioButtons
-  v-model="form.option"
-  label="Selecciona una opción"
-  :items="[
-    { id: '1', label: 'Opción 1' },
-    { id: '2', label: 'Opción 2' },
-    { id: '3', label: 'Opción 3', disabled: true }
-  ]"
-  :required="true"
-  :showValidation="touched.option"
-  :formError="form.errors.option"
-  :validateFunction="() => validateField('option')"
-/>
-
-
--->

@@ -1,5 +1,5 @@
 <template>
 	<div>
-		footer
+		&copy; Academia Internacional de Globos
 	</div>
 </template>

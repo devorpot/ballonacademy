@@ -79,7 +79,7 @@ public function show($courseId)
     $unlocked = true;
 
     // Añadir flag 'is_accessible' a cada video
-      $videos = $videos->map(function ($video) use (&$unlocked, $completedVideoIds) {
+    $videos = $videos->map(function ($video) use (&$unlocked, $completedVideoIds) {
         $videoArray = $video->toArray();
 
         $videoArray['is_ended'] = in_array($video->id, $completedVideoIds);
@@ -92,12 +92,21 @@ public function show($courseId)
         return $videoArray;
     });
 
-    return Inertia::render('Frontend/Videos/List', [
-        'course' => $course,
-        'videos' => $videos,
-        'completedVideoIds'=>$completedVideoIds
+    // Solo queremos un booleano si existe registro de ended
+    $hasCourseEnded = DB::table('course_activities')
+        ->where('user_id', $user->id)
+        ->where('course_id', $courseId)
+        ->where('ended', 1)
+        ->exists();
+
+    return Inertia::render('Frontend/Courses/CourseVideosList', [
+        'course'             => $course,
+        'videos'             => $videos,
+        'completedVideoIds'  => $completedVideoIds,
+        'hasCourseEnded'     => $hasCourseEnded,
     ]);
 }
+
   
 public function videoDetail($courseId, $videoId)
 {

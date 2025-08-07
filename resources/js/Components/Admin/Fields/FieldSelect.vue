@@ -1,22 +1,23 @@
 <template>
   <div class="form-group" :class="classObject">
     <div class="form-floating">
-        <select
-          :id="id"
-          v-model="inputValue"
-          class="form-control"
-          :class="{ 'is-invalid': (showValidation && validationMessage) || formError }"
-          @blur="onBlur"
-        >
-          <option value="">Seleccione una opción</option>
-          <option v-for="option in options" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-         <label :for="id">{{ label }} <strong v-if="required">*</strong></label>
-        <div v-if="(showValidation && validationMessage) || formError" class="invalid-feedback">
-          {{ formError || validationMessage }}
-        </div>
+      <select
+        :id="id"
+        v-model="inputValue"
+        class="form-control"
+        :class="{ 'is-invalid': (showValidation && validationMessage) || formError }"
+        @blur="onBlur"
+        :disabled="readonly"
+      >
+        <option value="">Seleccione una opción</option>
+        <option v-for="option in options" :key="option.value" :value="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+      <label :for="id">{{ label }} <strong v-if="required">*</strong></label>
+      <div v-if="(showValidation && validationMessage) || formError" class="invalid-feedback">
+        {{ formError || validationMessage }}
+      </div>
     </div>
   </div>
 </template>
@@ -26,14 +27,15 @@ export default {
   props: {
     id: { type: String, required: true },
     label: { type: String, required: true },
-     modelValue: { type: [String, Number], default: '' },
+    modelValue: { type: [String, Number], default: '' },
     placeholder: { type: String, default: "" },
     required: { type: Boolean, default: false },
     showValidation: { type: Boolean, default: false },
     formError: { type: String, default: "" },
     validateFunction: { type: Function, default: null },
-    options: { type: Array, required: true }, // [{ value, label }]
+    options: { type: Array, required: true },
     classObject: { type: String, default: "" },
+    readonly: { type: Boolean, default: false }, // <--- NUEVO
   },
   emits: ["update:modelValue", "blur"],
   computed: {

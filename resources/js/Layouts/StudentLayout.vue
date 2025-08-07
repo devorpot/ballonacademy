@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref } from 'vue' 
 import { Head } from '@inertiajs/vue3'
 
 import TopNav from '@/Components/Dashboard/TopNav.vue'
@@ -43,7 +43,7 @@ function toggleSidebar() {
         </aside>
       </div>
     </Transition>
-
+ 
     <!-- Contenido principal -->
     <Transition name="fade" mode="out-in">
       <div :key="$page.component" class="layout-body">
@@ -59,8 +59,9 @@ function toggleSidebar() {
       </div>
     </Transition>
 
-    <Footer />
+   
   </div>
+   <Footer />
 </template>
 
 <style scoped>

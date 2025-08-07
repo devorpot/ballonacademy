@@ -1,20 +1,21 @@
 <template>
   <div class="form-group" :class="classObject">
     <div class="form-floating">
-         
-          <input
-            :id="id"
-            type="email"
-            v-model="inputValue"
-            class="form-control"
-            :placeholder="placeholder"
-            :class="{ 'is-invalid': (showValidation && validationMessage) || formError }"
-            @blur="onBlur"
-          />
-           <label :for="id">{{ label }} <strong v-if="required">*</strong></label>
-          <div v-if="(showValidation && validationMessage) || formError" class="invalid-feedback">
-            {{ formError || validationMessage }}
-          </div>
+      <input
+        :id="id"
+        type="email"
+        v-model="inputValue"
+        class="form-control"
+        :placeholder="placeholder"
+        :class="{ 'is-invalid': (showValidation && validationMessage) || formError }"
+        @blur="onBlur"
+        :readonly="readonly"
+        :disabled="readonly"
+      />
+      <label :for="id">{{ label }} <strong v-if="required">*</strong></label>
+      <div v-if="(showValidation && validationMessage) || formError" class="invalid-feedback">
+        {{ formError || validationMessage }}
+      </div>
     </div>
   </div>
 </template>
@@ -31,6 +32,7 @@ export default {
     formError: String,
     validateFunction: Function,
     classObject: String,
+    readonly: { type: Boolean, default: false }, // <-- NUEVO
   },
   emits: ["update:modelValue", "blur"],
   computed: {

@@ -1,17 +1,18 @@
 <template>
   <div class="form-group" :class="classObject">
     <div class="form-floating">
-     <input
-          :id="id"
-          type="text"
-          class="form-control"
-          v-model="displayValue"
-          :placeholder="placeholder"
-          :readonly="readonly"
-          :class="{ 'is-invalid': showValidation && formError }"
-          @input="onInput"
-          @blur="onBlur"
-        />
+      <input
+        :id="id"
+        type="text"
+        class="form-control"
+        v-model="displayValue"
+        :placeholder="placeholder"
+        :readonly="readonly"
+        :disabled="readonly"     
+        :class="{ 'is-invalid': showValidation && formError }"
+        @input="onInput"
+        @blur="onBlur"
+      />
       <label :for="id">
         {{ label }} <strong v-if="required">*</strong>
       </label>
@@ -40,12 +41,10 @@ const props = defineProps({
   },
 })
 
-
 const emit = defineEmits(['update:modelValue', 'blur'])
-
 const displayValue = ref('')
 
-// ✅ Reflejar modelValue cuando cambia externamente
+// Reflejar modelValue cuando cambia externamente
 watch(
   () => props.modelValue,
   (val) => {
@@ -56,7 +55,6 @@ watch(
   { immediate: true }
 )
 
-// ✅ Función para formatear al perder foco
 const formatCurrency = (val) => {
   const number = parseFloat(val)
   if (isNaN(number)) return ''
@@ -66,15 +64,15 @@ const formatCurrency = (val) => {
   })
 }
 
-// ✅ Al escribir: limpia, emite y actualiza displayValue para reflejo inmediato
+// Solo permitir input si no es readonly
 const onInput = () => {
+  if (props.readonly) return
   const raw = displayValue.value.replace(/[^0-9.,-]+/g, '').replace(',', '.')
-  displayValue.value = raw // 👈 esto permite seguir escribiendo
+  displayValue.value = raw
   const parsed = parseFloat(raw)
   emit('update:modelValue', isNaN(parsed) ? null : parsed)
 }
 
-// ✅ Al salir del campo: aplicar formato final
 const onBlur = () => {
   if (!isNaN(props.modelValue)) {
     displayValue.value = formatCurrency(props.modelValue)

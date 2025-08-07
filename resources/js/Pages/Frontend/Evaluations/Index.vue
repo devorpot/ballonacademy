@@ -10,10 +10,13 @@ import CrudFilters from '@/Components/Admin/Ui/CrudFilters.vue';
 import CrudPagination from '@/Components/Admin/Ui/CrudPagination.vue';
 import ConfirmDeleteModal from '@/Components/Admin/ConfirmDeleteModal.vue';
 import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue';
+import CourseCard from '@/Components/Dashboard/Courses/CourseCard.vue'
 
 const props = defineProps({
   evaluations: Array,
-  filters: Object
+  filters: Object,
+   course: Object,
+  videos: Array,
 });
 
 const searchQuery = ref('');
@@ -123,13 +126,12 @@ const deleteEvaluation = () => {
 <template>
   <Head title="Mis Evaluaciones" />
   <StudentLayout>
-
-
-    {{ page.props.user }}
     <Breadcrumbs username="estudiante" :breadcrumbs="[
       { label: 'Dashboard', route: 'dashboard.index' },
       { label: 'Mis Evaluaciones', route: '' }
     ]" />
+
+ <CourseCard :course="course" :videos="videos" />
 
  
 
@@ -138,6 +140,8 @@ const deleteEvaluation = () => {
     <i class="bi bi-plus-circle me-2"></i>Agregar Evaluación
   </Link>
 </div>
+
+ 
 
 
     <CrudFilters v-model:searchQuery="searchQuery" :count="sortedEvaluations.length" placeholder="Buscar por comentario..." item-label="evaluación(es)" />
@@ -156,8 +160,10 @@ const deleteEvaluation = () => {
                     </th>
                     <th>Curso</th>
                     <th>Enviado</th>
+
                      
                     <th>Archivo</th>
+                    <th>Estado</th>
                     <th class="text-end pe-4">Acciones</th>
                   </tr>
                 </thead>
@@ -166,12 +172,13 @@ const deleteEvaluation = () => {
                     <td>{{ eva.id }}</td>
                     <td>{{ eva.course.title }}</td>
                     <td>{{ eva.eva_send_date}} </td>
-                     
+                    
                     <td>
                       <a :href="route('dashboard.courses.evaluations.download', [eva.course_id, eva.id])" target="_blank" class="btn btn-sm btn-outline-primary">
                         Descargar video
                       </a>
                     </td>
+                     <td>{{ eva.status}} </td>
                     <td class="text-end pe-4">
                       <div class="btn-group btn-group-sm">
                         <button class="btn btn-outline-danger" @click="prepareDelete(eva)" :disabled="isDeleting" title="Eliminar">

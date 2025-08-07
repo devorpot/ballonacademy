@@ -42,24 +42,17 @@
       <div class="container-fluid">
         <div class="row">
          <div
-  class="col-12 col-sm-12 col-md-6 col-lg-6"
-  v-for="video in videos"
-  :key="video.id"
->
+                class="col-12 col-sm-12 col-md-6 col-lg-6"
+                v-for="video in videos"
+                :key="video.id"
+              >
 
-
-
- 
-
-<VideoListItem
-  :video="video"
-  :courseId="course.id"
-  :isAccessible="video.is_accessible"
-  :isEnded="is_ended"
-/>
-
-
-
+              <VideoListItem
+                :video="video"
+                :courseId="course.id"
+                :isAccessible="video.is_accessible"
+                :isEnded="is_ended"
+              />
 </div>
 
         </div>

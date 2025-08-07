@@ -13,6 +13,7 @@
       :class="{ 'is-invalid': (showValidation && validationMessage) || formError }"
       @change="onFileChange"
       @blur="onBlur"
+      :disabled="readonly"
     />
 
     <!-- Errores -->
@@ -30,6 +31,7 @@
         playsinline
       ></video>
       <button
+        v-if="!readonly"
         type="button"
         class="btn btn-sm btn-outline-danger mt-2"
         @click="removeNewFile"
@@ -48,6 +50,7 @@
         :src="`/storage/${initialPath}`"
       ></video>
       <button
+        v-if="!readonly"
         type="button"
         class="btn btn-sm btn-outline-danger mt-2"
         @click="removeExistingVideo"
@@ -75,7 +78,8 @@ const props = defineProps({
     type: String,
     default: 'video/mp4,video/x-m4v,video/quicktime'
   },
-  initialPath: { type: String, default: '' }
+  initialPath: { type: String, default: '' },
+  readonly: { type: Boolean, default: false }, // <-- añadido aquí
 })
 
 const emit = defineEmits(['update:modelValue', 'update:keep', 'blur'])
@@ -90,6 +94,7 @@ const validationMessage = computed(() =>
 )
 
 function onFileChange(event) {
+  if (props.readonly) return
   const file = event.target.files[0]
   if (file && file.type.startsWith('video/')) {
     videoUrl.value = URL.createObjectURL(file)
@@ -112,6 +117,7 @@ function onFileChange(event) {
 }
 
 function removeNewFile() {
+  if (props.readonly) return
   if (videoUrl.value) URL.revokeObjectURL(videoUrl.value)
   videoUrl.value = null
   emit('update:modelValue', null)
@@ -127,6 +133,7 @@ function removeNewFile() {
 }
 
 function removeExistingVideo() {
+  if (props.readonly) return
   hideInitial.value = true
   emit('update:modelValue', null)
   emit('update:keep', false)

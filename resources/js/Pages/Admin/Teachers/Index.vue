@@ -187,7 +187,7 @@ const onCreated = () => {
                     <th @click="sortBy('id')" style="cursor: pointer;">ID <i :class="sortIcon('id')"></i></th>
                     <th @click="sortBy('name')" style="cursor: pointer;">Nombre <i :class="sortIcon('name')"></i></th>
                     <th @click="sortBy('email')" style="cursor: pointer;">Email <i :class="sortIcon('email')"></i></th>
-                    <th @click="sortBy('teacher_id')" style="cursor: pointer;">Clave <i :class="sortIcon('teacher_id')"></i></th>
+                   
                     <th @click="sortBy('phone')" style="cursor: pointer;">Teléfono <i :class="sortIcon('phone')"></i></th>
                     <th @click="sortBy('country')" style="cursor: pointer;">País <i :class="sortIcon('country')"></i></th>
                     <th class="text-end pe-4">Acciones</th>
@@ -198,7 +198,7 @@ const onCreated = () => {
                     <td>{{ teacher.id }}</td>
                     <td>{{ teacher.firstname }} {{ teacher.lastname }}</td>
                     <td>{{ teacher.user.email }}</td>
-                    <td>{{ teacher.teacher_id }}</td>
+                    
                     <td>{{ teacher.phone }}</td>
                     <td>{{ teacher.country }}</td>
                     <td class="text-end pe-4">

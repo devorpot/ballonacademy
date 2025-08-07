@@ -9,8 +9,10 @@
         :class="{ 'is-invalid': (showValidation && validationMessage) || formError }"
         @blur="onBlur"
         rows="5"
+        :readonly="readonly"
+        :disabled="readonly"
       ></textarea>
-       <label :for="id">{{ label }} <strong v-if="required">*</strong></label>
+      <label :for="id">{{ label }} <strong v-if="required">*</strong></label>
       <div v-if="(showValidation && validationMessage) || formError" class="invalid-feedback">
         {{ formError || validationMessage }}
       </div>
@@ -30,6 +32,7 @@ export default {
     formError: { type: String, default: "" },
     validateFunction: { type: Function, default: null },
     classObject: { type: String, default: "" },
+    readonly: { type: Boolean, default: false }, // <-- Añadido aquí
   },
   emits: ["update:modelValue", "blur"],
   computed: {
