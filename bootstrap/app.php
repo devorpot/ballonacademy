@@ -1,12 +1,11 @@
 <?php
 
+// bootstrap/app.php
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Configuration\Middleware;
-
-
-
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,8 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+
+            // 👇 nuestro middleware para cargar traducciones
+            \App\Http\Middleware\SetLocaleManual::class,
         ]);
-        
+
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,

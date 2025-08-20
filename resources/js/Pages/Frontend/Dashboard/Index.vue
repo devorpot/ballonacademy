@@ -86,7 +86,7 @@ import CardVideoThumb from '@/Components/Dashboard/Cards/CardVideoThumb.vue';
 import CardCourseThumb from '@/Components/Dashboard/Cards/CardCourseThumb.vue';
 import CourseBlogPost from '@/Components/Dashboard/Cards/CardBlogPost.vue';
 import SectionHeader from '@/Components/Dashboard/SectionHeader.vue';
-import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
+import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue';
 
 
 // Props que vienen desde el backend

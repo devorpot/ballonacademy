@@ -1,21 +1,19 @@
 <script setup>
-import { Inertia } from '@inertiajs/inertia';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, usePage, Link, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted } from 'vue';
 import { route } from 'ziggy-js';
 
 import StudentLayout from '@/Layouts/StudentLayout.vue';
-import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
+import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue';
 import CrudFilters from '@/Components/Admin/Ui/CrudFilters.vue';
 import CrudPagination from '@/Components/Admin/Ui/CrudPagination.vue';
-import ConfirmDeleteModal from '@/Components/Admin/ConfirmDeleteModal.vue';
 import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue';
 import CourseCard from '@/Components/Dashboard/Courses/CourseCard.vue'
 
 const props = defineProps({
   evaluations: Array,
   filters: Object,
-   course: Object,
+  course: Object,
   videos: Array,
 });
 
@@ -24,12 +22,9 @@ const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const sortKey = ref('id');
 const sortOrder = ref('asc');
-
-const deletingEvaluation = ref(null);
-const showDeleteModal = ref(false);
-const isDeleting = ref(false);
 const toast = ref(null);
 const page = usePage();
+const retryingId = ref(null);
 
 onMounted(() => {
   if (page.props.flash.success) {
@@ -82,126 +77,170 @@ const changePage = (page) => {
   }
 };
 
-const prepareDelete = (evaluation) => {
-  deletingEvaluation.value = evaluation;
-  showDeleteModal.value = true;
-};
-
-const cancelDelete = () => {
-  showDeleteModal.value = false;
-  deletingEvaluation.value = null;
-  isDeleting.value = false;
-};
-
-const deleteEvaluation = () => {
-  if (!deletingEvaluation.value) return;
-
-  console.log(deletingEvaluation)
-
-  const url = route('dashboard.courses.evaluations.destroy', {
-    course: deletingEvaluation.value.course_id,
-    evaluation: deletingEvaluation.value.id
-  });
-
-  console.log('URL generada para eliminar:', url); // Verifica si incluye los IDs correctamente
-
-  isDeleting.value = true;
-
-  Inertia.delete(url, {
-    preserveScroll: true,
-    onSuccess: cancelDelete,
-    onError: () => {
-      isDeleting.value = false;
-      toast.value = { message: 'Ocurrió un error al eliminar', type: 'danger' };
+// Eliminar intento anterior y redirigir
+function retryEvaluation(eva) {
+  if (!confirm('¿Estás seguro que deseas volver a realizar el test? Tu envío anterior será eliminado de forma permanente.')) {
+    return;
+  }
+  retryingId.value = eva.id;
+  router.delete(route('dashboard.evaluation-users.destroy-by-evaluation'), {  // <--- corrige aquí
+    data: {
+      evaluation_id: eva.id,
+      course_id: eva.course_id
     },
-    onFinish: () => {
-      isDeleting.value = false;
+    onSuccess: () => {
+      retryingId.value = null;
+    },
+    onError: () => {
+      alert('Ocurrió un error al intentar eliminar tu evaluación anterior.');
+      retryingId.value = null;
     }
   });
-};
+}
 
 </script>
 
-
 <template>
-  <Head title="Mis Evaluaciones" />
+  <Head title="Evaluaciones" />
   <StudentLayout>
-    <Breadcrumbs username="estudiante" :breadcrumbs="[
-      { label: 'Dashboard', route: 'dashboard.index' },
-      { label: 'Mis Evaluaciones', route: '' }
-    ]" />
-
- <CourseCard :course="course" :videos="videos" />
-
- 
-
-    <div class="text-end mb-3" v-if="page.props.canSubmitEvaluation">
-  <Link :href="route('dashboard.courses.evaluations.create', { course: page.props.course.id })" class="btn btn-primary">
-    <i class="bi bi-plus-circle me-2"></i>Agregar Evaluación
-  </Link>
-</div>
-
- 
-
+     <SectionHeader title="Cursos Inscritos" />
+     <Breadcrumbs username="estudiante" :breadcrumbs="[
+        { label: 'Dashboard', route: 'dashboard.index' },
+        { label: 'Cursos', route: 'dashboard.index' },
+        { label: course.title, route: '' },
+        { label: 'Evaluaciones', route: '' },
+      ]" />
+    <CourseCard :course="course" :videos="videos" />
 
     <CrudFilters v-model:searchQuery="searchQuery" :count="sortedEvaluations.length" placeholder="Buscar por comentario..." item-label="evaluación(es)" />
 
+
+
+ 
     <section class="section-data my-2">
       <div class="container-fluid">
-        <div class="card">
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-striped table-hover align-middle mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th @click="sortBy('id')" style="cursor: pointer;">
-                      ID
-                      <i :class="sortKey === 'id' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
-                    </th>
-                    <th>Curso</th>
-                    <th>Enviado</th>
+        <div class="row g-3">
+          <div
+            v-for="eva in paginatedEvaluations"
+            :key="eva.id"
+            class="col-12 col-md-6 col-lg-4"
+          >
+            <div class="card shadow-sm h-100">
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                  <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-file-earmark-text me-2 fs-3 text-primary"></i>
+                    <h5 class="card-title mb-0 flex-fill">
+                      {{ eva.title }}
+                    </h5>
+                    <span
+                      class="badge rounded-pill"
+                      :class="eva.last_evaluation_user && eva.last_evaluation_user.status === 999
+                        ? 'bg-success'
+                        : eva.last_evaluation_user && eva.last_evaluation_user.status === 333
+                          ? 'bg-danger'
+                          : eva.last_evaluation_user && eva.last_evaluation_user.status === 222
+                            ? 'bg-warning text-dark'
+                            : eva.last_evaluation_user && eva.last_evaluation_user.status === 111
+                              ? 'bg-info text-dark'
+                              : 'bg-secondary'"
+                    >
+                      {{
+                        eva.last_evaluation_user && eva.last_evaluation_user.status === 999
+                          ? 'Aprobada'
+                          : eva.last_evaluation_user && eva.last_evaluation_user.status === 333
+                            ? 'No aprobada'
+                            : eva.last_evaluation_user && eva.last_evaluation_user.status === 222
+                              ? 'En revisión'
+                              : eva.last_evaluation_user && eva.last_evaluation_user.status === 111
+                                ? 'Enviada'
+                                : 'No realizada'
+                      }}
+                    </span>
+                  </div>
+                  <div class="mb-2 small text-muted">
+                    <i class="bi bi-calendar-event me-1"></i>
+                    Publicada: {{ eva.eva_send_date }}
+                  </div>
+                  <div class="mb-3">
+                    <strong>Comentarios:</strong>
+                    <div class="text-body-secondary">
+                      {{ eva.eva_comments || 'Sin comentarios' }}
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-auto">
+                  <!-- Ya realizada y aprobada -->
+                  <template v-if="eva.user_has_evaluated && eva.last_evaluation_user && eva.last_evaluation_user.status === 999">
+                    <div class="alert alert-success d-flex align-items-center gap-2 mb-2 py-2 px-3">
+                      <i class="bi bi-award-fill fs-4"></i>
+                      <span>¡Felicidades! Has aprobado esta evaluación.</span>
+                    </div>
+                    <Link
+                      class="btn btn-primary btn-sm px-4 d-inline-flex align-items-center gap-2"
+                      :href="route('dashboard.courses.evaluations.evaluation.preview', { course: eva.course_id, evaluation: eva.id })"
+                    >
+                      <i class="bi bi-eye"></i> Ver resultados
+                    </Link>
+                  </template>
+                  <!-- Ya realizada pero no aprobada, en revisión o enviada -->
+                  <template v-else-if="eva.user_has_evaluated && eva.last_evaluation_user">
+                    <div
+                      class="alert alert-warning d-flex align-items-center gap-2 mb-2 py-2 px-3"
+                      v-if="eva.last_evaluation_user.status === 222"
+                    >
+                      <i class="bi bi-hourglass-split fs-4"></i>
+                      <span>
+                        Tu evaluación está en revisión. Puedes volver a hacer el test si lo deseas, pero tu envío anterior será eliminado.
+                      </span>
+                    </div>
+                    <div
+                      class="alert alert-info d-flex align-items-center gap-2 mb-2 py-2 px-3"
+                      v-else-if="eva.last_evaluation_user.status === 111"
+                    >
+                      <i class="bi bi-send-check-fill fs-4"></i>
+                      <span>
+                        Tu evaluación fue enviada. Puedes volver a hacer el test, pero tu envío anterior será eliminado.
+                      </span>
+                    </div>
+                    <div
+                      class="alert alert-danger d-flex align-items-center gap-2 mb-2 py-2 px-3"
+                      v-else-if="eva.last_evaluation_user.status === 333"
+                    >
+                      <i class="bi bi-x-circle-fill fs-4"></i>
+                      <span>
+                        No aprobaste esta evaluación. Puedes volver a hacer el test, pero tu envío anterior será eliminado.
+                      </span>
+                    </div>
+                    <button
+                      class="btn btn-warning btn-sm fw-bold text-white px-4 d-inline-flex align-items-center gap-2"
+                      @click="retryEvaluation(eva)"
+                      :disabled="retryingId === eva.id"
+                    >
+                      <span v-if="retryingId === eva.id" class="spinner-border spinner-border-sm me-2"></span>
+                      <i class="bi bi-arrow-repeat"></i>
+                      Volver a Realizar Evaluación
+                    </button>
+                  </template>
+                  <!-- Nunca la ha realizado -->
+                  <template v-else>
+                    <Link
+                      class="btn btn-success btn-sm fw-bold px-4 d-inline-flex align-items-center gap-2"
+                      :href="route('dashboard.courses.evaluations.evaluation.preview', { course: eva.course_id, evaluation: eva.id })"
+                    >
+                      <i class="bi bi-pencil-square"></i> Realizar Evaluación
+                    </Link>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                     
-                    <th>Archivo</th>
-                    <th>Estado</th>
-                    <th class="text-end pe-4">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="eva in paginatedEvaluations" :key="eva.id">
-                    <td>{{ eva.id }}</td>
-                    <td>{{ eva.course.title }}</td>
-                    <td>{{ eva.eva_send_date}} </td>
-                    
-                    <td>
-                      <a :href="route('dashboard.courses.evaluations.download', [eva.course_id, eva.id])" target="_blank" class="btn btn-sm btn-outline-primary">
-                        Descargar video
-                      </a>
-                    </td>
-                     <td>{{ eva.status}} </td>
-                    <td class="text-end pe-4">
-                      <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-danger" @click="prepareDelete(eva)" :disabled="isDeleting" title="Eliminar">
-                          <i class="bi bi-trash-fill"></i>
-                        </button>
-                        <Link
-                            class="btn btn-outline-secondary"
-                            :href="route('dashboard.courses.evaluations.edit', { course: eva.course_id, evaluation: eva.id })"
-                            title="Editar"
-                          >
-                            <i class="bi bi-pencil-square"></i>
-                          </Link>
-
-                      </div>
-                    </td>
-                  </tr>
-                  <tr v-if="sortedEvaluations.length === 0">
-                    <td colspan="4" class="text-center py-4 text-muted">
-                      <i class="bi bi-exclamation-circle me-2"></i>No se encontraron evaluaciones
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <!-- Si no hay evaluaciones -->
+          <div v-if="sortedEvaluations.length === 0" class="col-12">
+            <div class="alert alert-secondary text-center py-4">
+              <i class="bi bi-exclamation-circle me-2"></i>
+              No se encontraron evaluaciones
             </div>
           </div>
         </div>
@@ -209,14 +248,6 @@ const deleteEvaluation = () => {
     </section>
 
     <CrudPagination :current-page="currentPage" :total-pages="totalPages" @change-page="changePage" />
-
-    <ConfirmDeleteModal :show="showDeleteModal" :loading="isDeleting" @close="cancelDelete" @confirm="deleteEvaluation"
-      title="¿Deseas eliminar esta evaluación?"
-      confirm-message="Esta acción eliminará el archivo subido por el estudiante"
-      warning-text="Esta acción no se puede deshacer."
-      cancel-text="No, cancelar"
-      confirm-text="Sí, eliminar"
-    />
 
     <ToastNotification v-if="toast" :message="toast.message" :type="toast.type" @hidden="toast = null" />
   </StudentLayout>

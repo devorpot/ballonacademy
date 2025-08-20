@@ -9,6 +9,7 @@ import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
 import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue';
 
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
+import FieldNumber from '@/Components/Admin/Fields/FieldNumber.vue';
 import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldSwitch from '@/Components/Admin/Fields/FieldSwitch.vue';
 
@@ -43,8 +44,10 @@ const form = useForm({
   type: Number(props.question.type), // 0 = opción múltiple, 1 = abierta
   question: props.question.question,
   response_text: props.question.response_text ?? '',
+  points: props.question.points ?? 1,
   response_option: props.question.response_option ?? null,
   status: !!props.question.status,
+
 });
 
 const toast = ref(null);
@@ -154,7 +157,7 @@ const submit = () => {
             <form @submit.prevent="submit">
               <div class="card-body">
                 <div class="row">
-                  <div class="col-md-6 mb-3">
+                  <div class="col-md-4 mb-3">
                     <FieldSelect
                       id="type"
                       label="Tipo de Pregunta"
@@ -168,7 +171,19 @@ const submit = () => {
                       @change="handleTypeChange"
                     />
                   </div>
-                  <div class="col-md-6 mb-3">
+                 
+                    <div class="col-md-4 mb-3">
+                    <FieldNumber
+                      id="points"
+                      label="Puntos"
+                      v-model="form.points"
+                      :required="true"
+                      :maxlength="255"
+                      :formError="form.errors.points"
+                      placeholder="Asigna los puntos"
+                    />
+                  </div>
+                   <div class="col-md-4 mb-3">
                     <FieldSwitch
                       id="status"
                       label="Pregunta activa"
@@ -187,6 +202,7 @@ const submit = () => {
                       placeholder="Escribe la pregunta"
                     />
                   </div>
+                 
                   <div class="col-md-12 mb-3">
                     <template v-if="isMultiple">
                       <label class="form-label mb-2">Opciones (Arrastra para reordenar)</label>

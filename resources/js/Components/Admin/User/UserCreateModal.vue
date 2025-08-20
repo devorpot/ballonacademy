@@ -161,7 +161,8 @@ const form = useForm({
   email: '',
   password: '',
   password_confirmation: '',
-  role_ids: []
+  role_ids: [],
+  active: false   
 });
 
 const touched = ref({

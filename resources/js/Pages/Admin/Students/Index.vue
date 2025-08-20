@@ -1,90 +1,114 @@
 <script setup>
-import { Inertia } from '@inertiajs/inertia';
-import { Head, usePage } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
-import { route } from 'ziggy-js';
+import { Inertia } from '@inertiajs/inertia'
+import { Head, usePage } from '@inertiajs/vue3'
+import { ref, onMounted } from 'vue'
+import { route } from 'ziggy-js'
 
-import AdminLayout from '@/Layouts/AdminLayout.vue';
-import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
-import Title from '@/Components/Admin/Ui/Title.vue';
-import ConfirmDeleteModal from '@/Components/Admin/ConfirmDeleteModal.vue';
-import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue';
-import ShowStudentModal from '@/Pages/Admin/Students/ShowStudentModal.vue';
-import CreateStudentModal from '@/Pages/Admin/Students/CreateStudentModal.vue';
-import StudentsTable from '@/Components/Admin/Students/StudentsTable.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue'
+import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue'
+import Title from '@/Components/Admin/Ui/Title.vue'
+import ConfirmDeleteModal from '@/Components/Admin/ConfirmDeleteModal.vue'
+import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue'
+
+
+import ShowStudentModal from '@/Components/Admin/Students/ShowStudentModal.vue'
+import CreateStudentModal from '@/Components/Admin/Students/CreateStudentModal.vue'
+import StudentsTable from '@/Components/Admin/Students/StudentsTable.vue'
+
+// Nuevo: modal de activación
+import ActivationUserModal from '@/Components/Admin/User/ActivationUserModal.vue'
 
 const props = defineProps({
   students: Array,
   courses: Array
-});
+})
 
-const deletingId = ref(null);
-const showDeleteModal = ref(false);
-const isDeleting = ref(false);
-const showCreateModal = ref(false);
-const showViewModal = ref(false);
-const selectedStudent = ref(null);
-const toast = ref(null);
+const deletingId = ref(null)
+const showDeleteModal = ref(false)
+const isDeleting = ref(false)
+const showCreateModal = ref(false)
+const showViewModal = ref(false)
+const selectedStudent = ref(null)
+const toast = ref(null)
 
-const page = usePage();
+// Activación
+const showActivateModal = ref(false)
+const userToActivate = ref(null)
+
+const page = usePage()
 
 onMounted(() => {
   if (page.props.flash.success) {
-    toast.value = { message: page.props.flash.success, type: 'success' };
+    toast.value = { message: page.props.flash.success, type: 'success' }
   }
   if (page.props.flash.error) {
-    toast.value = { message: page.props.flash.error, type: 'danger' };
+    toast.value = { message: page.props.flash.error, type: 'danger' }
   }
-});
+})
 
 const openViewModal = (student) => {
-  selectedStudent.value = student;
-  showViewModal.value = true;
-};
+  selectedStudent.value = student
+  showViewModal.value = true
+}
 
 const onCreated = () => {
-  toast.value = { message: 'Estudiante creado exitosamente', type: 'success' };
-  showCreateModal.value = false;
-};
+  toast.value = { message: 'Estudiante creado exitosamente', type: 'success' }
+  showCreateModal.value = false
+}
 
 const prepareDelete = (id) => {
-  deletingId.value = id;
-  showDeleteModal.value = true;
-};
+  deletingId.value = id
+  showDeleteModal.value = true
+}
 
 const cancelDelete = () => {
-  showDeleteModal.value = false;
-  deletingId.value = null;
-  isDeleting.value = false;
-};
+  showDeleteModal.value = false
+  deletingId.value = null
+  isDeleting.value = false
+}
 
 const deleteStudent = () => {
-  if (!deletingId.value) return;
-  isDeleting.value = true;
+  if (!deletingId.value) return
+  isDeleting.value = true
   Inertia.delete(route('admin.students.destroy', deletingId.value), {
     preserveScroll: true,
     onSuccess: () => {
-      cancelDelete();
-      toast.value = { message: 'Estudiante eliminado exitosamente', type: 'success' };
+      cancelDelete()
+      toast.value = { message: 'Estudiante eliminado exitosamente', type: 'success' }
     },
     onError: () => {
-      isDeleting.value = false;
-      toast.value = { message: 'Ocurrió un error al eliminar', type: 'danger' };
+      isDeleting.value = false
+      toast.value = { message: 'Ocurrió un error al eliminar', type: 'danger' }
     },
     onFinish: () => {
-      isDeleting.value = false;
+      isDeleting.value = false
     }
-  });
-};
+  })
+}
+
+// Abrir modal de activación desde la tabla
+const openActivateModal = (student) => {
+  // student.user debe contener id y email
+  userToActivate.value = student.user
+  showActivateModal.value = true
+}
+
+// Callback cuando el modal confirmó el envío
+const onActivationSent = () => {
+  toast.value = { message: 'Se envió la activación al correo indicado', type: 'success' }
+}
 </script>
 
 <template>
   <Head title="Gestión de Estudiantes" />
   <AdminLayout>
-    <Breadcrumbs username="admin" :breadcrumbs="[
-      { label: 'Dashboard', route: 'admin.dashboard' },
-      { label: 'Estudiantes', route: '' }
-    ]" />
+    <Breadcrumbs
+      username="admin"
+      :breadcrumbs="[
+        { label: 'Dashboard', route: 'admin.dashboard' },
+        { label: 'Estudiantes', route: '' }
+      ]"
+    />
 
     <section class="section-heading">
       <div class="container-fluid">
@@ -104,6 +128,7 @@ const deleteStudent = () => {
       :isDeleting="isDeleting"
       @view="openViewModal"
       @delete="prepareDelete"
+      @activate="openActivateModal"
     />
 
     <ConfirmDeleteModal
@@ -118,7 +143,12 @@ const deleteStudent = () => {
       confirm-text="Sí, eliminar"
     />
 
-    <ToastNotification v-if="toast" :message="toast.message" :type="toast.type" @hidden="toast = null" />
+    <ToastNotification
+      v-if="toast"
+      :message="toast.message"
+      :type="toast.type"
+      @hidden="toast = null"
+    />
 
     <CreateStudentModal
       v-if="showCreateModal"
@@ -133,6 +163,15 @@ const deleteStudent = () => {
       :show="showViewModal"
       :student="selectedStudent"
       @close="showViewModal = false"
+    />
+
+    <!-- Modal de Activación -->
+    <ActivationUserModal
+      v-if="showActivateModal && userToActivate"
+      :show="showActivateModal"
+      :user="userToActivate"
+      @close="showActivateModal = false"
+      @sent="onActivationSent"
     />
   </AdminLayout>
 </template>

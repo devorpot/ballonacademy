@@ -4,6 +4,8 @@
       {{ label }} <strong v-if="required">*</strong>
     </label>
 
+
+ 
     <!-- Input para subir nuevo video -->
     <input
       :id="id"
@@ -24,12 +26,27 @@
     <!-- Vista previa del nuevo video seleccionado -->
     <div v-if="videoUrl" class="mt-3">
       <label class="form-label text-muted">Vista previa del nuevo video:</label>
+
       <video
         controls
         class="w-100"
         style="max-height: 300px;"
         :src="videoUrl"
-      />
+        :key="'preview-'+videoKey"
+        :crossorigin="useCrossorigin ? 'anonymous' : null"
+      >
+
+
+        <track
+          v-for="(t, i) in subtitles"
+          :key="'p-'+i+'-'+(t.src||i)"
+          kind="subtitles"
+          :src="t.src"
+          :srclang="t.srclang"
+          :label="t.label"
+          :default="t.default === true"
+        />
+      </video>
       <button
         v-if="!readonly"
         type="button"
@@ -48,7 +65,19 @@
         class="w-100"
         style="max-height: 300px;"
         :src="initialPath"
-      />
+        :key="'initial-'+videoKey"
+        :crossorigin="useCrossorigin ? 'anonymous' : null"
+      >
+        <track
+          v-for="(t, i) in subtitles"
+          :key="'i-'+i+'-'+(t.src||i)"
+          kind="subtitles"
+          :src="t.src"
+          :srclang="t.srclang"
+          :label="t.label"
+          :default="t.default === true"
+        />
+      </video>
       <button
         v-if="!readonly"
         type="button"
@@ -58,6 +87,8 @@
         <i class="bi bi-x-circle"></i> Quitar video actual
       </button>
     </div>
+}
+}
   </div>
 </template>
 
@@ -76,8 +107,27 @@ export default {
       type: String,
       default: 'video/mp4,video/x-m4v,video/quicktime'
     },
-    initialPath: { type: String, default: '' }, // Puede ser URL absoluta
-    readonly: { type: Boolean, default: false }, // <-- añadido aquí
+    initialPath: { type: String, default: '' },
+    readonly: { type: Boolean, default: false },
+
+    /**
+     * Subtítulos WebVTT para vista previa:
+     * [{ src: '/storage/subs/es.vtt', srclang: 'es', label: 'Español', default: true },
+     *  { src: '/storage/subs/en.vtt', srclang: 'en', label: 'English' }]
+     */
+    subtitles: {
+      type: Array,
+      default: () => []
+    },
+
+    /**
+     * Si las pistas están en otro dominio o requieren CORS para que el navegador las cargue.
+     * Se establece crossorigin="anonymous" en <video>.
+     */
+    useCrossorigin: {
+      type: Boolean,
+      default: false
+    }
   },
   emits: ['update:modelValue', 'update:keep', 'blur'],
   data() {
@@ -89,11 +139,18 @@ export default {
   computed: {
     validationMessage() {
       return this.validateFunction ? this.validateFunction() : '';
+    },
+    videoKey() {
+      // fuerza re-render cuando cambie fuente o lista de pistas
+      const listHash = Array.isArray(this.subtitles)
+        ? this.subtitles.map(t => t.src).join('|')
+        : '';
+      return `${this.videoUrl || this.initialPath || 'none'}::${listHash}`;
     }
   },
   methods: {
     onFileChange(event) {
-      if (this.readonly) return; // Previene cambios si readonly
+      if (this.readonly) return;
       const file = event.target.files[0];
       if (file && file.type.startsWith('video/')) {
         this.videoUrl = URL.createObjectURL(file);
@@ -103,7 +160,7 @@ export default {
       }
     },
     removeNewFile() {
-      if (this.readonly) return; // Previene eliminar si readonly
+      if (this.readonly) return;
       if (this.videoUrl) URL.revokeObjectURL(this.videoUrl);
       this.videoUrl = null;
       this.$emit('update:modelValue', null);
@@ -112,7 +169,7 @@ export default {
       if (input) input.value = '';
     },
     removeExistingVideo() {
-      if (this.readonly) return; // Previene eliminar si readonly
+      if (this.readonly) return;
       this.hideInitial = true;
       this.$emit('update:modelValue', null);
       this.$emit('update:keep', false);

@@ -1,6 +1,5 @@
 <template>
   <Head :title="`Ver Video: ${video.title}`" />
-
   <AdminLayout>
     <div class="position-relative">
       <Breadcrumbs
@@ -23,6 +22,9 @@
         </div>
       </section>
 
+
+      
+   
       <section class="section-form my-2">
         <div class="container-fluid">
           <div class="card">

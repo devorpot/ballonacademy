@@ -59,6 +59,8 @@
                       />
                     </div>
 
+
+
                     <!-- Contraseña -->
                     <div class="col-md-6 mb-3">
                       <FieldPassword
@@ -80,6 +82,19 @@
                       <small class="form-text text-muted">
                         Mínimo 8 caracteres, al menos una mayúscula y un número (si desea cambiar la contraseña)
                       </small>
+                    </div>
+
+                    <!-- Estado Activo -->
+                    <div class="col-md-6 mb-3">
+                      <FieldSwitch
+                        id="active"
+                        label="Usuario activo"
+                        v-model="form.active"
+                        :required="false"
+                        :showValidation="touched.active"
+                        :formError="form.errors.active"
+                        @blur="() => handleBlur('active')"
+                      />
                     </div>
 
                     <!-- Roles -->
@@ -132,7 +147,7 @@ import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue';
 import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue';
 import FieldCheckboxes from '@/Components/Admin/Fields/FieldCheckboxes.vue';
-
+import FieldSwitch from '@/Components/Admin/Fields/FieldSwitch.vue';
 const props = defineProps({
   user: { type: Object, required: true },
   roles: { type: Array, required: true },
@@ -144,7 +159,8 @@ const form = useForm({
   email: props.user.email,
   password: '',
   password_confirmation: '',
-  role_ids: props.user_roles
+  role_ids: props.user_roles,
+   active: props.user.active ?? false  
 });
 
 const touched = ref({
@@ -162,6 +178,10 @@ const allRolesSelected = computed({
     touched.value.role_ids = true;
   }
 });
+
+const validateActive = () => {
+  return ''; // siempre válido
+};
 
 const validateName = () => {
   if (!form.name.trim()) return 'El nombre es requerido';

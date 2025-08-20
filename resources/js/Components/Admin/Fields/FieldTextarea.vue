@@ -8,7 +8,7 @@
         :placeholder="placeholder"
         :class="{ 'is-invalid': (showValidation && validationMessage) || formError }"
         @blur="onBlur"
-        rows="5"
+        :rows="rows"
         :readonly="readonly"
         :disabled="readonly"
       ></textarea>
@@ -30,6 +30,7 @@ export default {
     required: { type: Boolean, default: false },
     showValidation: { type: Boolean, default: false },
     formError: { type: String, default: "" },
+    rows: { type: Number, default: 5 },
     validateFunction: { type: Function, default: null },
     classObject: { type: String, default: "" },
     readonly: { type: Boolean, default: false }, // <-- Añadido aquí

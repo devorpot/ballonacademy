@@ -7,34 +7,55 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Course;
 use App\Models\Evaluation;
+use App\Models\EvaluationUser;
 use App\Models\Activity;
 use App\Enums\ActivityType;
 use App\Models\CourseActivity;
-  
 use Illuminate\Support\Facades\Storage;
 
 
 class EvaluationController extends Controller
 {
-    public function index(Course $course)
-    {
-        $userId = auth()->id();
+public function index(Course $course)
+{
+    $userId = auth()->id();
 
-        $hasFinishedCourse = CourseActivity::where('user_id', $userId)
-            ->where('course_id', $course->id)
-            ->exists();
+    $hasFinishedCourse = CourseActivity::where('user_id', $userId)
+        ->where('course_id', $course->id)
+        ->exists();
 
-       return Inertia::render('Frontend/Evaluations/Index', [
-            'course' => $course,
-            'evaluations' => Evaluation::with('course')
-                ->where('user_id', $userId)
-                ->where('course_id', $course->id)
-                ->latest()
-                ->get(),
-            'canSubmitEvaluation' => $hasFinishedCourse,
-        ]);
+    // Todas las evaluaciones del curso
+    $evaluations = Evaluation::with('course')
+        ->where('course_id', $course->id)
+      //  ->where('type', 1)
+        ->latest()
+        ->get();
 
-    }
+    // Todos los intentos de este usuario para estas evaluaciones
+    $userEvaluations = EvaluationUser::where('user_id', $userId)
+        ->whereIn('evaluation_id', $evaluations->pluck('id'))
+        ->get()
+        ->groupBy('evaluation_id'); // Agrupa por id de evaluación
+
+    // Añade array y el último intento a cada evaluación
+    $evaluations = $evaluations->map(function ($eva) use ($userEvaluations) {
+        $attempts = $userEvaluations->get($eva->id, collect());
+        $eva->last_evaluation_user = $attempts->sortByDesc('created_at')->first(); // último intento o null
+        $eva->user_has_evaluated = $attempts->isNotEmpty(); // bool rápido
+        return $eva;
+    });
+
+    // Carga la relación de videos
+    $course->load('videos');
+
+    return Inertia::render('Frontend/Evaluations/Index', [
+        'course' => $course,
+        'evaluations' => $evaluations,
+        'canSubmitEvaluation' => $hasFinishedCourse,
+        'videos' => $course->videos, // <-- aquí
+    ]);
+}
+
 
     public function create(Course $course)
     {
@@ -52,55 +73,53 @@ class EvaluationController extends Controller
 
         $path = $request->file('eva_video_file')->store('evaluations', 'public');
 
-       $evaluation = Evaluation::create([
-            'user_id' => auth()->id(),
+        $evaluation = Evaluation::create([
             'course_id' => $course->id,
             'eva_send_date' => now()->toDateString(),
             'eva_video_file' => $path,
             'eva_comments' => $request->eva_comments,
         ]);
 
-
-      Activity::create([
-            'user_id' => auth()->id(),
+        Activity::create([
+            'user_id' => auth()->id(), // Aquí sí puedes dejar el user_id, es para tracking en tabla de actividades
             'course_id' => $course->id,
             'evaluation_id' => $evaluation->id,
             'type' => ActivityType::EVALUATION_SEND->value,
             'description' => 'El usuario envió una evaluación.',
         ]);
+
         return redirect()
             ->route('dashboard.courses.evaluations.index', $course)
             ->with('success', 'Evaluación enviada.');
     }
 
-    
-public function edit(Course $course, Evaluation $evaluation)
-{
-    $this->authorizeEvaluation($evaluation, $course);
+    public function edit(Course $course, Evaluation $evaluation)
+    {
+        $this->authorizeEvaluation($evaluation, $course);
 
-    return Inertia::render('Frontend/Evaluations/Edit', [
-        'course' => $course,
-        'evaluation' => $evaluation,
-        'video_url' => $evaluation->eva_video_file 
-            ? route('dashboard.courses.evaluations.download', [$course, $evaluation]) 
-            : null
-    ]);
-}
+        return Inertia::render('Frontend/Evaluations/Edit', [
+            'course' => $course,
+            'evaluation' => $evaluation,
+            'video_url' => $evaluation->eva_video_file 
+                ? route('dashboard.courses.evaluations.download', [$course, $evaluation]) 
+                : null
+        ]);
+    }
 
     public function update(Request $request, Course $course, Evaluation $evaluation)
     {
         $this->authorizeEvaluation($evaluation, $course);
 
-       $request->validate([
-            'eva_video_file' => 'nullable|file|mimetypes:video/mp4|max:551200',
-    'eva_comments' => 'nullable|string',
-    'keep_video' => 'nullable|boolean',
+        $request->validate([
+            'eva_video_file' => 'nullable|file|mimetypes:video/mp4|max:51200',
+            'eva_comments' => 'nullable|string',
+            'keep_video' => 'nullable|boolean',
         ]);
 
-      if ($request->hasFile('eva_video_file')) {
-        if ($evaluation->eva_video_file && Storage::disk('public')->exists($evaluation->eva_video_file)) {
-            Storage::disk('public')->delete($evaluation->eva_video_file);
-             }
+        if ($request->hasFile('eva_video_file')) {
+            if ($evaluation->eva_video_file && Storage::disk('public')->exists($evaluation->eva_video_file)) {
+                Storage::disk('public')->delete($evaluation->eva_video_file);
+            }
             $path = $request->file('eva_video_file')->store('evaluations', 'public');
             $evaluation->eva_video_file = $path;
         } elseif (!$request->boolean('keep_video')) {
@@ -110,7 +129,6 @@ public function edit(Course $course, Evaluation $evaluation)
             $evaluation->eva_video_file = null;
         }
 
-
         $evaluation->eva_comments = $request->eva_comments;
         $evaluation->save();
 
@@ -119,31 +137,28 @@ public function edit(Course $course, Evaluation $evaluation)
             ->with('success', 'Evaluación actualizada.');
     }
 
-  public function destroy(Course $course, Evaluation $evaluation)
-{
-    $this->authorizeEvaluation($evaluation, $course);
+    public function destroy(Course $course, Evaluation $evaluation)
+    {
+        $this->authorizeEvaluation($evaluation, $course);
 
-    if ($evaluation->eva_video_file && Storage::disk('public')->exists($evaluation->eva_video_file)) {
-        Storage::disk('public')->delete($evaluation->eva_video_file);
+        if ($evaluation->eva_video_file && Storage::disk('public')->exists($evaluation->eva_video_file)) {
+            Storage::disk('public')->delete($evaluation->eva_video_file);
+        }
+
+        Activity::create([
+            'user_id' => auth()->id(),
+            'course_id' => $course->id,
+            'evaluation_id' => $evaluation->id,
+            'type' => ActivityType::EVALUATION_DELETE->value,
+            'description' => 'El usuario eliminó su evaluación.',
+        ]);
+
+        $evaluation->delete();
+
+        return redirect()
+            ->route('dashboard.courses.evaluations.index', $course)
+            ->with('success', 'Evaluación eliminada.');
     }
-
-
-
-    Activity::create([
-        'user_id' => auth()->id(),
-        'course_id' => $course->id,
-        'evaluation_id' => $evaluation->id,
-        'type' => ActivityType::EVALUATION_DELETE->value,
-        'description' => 'El usuario eliminó su evaluación.',
-    ]);
-
-
-    $evaluation->delete();
-
-    return redirect()
-        ->route('dashboard.courses.evaluations.index', $course)
-        ->with('success', 'Evaluación eliminada.');
-}
 
     public function show(Course $course, Evaluation $evaluation)
     {
@@ -167,13 +182,7 @@ public function edit(Course $course, Evaluation $evaluation)
         return Storage::disk('public')->download($evaluation->eva_video_file);
     }
 
-    protected function authorizeEvaluation(Evaluation $evaluation, Course $course)
-    {
-        if (
-            $evaluation->user_id !== auth()->id() ||
-            $evaluation->course_id !== $course->id
-        ) {
-            abort(403);
-        }
-    }
+  
+
+
 }

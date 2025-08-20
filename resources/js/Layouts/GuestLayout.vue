@@ -9,18 +9,10 @@ import { Head } from '@inertiajs/vue3';
         </Head>
 
         <main class="container py-5">
-            <div class="row justify-content-center">
-                <div class="col-md-8 col-lg-6 col-xl-5">
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold">
-                            <i class="bi bi-shield-lock me-2"></i>
-                            Academia de Globos
-                        </h2>
-                    </div>
-                    
+            
+               
                     <slot />
-                </div>
-            </div>
+              
         </main>
     </div>
 </template>

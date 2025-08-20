@@ -1,11 +1,12 @@
 <template>
-  <StudentLayout>
+    <Head title="Videos del Curso" />
+  <StudentLayout> 
    
 
     <!-- Card con información del curso -->
     <section class="section-panel py-3" v-if="course">
       <div class="container-fluid">
-        <div class="card mb-4 shadow-sm border-0">
+       
           <div class="row g-0">
             <!-- Imagen -->
             <div class="col-md-4">
@@ -33,7 +34,7 @@
               </div>
             </div>
           </div>
-        </div>
+         
       </div>
     </section>
  <SectionHeader title="Videos" />

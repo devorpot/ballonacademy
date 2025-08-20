@@ -26,6 +26,26 @@ class ProfileController extends Controller
         $user = auth()->user();
         $validated = $this->validateProfile($request, $user);
 
+
+
+ 
+            if (isset($validated['locale']) && in_array($validated['locale'], ['es','en'])) {
+                $user->locale = $validated['locale'];
+                $user->save();
+                // opcional: también puedes guardar en sesión
+                $request->session()->put('locale', $validated['locale']);
+            }
+
+            // 2) Actualiza el perfil relacionado
+            $profileData = collect($validated)->except(['locale'])->toArray();
+            $profile = $user->profile; // asumiendo relación $user->profile()
+            if ($profile) {
+                $profile->fill($profileData);
+                $profile->save();
+            } else {
+                $user->profile()->create($profileData);
+            }
+
         // Eliminar imagen de perfil si se solicita
         if ($request->boolean('remove_profile_image')) {
             if ($user->profile?->profile_image) {
@@ -71,6 +91,7 @@ class ProfileController extends Controller
     {
         return $request->validate([
             // Fiscales
+            'locale' => ['required','in:es,en'],
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'rfc' => 'nullable|string|max:13',

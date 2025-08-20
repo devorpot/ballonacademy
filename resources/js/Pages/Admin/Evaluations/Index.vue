@@ -175,13 +175,14 @@ const deleteEvaluation = () => {
                       ID
                       <i :class="sortKey === 'id' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
                     </th>
-                    <th @click="sortBy('user')" style="cursor: pointer;">
-                      Usuario
-                      <i :class="sortKey === 'user' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
-                    </th>
+                    
                     <th @click="sortBy('course')" style="cursor: pointer;">
                       Curso
                       <i :class="sortKey === 'course' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
+                    </th>
+                     <th >
+                      Titulo
+                     
                     </th>
                     <th @click="sortBy('eva_send_date')" style="cursor: pointer;">
                       Fecha Envío
@@ -196,11 +197,14 @@ const deleteEvaluation = () => {
                 <tbody>
                   <tr v-for="evaluation in paginatedEvaluations" :key="evaluation.id">
                     <td>{{ evaluation.id }}</td>
-                    <td>{{ evaluation.user?.name }}</td>
+                   
                     <td>{{ evaluation.course?.title }}</td>
+                    <td>{{ evaluation.title }}</td>
                     <td>{{ evaluation.eva_send_date }}</td>
                     <td>
-                      {{evaluation.eva_type}}
+                      {{ evaluation.type_label || evaluation.type_name || evaluation.type }}
+
+
                     </td>
                     <td class="text-end pe-4">
                       <div class="btn-group btn-group-sm">
@@ -210,9 +214,15 @@ const deleteEvaluation = () => {
                         <Link class="btn btn-outline-info" :href="route('admin.evaluations.show', evaluation.id)" title="Ver">
                           <i class="bi bi-eye-fill"></i>
                         </Link>
+
+                         <Link class="btn btn-outline-info" 
+                             :href="route('admin.evaluation-users.course.index', evaluation.course.id)"
+                         title="Enviados">
+                          <i class="bi bi-eye-fill"></i> Envios
+                        </Link>
                           <Link
                               v-if="evaluation?.eva_type == 1"
-                              :href="route('admin.evaluation-questions.index', evaluation.id)"
+                               :href="route('admin.evaluation-questions.index', evaluation.id)"
                               class="btn btn-outline-info btn-sm"
                               title="Preguntas de evaluación"
                             >

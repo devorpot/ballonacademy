@@ -1,6 +1,6 @@
 <template>
   <div v-show="show" class="modal fade show d-block" tabindex="-1" aria-labelledby="createStudentModalLabel" aria-modal="true" role="dialog">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered"> 
       <div class="modal-content" style="z-index: 9999 !important;">
         <div class="modal-header">
           <h5 class="modal-title" id="createStudentModalLabel">
@@ -34,6 +34,18 @@
                     :validateConfirmFunction="validatePasswordConfirmation" @update:password="val => form.password = val"
                     @update:passwordConfirmation="val => form.password_confirmation = val"
                     @blur="(field) => handleBlur(field)" />
+                </div>
+
+             <div class="col-md-6 mb-3">
+                  <FieldSwitch
+                    id="active"
+                    label="Usuario activo"
+                    v-model="form.active"
+                    :required="false"
+                    :showValidation="touched.active"
+                    :formError="form.errors.active"
+                    @blur="() => handleBlur('active')"
+                  />
                 </div>
               </div>
 
@@ -110,7 +122,7 @@ import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
 import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue';
 import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
-
+import FieldSwitch from '@/Components/Admin/Fields/FieldSwitch.vue';
 const props = defineProps({
   show: Boolean
 });
@@ -134,7 +146,8 @@ const form = useForm({
   phone: '',
   shirt_size: '',
   address: '',
-  country: ''
+  country: '',
+  active:   false  
 });
 
 const touched = ref({});

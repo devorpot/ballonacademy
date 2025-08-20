@@ -2,8 +2,7 @@
   <Head title="Mis Cursos" />
 <!--/frontend/courses-->
   <StudentLayout>
-     <SectionHeader title="Cursos Inscritos" />
-         <Breadcrumbs username="estudiante" :breadcrumbs="[
+   <Breadcrumbs username="estudiante" :breadcrumbs="[
       { label: 'Dashboard', route: 'dashboard.index' },
       { label: 'Mis Cursos', route: '' }
     ]" />
@@ -19,7 +18,7 @@
         <div v-else class="row">
           <div v-for="course in courses" :key="course.id" class="col-12 col-md-6 col-lg-4 mb-4">
                
-               <CardCourseThumb
+               <CourseCardThumb
                 :title="course.title"
                 :videosCount="course.videos_count"
                 :image="course.image_cover ? `/storage/${course.image_cover}` : '/images/default-cover.jpg'"
@@ -36,8 +35,8 @@
 import { Head } from '@inertiajs/vue3'
 import StudentLayout from '@/Layouts/StudentLayout.vue'
 import SectionHeader from '@/Components/Dashboard/SectionHeader.vue'
-import CardCourseThumb from '@/Components/Dashboard/Cards/CardCourseThumb.vue'
-import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
+import CourseCardThumb from '@/Components/Dashboard/Courses/CourseCardThumb.vue'
+import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue';
 import { route } from 'ziggy-js'
 
 defineProps({

@@ -31,6 +31,7 @@
           </div>
         </section>
 
+
         <section class="section-form my-2">
           <div class="container-fluid">
             <form @submit.prevent="submit" enctype="multipart/form-data">
@@ -41,66 +42,21 @@
                      <div class="col-md-12 mb-3">
 
                       
-                        <FieldVideo
-                          id="video_path"
-                          label="Reemplazar video (opcional)"
-                          :initial-path="props.video.stream_url"
-                          :form-error="form.errors.video_path"
-                          :show-validation="true"
-                          @update:modelValue="form.video_path = $event"
-                          @update:keep="form.keep_video = $event"
-                      />
+       <FieldVideo
+  id="video_path"
+  label="Reemplazar video (opcional)"
+  :initial-path="props.video.stream_url"
+  :form-error="form.errors.video_path"
+  :show-validation="true"
+  :subtitles="videoSubtitles"
+  @update:modelValue="form.video_path = $event"
+  @update:keep="form.keep_video = $event"
+/>
+
 
                       </div>
-                      <div class="col-md-6 mb-3">
-                      <FieldText
-                        id="title"
-                        label="Título"
-                        v-model="form.title"
-                        :required="true"
-                        :showValidation="touched.title"
-                        :formError="form.errors.title"
-                        :validateFunction="() => validateField('title')"
-                        placeholder="Título del video"
-                        @blur="() => handleBlur('title')"
-                      />
-                    </div>
-                       
 
-                    <div class="col-md-6 mb-3">
-                      <FieldText
-                        id="description"
-                        label="Descripción"
-                        v-model="form.description"
-                        :showValidation="touched.description"
-                        :formError="form.errors.description"
-                        @blur="() => handleBlur('description')"
-                      />
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                      <FieldText
-                        id="description_short"
-                        label="Descripción corta"
-                        v-model="form.description_short"
-                        :showValidation="touched.description_short"
-                        :formError="form.errors.description_short"
-                        @blur="() => handleBlur('description_short')"
-                      />
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                      <FieldText
-                        id="comments"
-                        label="Comentarios"
-                        v-model="form.comments"
-                        :showValidation="touched.comments"
-                        :formError="form.errors.comments"
-                        @blur="() => handleBlur('comments')"
-                      />
-                    </div>
-
-                    <div class="col-md-6 mb-3">
+                       <div class="col-md-6 mb-3">
                       <FieldSelect
                         id="course_id"
                         label="Curso"
@@ -127,8 +83,59 @@
                         @blur="() => handleBlur('teacher_id')"
                       />
                     </div>
+                      <div class="col-md-6 mb-3">
+                      <FieldText
+                        id="title"
+                        label="Título"
+                        v-model="form.title"
+                        :required="true"
+                        :showValidation="touched.title"
+                        :formError="form.errors.title"
+                        :validateFunction="() => validateField('title')"
+                        placeholder="Título del video"
+                        @blur="() => handleBlur('title')"
+                      />
+                    </div>
+                       
+
+                   
 
                     <div class="col-md-6 mb-3">
+                      <FieldText
+                        id="description_short"
+                        label="Descripción corta"
+                        v-model="form.description_short"
+                        :showValidation="touched.description_short"
+                        :formError="form.errors.description_short"
+                        @blur="() => handleBlur('description_short')"
+                      />
+                    </div>
+
+                     <div class="col-md-12 mb-3">
+                      <FieldTextarea
+                        id="description"
+                        label="Descripción"
+                        v-model="form.description"
+                        :showValidation="touched.description"
+                        :formError="form.errors.description"
+                        @blur="() => handleBlur('description')"
+                      />
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                      <FieldTextarea
+                        id="comments"
+                        label="Comentarios"
+                        v-model="form.comments"
+                        :showValidation="touched.comments"
+                        :formError="form.errors.comments"
+                        @blur="() => handleBlur('comments')"
+                      />
+                    </div>
+
+                   
+
+                    <div class="col-md-12 mb-3">
                      <FieldImage
                       id="image_cover"
                       label="Imagen de portada"
@@ -157,7 +164,20 @@
           </div>
         </section>
 
-        <section class="section-materials my-3">
+         <section class="section-captions my-3">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-box-seam me-1"></i> Captions del video</span>
+      
+    </div>
+    <div class="card-body">
+     <VideoCaptionsCrud :video="props.video" />
+
+    </div>
+  </div>
+</section>
+
+ <section class="section-materials my-3">
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
       <span><i class="bi bi-box-seam me-1"></i> Materiales del video</span>
@@ -169,7 +189,18 @@
     </div>
   </div>
 </section>
+ <section class="section-resources my-3">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-box-seam me-1"></i> Recursos del video</span>
+      
+    </div>
+    <div class="card-body">
+     <VideoResourcesCrud :video="props.video" />
 
+    </div>
+  </div>
+</section>
 
       </div>
 
@@ -191,6 +222,7 @@ import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
 
 
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
+import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
 import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
 import FieldFile from '@/Components/Admin/Fields/FieldFile.vue';
@@ -198,7 +230,8 @@ import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue';
 
 
 import VideoMaterialRow from '@/Components/Admin/Videos/VideoMaterialRow.vue';
-
+import VideoResourcesCrud from '@/Components/Admin/Videos/VideoResourcesCrud.vue';
+import VideoCaptionsCrud from '@/Components/Admin/Videos/VideoCaptionsCrud.vue';
 const props = defineProps({
   video: Object,
   courses: Array,
@@ -291,6 +324,32 @@ const submit = () => {
     });
   }
 };
+
+const videoSubtitles = computed(() => {
+  if (!props.video || !props.video.captions || !Array.isArray(props.video.captions)) return []
+
+  return props.video.captions
+    .filter(c => !!c.file)
+    .map(c => ({
+      src: `/storage/${c.file}`,
+      srclang: c.lang || 'es',
+      label: getLabel(c.lang),
+      default: c.lang === 'es'
+    }))
+})
+
+
+// Traducción rápida para etiquetas
+function getLabel(lang) {
+  switch (lang) {
+    case 'es': return 'Español'
+    case 'en': return 'English'
+    case 'fr': return 'Français'
+    case 'pt': return 'Português'
+    default: return lang.toUpperCase()
+  }
+}
+
 </script>
 
 <style scoped>

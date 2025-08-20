@@ -64,8 +64,8 @@
                         @blur="() => handleBlur('email')"
                       />
                     </div>
-                    <div class="col-md-6 mb-3">
-                      <FieldPassword
+                    <div class="col-md-12 mb-3">
+                      <FieldPassword 
                         id="password"
                         confirmId="password_confirmation"
                         label="Contraseña"
@@ -83,6 +83,18 @@
                       />
                       <small class="form-text text-muted">Dejar en blanco para mantener la actual</small>
                     </div>
+                      <div class="col-md-6 mb-3">
+                      <FieldSwitch
+                        id="active"
+                        label="Usuario activo"
+                        v-model="form.active"
+                        :required="false"
+                        :showValidation="touched.active"
+                        :formError="form.errors.active"
+                        @blur="() => handleBlur('active')"
+                      />
+                    </div>
+
                   </fieldset>
                     </div>
                   </div>
@@ -232,7 +244,7 @@ import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue';
 import FieldPhone from '@/Components/Admin/Fields/FieldPhone.vue';
 import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
-
+import FieldSwitch from '@/Components/Admin/Fields/FieldSwitch.vue';
 const props = defineProps({
   student: { type: Object, required: true }
 });
@@ -245,6 +257,7 @@ const form = useForm({
   email: props.student.user.email,
   password: '',
   password_confirmation: '',
+   active: props.student.user.active ?? false ,
 
   // Datos del estudiante
   student_id: props.student.student_id,

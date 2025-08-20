@@ -18,6 +18,7 @@ class HandleInertiaRequests extends Middleware
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                 'locale' => $user->locale,
                 // Aquí cargamos el perfil relacionado
                 'profile' => $user->profile ? [
                     'id' => $user->profile->id,

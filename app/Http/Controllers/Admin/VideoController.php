@@ -86,6 +86,8 @@ $video = Video::create($validated);
 
 public function edit(Video $video)
 {
+    $video->load('captions'); // Cargar subtítulos
+
     $courses = Course::select('id', 'title')->get();
     $teachers = Teacher::select('id', 'firstname', 'lastname')->get();
     $course = $video->course; // Relación en el modelo Video
@@ -93,13 +95,21 @@ public function edit(Video $video)
     return Inertia::render('Admin/Videos/Edit', [
         'video' => [
             ...$video->toArray(),
-            'stream_url' => route('admin.videos.stream', ['video' => $video->id])
+            'stream_url' => route('admin.videos.stream', ['video' => $video->id]),
+            'captions' => $video->captions->map(fn($cap) => [
+                'id'     => $cap->id,
+                'lang'   => $cap->lang,
+                'file'   => $cap->file,
+                'label'  => $cap->lang, // opcional
+                'default' => $cap->lang === 'es',
+            ])
         ],
         'courses' => $courses,
         'teachers' => $teachers,
-        'course' => $course // Aquí pasas el curso completo
+        'course' => $course
     ]);
 }
+
 
 public function update(Request $request, Video $video)
 {

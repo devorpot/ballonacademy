@@ -42,7 +42,7 @@ class EvaluationQuestionController extends Controller
             'response_option' => 'nullable|integer',
             'order' => 'nullable|integer|min:1',
             'status' => 'required|boolean',
-              'points' => 'required|integer|min:1|max:100'
+            'points' => 'required|integer|min:1|max:100'
         ]);
 
         $validated['evaluation_id'] = $evaluation->id;

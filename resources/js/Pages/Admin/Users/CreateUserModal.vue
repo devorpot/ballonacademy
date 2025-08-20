@@ -41,7 +41,7 @@
                   />
                 </div>
 
-                <div class="col-md-6 mb-3">
+                <div class="col-md-12 mb-3">
                   <FieldPassword
                     id="password"
                     confirmId="password_confirmation"
@@ -59,6 +59,17 @@
                     @blur="(field) => handleBlur(field)"
                   />
                 </div>
+                <div class="col-md-6 mb-3">
+                <FieldSwitch
+                  id="active"
+                  label="Usuario activo"
+                  v-model="form.active"
+                  :required="false"
+                  :showValidation="touched.active"
+                  :formError="form.errors.active"
+                  @blur="() => handleBlur('active')"
+                />
+              </div>
 
                 <div class="col-12 mb-3">
                   <FieldCheckboxes
@@ -104,6 +115,7 @@ import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue';
 import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue';
 import FieldCheckboxes from '@/Components/Admin/Fields/FieldCheckboxes.vue';
+import FieldSwitch from '@/Components/Admin/Fields/FieldSwitch.vue';
 import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
 
 const props = defineProps({
@@ -118,7 +130,8 @@ const form = useForm({
   email: '',
   password: '',
   password_confirmation: '',
-  role_ids: []
+  role_ids: [],
+  active:   false  
 });
 
 const touched = ref({});

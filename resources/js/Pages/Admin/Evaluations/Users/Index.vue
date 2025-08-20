@@ -1,0 +1,292 @@
+<script setup>
+import { Head, Link, usePage, router } from '@inertiajs/vue3'
+import { ref, computed, onMounted } from 'vue'
+import { route } from 'ziggy-js'
+
+import AdminLayout from '@/Layouts/AdminLayout.vue'
+import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue'
+import CrudFilters from '@/Components/Admin/Ui/CrudFilters.vue'
+import CrudPagination from '@/Components/Admin/Ui/CrudPagination.vue'
+import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue'
+
+const props = defineProps({
+  // Resultado de paginate() en el controlador: { data, links, meta... }
+  evaluations: { type: Object, required: true },
+  // Presente cuando navegas por /admin/evaluation-users/course/{course}/index
+  course: { type: Object, default: null },
+  // Filtros actuales (enviados por el backend con withQueryString)
+  filters: {
+    type: Object,
+    default: () => ({
+      course: null,
+      user: '',
+      status: '',
+      q: '',
+      per_page: 20
+    })
+  }
+})
+
+
+const page = usePage()
+const toast = ref(null)
+const searchQuery = ref('')
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+
+onMounted(() => {
+  if (page.props.flash?.success) {
+    toast.value = { message: page.props.flash.success, type: 'success' }
+  }
+  if (page.props.flash?.error) {
+    toast.value = { message: page.props.flash.error, type: 'danger' }
+  }
+})
+
+// Mapas de fallback si el backend aún no expone *_label
+const TYPE_MAP = { 1: 'Curso', 2: 'Video' }
+const EVA_TYPE_MAP = { 1: 'Cuestionario', 2: 'Video' }
+
+const fmtDate = (d) => {
+  if (!d) return '—'
+  const date = new Date(d)
+  return isNaN(date) ? '—' : date.toLocaleDateString()
+}
+const fmtDateTime = (d) => {
+  if (!d) return '—'
+  const date = new Date(d)
+  return isNaN(date) ? '—' : date.toLocaleString()
+}
+
+const statusBadge = (statusLabelRaw) => {
+  const txt = String(statusLabelRaw ?? '—')
+  // Puedes ajustar clases según label real si quieres una lógica más fina
+  if (/aprob/i.test(txt)) return { class: 'badge bg-success-subtle text-success border', text: txt }
+  if (/revi/i.test(txt))  return { class: 'badge bg-warning-subtle text-warning border', text: txt }
+  if (/no\s?apro/i.test(txt)) return { class: 'badge bg-danger-subtle text-danger border', text: txt }
+  return { class: 'badge bg-secondary-subtle text-secondary border', text: txt }
+}
+
+const rows = computed(() => {
+  // Normaliza los datos que muestran la tabla para no repetir lógica en plantilla
+  return (props.evaluations?.data ?? []).map(ev => {
+    const evaluation = ev.evaluation ?? {}
+    const typeLabel =
+      evaluation.type_label ??
+      TYPE_MAP[Number(evaluation.type)] ??
+      evaluation.type ??
+      '—'
+
+    const evaTypeLabel =
+      evaluation.eva_type_label ??
+      EVA_TYPE_MAP[Number(evaluation.eva_type)] ??
+      evaluation.eva_type ??
+      '—'
+
+    return {
+      id: ev.id,
+      userName: ev.user?.name ?? '—',
+      courseTitle: ev.course?.title ?? '—',
+      evaluationTitle: evaluation.title ?? '—',
+      typeLabel,
+      evaTypeLabel,
+      pointsMin: evaluation.points_min ?? '—',
+      sendDate: fmtDate(ev.eva_send_date ?? evaluation.eva_send_date), // toma del envío o de la evaluación si aplica
+      statusLabel: ev.status_label ?? '—',
+      approvedBy: ev.approved_user?.name ?? '—'
+    }
+  })
+})
+
+const filteredEvaluations = computed(() => {
+  if (!searchQuery.value) return rows.value
+  const q = searchQuery.value.toLowerCase()
+  return rows.value.filter(r =>
+    r.userName.toLowerCase().includes(q) ||
+    r.courseTitle.toLowerCase().includes(q) ||
+    r.evaluationTitle.toLowerCase().includes(q) ||
+    String(r.typeLabel).toLowerCase().includes(q) ||
+    String(r.evaTypeLabel).toLowerCase().includes(q) ||
+    String(r.statusLabel).toLowerCase().includes(q)
+  )
+})
+
+const paginatedEvaluations = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  return filteredEvaluations.value.slice(start, start + itemsPerPage.value)
+})
+
+const totalPages = computed(() => Math.ceil(filteredEvaluations.value.length / itemsPerPage.value))
+
+const changePage = (pageNum) => {
+  if (pageNum >= 1 && pageNum <= totalPages.value) {
+    currentPage.value = pageNum
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+// Estado para eliminar
+const showDeleteModal = ref(false)
+const deletingId = ref(null)
+const deletingLabel = ref('') // opcional: nombre de la evaluación/usuario para mostrar en modal
+
+function askDelete(ev) {
+  deletingId.value = ev.id
+  deletingLabel.value = `#${ev.id} — ${ev.evaluationTitle} · ${ev.userName}`
+  showDeleteModal.value = true
+}
+
+function closeDeleteModal() {
+  showDeleteModal.value = false
+  deletingId.value = null
+  deletingLabel.value = ''
+}
+
+function confirmDelete() {
+  if (!deletingId.value) return
+  router.delete(
+    route('admin.evaluation-users.destroy', deletingId.value),
+    {
+      preserveScroll: true,
+      onStart: () => {
+        toast.value = null
+      },
+      onSuccess: () => {
+        toast.value = { message: 'Evaluación eliminada correctamente.', type: 'success' }
+      },
+      onError: () => {
+        toast.value = { message: 'No se pudo eliminar la evaluación.', type: 'danger' }
+      },
+      onFinish: () => {
+        closeDeleteModal()
+      }
+    }
+  )
+}
+</script>
+
+<template>
+  <Head title="Evaluaciones Enviadas por Usuarios" />
+  <AdminLayout>
+      <Breadcrumbs
+        username="admin"
+        :breadcrumbs="[
+          { label: 'Dashboard', route: 'admin.dashboard' },
+          { label: 'Evaluaciones', route: 'admin.evaluations.index' },
+          {
+            label: `${(props.course?.title ?? '-')}`,
+            route: 'admin.evaluation-users.course.index',   // nombre de ruta
+            params: { course: props.evaluationUser?.course?.id } // <-- aquí va el ID
+          } 
+        ]"
+      />
+
+
+ 
+    <section class="section-heading">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4 class="admin-title">
+              <i class="bi bi-person-check me-2"></i> Evaluaciones Enviadas
+            </h4>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <CrudFilters
+      v-model:searchQuery="searchQuery"
+      :count="filteredEvaluations.length"
+      placeholder="Buscar por usuario, curso, evaluación, tipo o estatus..."
+      item-label="envío(s)"
+    />
+
+    <section class="section-data my-3">
+      <div class="container-fluid">
+        <div class="card shadow-sm">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover table-striped align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Curso</th>
+                    <th>Evaluación</th>
+                    <th>Ámbito</th>
+                    <th>Tipo</th>
+                    <th>Pts. mín.</th>
+                     
+                    <th>Aprobado por</th>
+                    <th class="text-end pe-4">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="ev in paginatedEvaluations" :key="ev.id">
+                    <td>{{ ev.id }}</td>
+                    <td>{{ ev.userName }}</td>
+                    <td>{{ ev.courseTitle }}</td>
+                    <td>{{ ev.evaluationTitle }}</td>
+                    <td>{{ ev.typeLabel }}</td>
+                    <td>{{ ev.evaTypeLabel }}</td>
+                    <td>{{ ev.pointsMin }}</td>
+                     
+                    <td>{{ ev.approvedBy }}</td>
+                    <td class="text-end pe-4">
+                      <div class="btn-group" role="group">
+                        <Link
+                          class="btn btn-outline-primary btn-sm"
+                          :href="route('admin.evaluation-users.show', ev.id)"
+                          title="Ver envío"
+                        >
+                          <i class="bi bi-eye-fill"></i>
+                        </Link>
+
+                        <button
+                          type="button"
+                          class="btn btn-outline-danger btn-sm"
+                          :disabled="deletingId === ev.id"
+                          @click="askDelete(ev)"
+                          title="Eliminar envío"
+                        >
+                          <span v-if="deletingId === ev.id" class="spinner-border spinner-border-sm me-1"></span>
+                          <i v-else class="bi bi-trash-fill"></i>
+                        </button>
+                      </div>
+                  </td>
+
+                  </tr>
+                  <tr v-if="filteredEvaluations.length === 0">
+                    <td colspan="11" class="text-center py-4 text-muted">
+                      <i class="bi bi-exclamation-circle me-2"></i>No hay evaluaciones enviadas
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <CrudPagination
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      @change-page="changePage"
+    />
+
+    <ToastNotification
+      v-if="toast"
+      :message="toast.message"
+      :type="toast.type"
+      @hidden="toast = null"
+    />
+  </AdminLayout>
+</template>
+
+<style scoped>
+.table-hover tbody tr:hover { background-color: #f8f9fa; }
+.table td, .table th { vertical-align: middle; }
+.badge.border { border: 1px solid rgba(0,0,0,.1); }
+</style>

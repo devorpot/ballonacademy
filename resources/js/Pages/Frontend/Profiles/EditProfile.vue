@@ -9,7 +9,9 @@ import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue';
 import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
+import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue';
+import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue';
 import SectionHeader from '@/Components/Dashboard/SectionHeader.vue';
 
 const toast = ref(null);
@@ -59,7 +61,8 @@ const form = useForm({
   instagram: props.profile?.instagram || '',
   tiktok: props.profile?.tiktok || '',
   youtube: props.profile?.youtube || '',
-  description: props.profile?.description || ''
+  description: props.profile?.description || '',
+  locale: props.user?.locale || 'es',
 });
 
 const handleBlur = (field) => {
@@ -80,6 +83,7 @@ const validateField = (field) => {
 
 const isFormValid = computed(() => {
   return  !validateEmail() &&
+         ['es','en'].includes(form.locale) &&
          !validateField('country') &&
          !validateField('nickname');
 });
@@ -110,6 +114,7 @@ const submit = () => {
         form.remove_profile_image = false;
         form.remove_cover_image = false;
         // Puedes recargar la página si quieres refrescar previews
+        Inertia.visit(route('dashboard.profile.edit', props.user.id), { preserveScroll: true, replace: true })
       },
       onError: () => {
         toast.value = { message: 'Ocurrió un error al guardar el perfil.', type: 'danger' };
@@ -133,10 +138,17 @@ onMounted(() => {
 <template>
   <Head :title="'Editar Perfil'" />
   <StudentLayout>
+  <Breadcrumbs username="estudiante" :breadcrumbs="[
+      { label: 'Dashboard', route: 'dashboard.index' },
+       
+       { label: 'Mi Perfil', route: '' },
+    ]" />
     <SectionHeader title="Editar Perfil" />
     <ToastNotification v-if="toast" :message="toast.message" :type="toast.type" @hidden="toast = null" />
     <section class="section-panel mb-4">
       <div class="container-fluid">
+
+        
         <form @submit.prevent="submit" novalidate>
           <div class="card">
             <div class="card-header">
@@ -167,6 +179,23 @@ onMounted(() => {
                   <div class="col-md-6 mb-3">
                     <FieldText id="whatsapp" label="Whatsapp" v-model="form.whatsapp" :showValidation="touched.whatsapp" :formError="form.errors.whatsapp" placeholder="Ingrese WhatsApp" @blur="() => handleBlur('whatsapp')" />
                   </div>
+
+                <div class="col-md-6 mb-3">
+                  <FieldSelect
+                    id="locale"
+                    label="Idioma de la interfaz"
+                    v-model="form.locale"
+                    :options="[
+                      { value: 'es', label: 'Español (MX)' },
+                      { value: 'en', label: 'English (US)' }
+                    ]"
+                    :required="true"
+                    :showValidation="touched.locale"
+                    :formError="form.errors.locale"
+                    @blur="() => handleBlur('locale')"
+                  />
+                </div>
+
                   <div class="col-md-6 mb-3">
                     <FieldText id="nickname" label="Nickname" v-model="form.nickname" :required="true" :showValidation="touched.nickname" :formError="form.errors.nickname" :validateFunction="() => validateField('nickname')" placeholder="Ingrese nickname" @blur="() => handleBlur('nickname')" />
                   </div>
