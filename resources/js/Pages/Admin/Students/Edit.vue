@@ -1,5 +1,6 @@
 <template>
-  <Head title="Editar Estudiante" />
+  <Head :title="`Perfil fiscal de ${user.name}`" />
+
   <AdminLayout>
     <div class="position-relative">
       <div :class="{ 'blur-overlay': form.processing }">
@@ -8,7 +9,7 @@
           :breadcrumbs="[
             { label: 'Dashboard', route: 'admin.dashboard' },
             { label: 'Estudiantes', route: 'admin.students.index' },
-            { label: 'Editar', route: '' }
+            { label: 'Perfil', route: '' }
           ]"
         />
 
@@ -33,339 +34,464 @@
         <section class="section-form my-2">
           <div class="container-fluid">
             <form @submit.prevent="submit" novalidate>
-              <div class="card mb-3">
-                <div class="card-body">
-                  <!-- DATOS DE ACCESO -->
-                  <fieldset class="row">
-                    <legend class="h6 text-uppercase mb-4">Datos fiscales</legend>
-                    <div class="col-md-6 mb-3">
-                      <FieldText
-                        id="name"
-                        label="Nombre de usuario"
-                        v-model="form.name"
-                        :required="true"
-                        :showValidation="touched.name"
-                        :formError="form.errors.name"
-                        :validateFunction="validateName"
-                        placeholder="Ingrese el nombre de usuario"
-                        @blur="() => handleBlur('name')"
-                      />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <FieldEmail
-                        id="email"
-                        label="Email"
-                        v-model="form.email"
-                        :required="true"
-                        :showValidation="touched.email"
-                        :formError="form.errors.email"
-                        :validateFunction="validateEmail"
-                        placeholder="Ingrese el email"
-                        @blur="() => handleBlur('email')"
-                      />
-                    </div>
-                    <div class="col-md-12 mb-3">
-                      <FieldPassword 
-                        id="password"
-                        confirmId="password_confirmation"
-                        label="Contraseña"
-                        :password="form.password"
-                        :passwordConfirmation="form.password_confirmation"
-                        :required="false"
-                        :showValidation="touched.password || touched.password_confirmation"
-                        :formError="form.errors.password"
-                        :confirmFormError="form.errors.password_confirmation"
-                        :validateFunction="validatePassword"
-                        :validateConfirmFunction="validatePasswordConfirmation"
-                        @update:password="val => form.password = val"
-                        @update:passwordConfirmation="val => form.password_confirmation = val"
-                        @blur="(field) => handleBlur(field)"
-                      />
-                      <small class="form-text text-muted">Dejar en blanco para mantener la actual</small>
-                    </div>
-                      <div class="col-md-6 mb-3">
-                      <FieldSwitch
-                        id="active"
-                        label="Usuario activo"
-                        v-model="form.active"
-                        :required="false"
-                        :showValidation="touched.active"
-                        :formError="form.errors.active"
-                        @blur="() => handleBlur('active')"
-                      />
-                    </div>
-
-                  </fieldset>
-                    </div>
-                  </div>
-                  <!-- DATOS PERSONALES -->
-                  <div class="card mb-3">
-                    <div class="card-body">
-                      <fieldset class="row">
-                        <legend class="h6 text-uppercase mb-4">Datos personales</legend>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="firstname" label="Nombre" v-model="form.firstname" :formError="form.errors.firstname" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="lastname" label="Apellido" v-model="form.lastname" :formError="form.errors.lastname" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldPhone id="phone" label="Teléfono" v-model="form.phone" :formError="form.errors.phone" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldSelect
-                            id="shirt_size"
-                            label="Talla de camiseta"
-                            v-model="form.shirt_size"
-                            :formError="form.errors.shirt_size"
-                            :options="shirtSizes"
-                          />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldTextarea id="address" label="Dirección" v-model="form.address" :formError="form.errors.address" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="country" label="País" v-model="form.country" :formError="form.errors.country" />
-                        </div>
-                  
-                        <div class="col-md-6 mb-3">
-                          <FieldEmail id="personal_email" label="Correo personal" v-model="form.personal_email" :formError="form.errors.personal_email" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="whatsapp" label="WhatsApp" v-model="form.whatsapp" :formError="form.errors.whatsapp" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="nickname" label="Apodo" v-model="form.nickname" :formError="form.errors.nickname" />
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="website" label="Sitio web" v-model="form.website" :formError="form.errors.website" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="facebook" label="Facebook" v-model="form.facebook" :formError="form.errors.facebook" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="instagram" label="Instagram" v-model="form.instagram" :formError="form.errors.instagram" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="tiktok" label="TikTok" v-model="form.tiktok" :formError="form.errors.tiktok" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="youtube" label="YouTube" v-model="form.youtube" :formError="form.errors.youtube" />
-                        </div>
-                        <div class="col-12 mb-3">
-                          <FieldTextarea id="description" label="Descripción" v-model="form.description" :formError="form.errors.description" />
-                        </div>
-                      </fieldset>
-                    </div>
-                  </div>
-
-                  <!-- DATOS FISCALES -->
-                  <div class="card mb-3">
-                    <div class="card-body">
-                      <fieldset class="row">
-                        <legend class="h6 text-uppercase mb-4">Datos fiscales</legend>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="rfc" label="RFC" v-model="form.rfc" :formError="form.errors.rfc" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="business_name" label="Razón social" v-model="form.business_name" :formError="form.errors.business_name" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="street" label="Calle" v-model="form.street" :formError="form.errors.street" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="external_number" label="Número exterior" v-model="form.external_number" :formError="form.errors.external_number" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="internal_number" label="Número interior" v-model="form.internal_number" :formError="form.errors.internal_number" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="state" label="Estado" v-model="form.state" :formError="form.errors.state" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="municipality" label="Municipio" v-model="form.municipality" :formError="form.errors.municipality" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="neighborhood" label="Colonia" v-model="form.neighborhood" :formError="form.errors.neighborhood" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="postal_code" label="Código postal" v-model="form.postal_code" :formError="form.errors.postal_code" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldEmail id="billing_email" label="Correo para facturación" v-model="form.billing_email" :formError="form.errors.billing_email" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="tax_regime" label="Régimen fiscal" v-model="form.tax_regime" :formError="form.errors.tax_regime" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                          <FieldText id="cfdi_use" label="Uso de CFDI" v-model="form.cfdi_use" :formError="form.errors.cfdi_use" />
-                        </div>
-                      </fieldset>
-                      </div>
-                  </div>
-
-               
-
-                  <div class="row my-3">
-                    <div class="col-12 col-md-12 text-end">
-                      <button type="submit" class="btn btn-primary" :disabled="form.processing || !isFormValid">
-                        <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
-                        <i class="bi bi-save me-2"></i> Guardar cambios
+              <div class="card">
+                <div class="card-header">
+                  <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <a
+                        class="nav-link"
+                        :class="{ active: activeTab === 'personal' }"
+                        href="#"
+                        role="tab"
+                        aria-controls="tab-personal"
+                        :aria-selected="activeTab === 'personal'"
+                        @click.prevent="switchTab('personal')"
+                      >Perfil Personal</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <a
+                        class="nav-link"
+                        :class="{ active: activeTab === 'billing' }"
+                        href="#"
+                        role="tab"
+                        aria-controls="tab-billing"
+                        :aria-selected="activeTab === 'billing'"
+                        @click.prevent="switchTab('billing')"
+                      >Datos de Facturación</a>
+                    </li>
+                    <li class="nav-item ms-auto" role="presentation">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        @click="showAccount = !showAccount"
+                        :aria-expanded="showAccount ? 'true' : 'false'"
+                        aria-controls="account-section"
+                      >
+                        <i class="bi bi-person-gear me-1"></i>
+                        Datos de cuenta
                       </button>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="card-body">
+                  <!-- Datos de cuenta (opcionales) -->
+                  <transition name="fade">
+                    <div v-if="showAccount" id="account-section" class="alert alert-secondary small">
+                      <div class="row g-2 align-items-end">
+                        <div class="col-md-4">
+                          <FieldText id="user_name" label="Nombre de cuenta" v-model="form.user_name" />
+                        </div>
+                        <div class="col-md-4">
+                          <FieldEmail id="user_email" label="Email de cuenta" v-model="form.user_email" />
+                        </div>
+                        <div class="col-md-2">
+                          <label class="form-label d-block">Activo</label>
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="user_active" v-model="form.user_active">
+                            <label class="form-check-label" for="user_active">{{ form.user_active ? 'Sí' : 'No' }}</label>
+                          </div>
+                        </div>
+                        <div class="col-md-2">
+                          <FieldText id="user_locale" label="Locale" v-model="form.user_locale" placeholder="es, en, ..." />
+                        </div>
+                      </div>
+                    </div>
+                  </transition>
+
+                  <!-- Pestañas -->
+                  <div v-show="activeTab === 'personal'" id="tab-personal" role="tabpanel">
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <FieldText
+                          id="firstname"
+                          label="Nombre(s)"
+                          v-model="form.firstname"
+                          :required="true"
+                          :showValidation="touched.firstname"
+                          :formError="form.errors.firstname"
+                          :validateFunction="() => validateField('firstname')"
+                          placeholder="Ingrese el nombre"
+                          @blur="() => handleBlur('firstname')"
+                        />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText
+                          id="lastname"
+                          label="Apellido(s)"
+                          v-model="form.lastname"
+                          :required="true"
+                          :showValidation="touched.lastname"
+                          :formError="form.errors.lastname"
+                          :validateFunction="() => validateField('lastname')"
+                          placeholder="Ingrese los apellidos"
+                          @blur="() => handleBlur('lastname')"
+                        />
+                      </div>
+
+                      <div class="col-md-6 mb-3">
+                        <FieldEmail
+                          id="personal_email"
+                          label="Email personal"
+                          v-model="form.personal_email"
+                          :required="true"
+                          :showValidation="touched.personal_email"
+                          :formError="form.errors.personal_email"
+                          :validateFunction="validateEmail"
+                          placeholder="Ingrese el email personal"
+                          @blur="() => handleBlur('personal_email')"
+                        />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText
+                          id="country"
+                          label="País"
+                          v-model="form.country"
+                          :required="true"
+                          :showValidation="touched.country"
+                          :formError="form.errors.country"
+                          :validateFunction="() => validateField('country')"
+                          placeholder="Ingrese país"
+                          @blur="() => handleBlur('country')"
+                        />
+                      </div>
+
+                      <div class="col-md-6 mb-3">
+                        <FieldText
+                          id="whatsapp"
+                          label="Whatsapp"
+                          v-model="form.whatsapp"
+                          :showValidation="touched.whatsapp"
+                          :formError="form.errors.whatsapp"
+                          placeholder="Ingrese WhatsApp"
+                          @blur="() => handleBlur('whatsapp')"
+                        />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText
+                          id="nickname"
+                          label="Nickname"
+                          v-model="form.nickname"
+                          :required="true"
+                          :showValidation="touched.nickname"
+                          :formError="form.errors.nickname"
+                          :validateFunction="() => validateField('nickname')"
+                          placeholder="Ingrese nickname"
+                          @blur="() => handleBlur('nickname')"
+                        />
+                      </div>
+
+                      <!-- Imágenes -->
+                      <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <label class="form-label mb-1">Foto de perfil</label>
+                          <div class="btn-group btn-group-sm">
+                            <button
+                              v-if="hasCurrentProfileImage && !removeProfileImage"
+                              type="button" class="btn btn-outline-danger"
+                              @click="removeProfileImage = true"
+                              title="Eliminar imagen actual"
+                            >
+                              Quitar actual
+                            </button>
+                            <button
+                              v-if="removeProfileImage"
+                              type="button" class="btn btn-outline-secondary"
+                              @click="removeProfileImage = false"
+                              title="Restaurar sin eliminar"
+                            >
+                              Deshacer
+                            </button>
+                          </div>
+                        </div>
+                        <FieldImage
+                          id="profile_image"
+                          label=""
+                          v-model="form.profile_image"
+                          :initialPreview="profileImagePreview"
+                          :disabled="form.processing"
+                        />
+                        <small v-if="removeProfileImage" class="text-danger d-block mt-1">
+                          Se eliminará la imagen de perfil al guardar.
+                        </small>
+                        <div v-if="form.errors.profile_image" class="invalid-feedback d-block">
+                          {{ form.errors.profile_image }}
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <label class="form-label mb-1">Foto de portada</label>
+                          <div class="btn-group btn-group-sm">
+                            <button
+                              v-if="hasCurrentCoverImage && !removeCoverImage"
+                              type="button" class="btn btn-outline-danger"
+                              @click="removeCoverImage = true"
+                              title="Eliminar imagen actual"
+                            >
+                              Quitar actual
+                            </button>
+                            <button
+                              v-if="removeCoverImage"
+                              type="button" class="btn btn-outline-secondary"
+                              @click="removeCoverImage = false"
+                              title="Restaurar sin eliminar"
+                            >
+                              Deshacer
+                            </button>
+                          </div>
+                        </div>
+                        <FieldImage
+                          id="cover_image"
+                          label=""
+                          v-model="form.cover_image"
+                          :initialPreview="coverImagePreview"
+                          :disabled="form.processing"
+                        />
+                        <small v-if="removeCoverImage" class="text-danger d-block mt-1">
+                          Se eliminará la imagen de portada al guardar.
+                        </small>
+                        <div v-if="form.errors.cover_image" class="invalid-feedback d-block">
+                          {{ form.errors.cover_image }}
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="website" label="Sitio web" v-model="form.website" />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="facebook" label="Facebook" v-model="form.facebook" />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="instagram" label="Instagram" v-model="form.instagram" />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="tiktok" label="TikTok" v-model="form.tiktok" />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="youtube" label="YouTube" v-model="form.youtube" />
+                      </div>
+                      <div class="col-md-12 mb-3">
+                        <FieldTextarea id="description" label="Descripción" v-model="form.description" />
+                      </div>
                     </div>
                   </div>
 
+                  <div v-show="activeTab === 'billing'" id="tab-billing" role="tabpanel">
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="rfc" label="RFC" v-model="form.rfc" />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="business_name" label="Razón social" v-model="form.business_name" />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="street" label="Calle" v-model="form.street" />
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <FieldText id="external_number" label="Número exterior" v-model="form.external_number" />
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <FieldText id="internal_number" label="Número interior" v-model="form.internal_number" />
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <FieldText id="state" label="Estado" v-model="form.state" />
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <FieldText id="municipality" label="Municipio" v-model="form.municipality" />
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <FieldText id="neighborhood" label="Colonia" v-model="form.neighborhood" />
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <FieldText id="postal_code" label="Código postal" v-model="form.postal_code" />
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <FieldEmail id="billing_email" label="Correo para factura" v-model="form.billing_email" />
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <FieldText id="tax_regime" label="Régimen fiscal" v-model="form.tax_regime" />
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <FieldText id="cfdi_use" label="Uso de CFDI" v-model="form.cfdi_use" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card-footer text-end">
+                  <button type="submit" class="btn btn-primary" :disabled="form.processing || !isFormValid">
+                    <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
+                    <i class="bi bi-save me-2"></i> Guardar cambios
+                  </button>
+                </div>
+              </div>
             </form>
           </div>
         </section>
       </div>
 
-     
+      <!-- Spinner a body -->
+      <teleport to="body">
+        <SpinnerOverlay v-if="form.processing" :fullscreen="true" />
+      </teleport>
     </div>
-     <SpinnerOverlay v-if="form.processing" />
   </AdminLayout>
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3';
-import { useForm } from '@inertiajs/vue3';
-import { route } from 'ziggy-js';
-import { ref, computed } from 'vue';
+import { Head, useForm } from '@inertiajs/vue3'
+import { route } from 'ziggy-js'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 
-import AdminLayout from '@/Layouts/AdminLayout.vue';
-import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
-import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
-import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue'
+import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue'
+import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue'
+import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue'
+import FieldText from '@/Components/Admin/Fields/FieldText.vue'
+import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue'
+import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue'
+import FieldImage from '@/Components/Admin/Fields/FieldImage.vue'
 
-import FieldText from '@/Components/Admin/Fields/FieldText.vue';
-import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue';
-import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue';
-import FieldPhone from '@/Components/Admin/Fields/FieldPhone.vue';
-import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
-import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
-import FieldSwitch from '@/Components/Admin/Fields/FieldSwitch.vue';
 const props = defineProps({
-  student: { type: Object, required: true }
-});
+  user: { type: Object, required: true },
+  profile: { type: Object, required: true }
+})
+
+const TAB_KEY = `students.edit.tab.${props.user.id}`
+const activeTab = ref(localStorage.getItem(TAB_KEY) || 'personal')
+const showAccount = ref(false)
+const touched = ref({})
+
+const profileImagePreview = props.profile?.profile_image ? `/storage/${props.profile.profile_image}` : null
+const coverImagePreview   = props.profile?.cover_image   ? `/storage/${props.profile.cover_image}`   : null
+const hasCurrentProfileImage = !!profileImagePreview
+const hasCurrentCoverImage   = !!coverImagePreview
+
+// Flags de eliminación de imágenes
+const removeProfileImage = ref(false)
+const removeCoverImage   = ref(false)
 
 const form = useForm({
   _method: 'PUT',
 
-  // Datos de usuario
-  name: props.student.user.name,
-  email: props.student.user.email,
-  password: '',
-  password_confirmation: '',
-   active: props.student.user.active ?? false ,
+  // Campos opcionales de User
+  user_name: props.user?.name ?? '',
+  user_email: props.user?.email ?? '',
+  user_active: !!props.user?.active,
+  user_locale: props.user?.locale ?? 'es',
 
-  // Datos del estudiante
-  student_id: props.student.student_id,
-  firstname: props.student.firstname,
-  lastname: props.student.lastname,
-  phone: props.student.phone,
-  shirt_size: props.student.shirt_size,
-  address: props.student.address,
-  country: props.student.country,
+  // Requeridos por validateProfile()
+  firstname: props.profile?.firstname || '',
+  lastname:  props.profile?.lastname  || '',
 
-  // Datos del perfil
-  rfc: props.student.user.profile?.rfc ?? '',
-  business_name: props.student.user.profile?.business_name ?? '',
-  street: props.student.user.profile?.street ?? '',
-  external_number: props.student.user.profile?.external_number ?? '',
-  internal_number: props.student.user.profile?.internal_number ?? '',
-  state: props.student.user.profile?.state ?? '',
-  municipality: props.student.user.profile?.municipality ?? '',
-  neighborhood: props.student.user.profile?.neighborhood ?? '',
-  postal_code: props.student.user.profile?.postal_code ?? '',
-  billing_email: props.student.user.profile?.billing_email ?? '',
-  tax_regime: props.student.user.profile?.tax_regime ?? '',
-  cfdi_use: props.student.user.profile?.cfdi_use ?? '',
- 
-  personal_email: props.student.user.profile?.personal_email ?? '',
-  whatsapp: props.student.user.profile?.whatsapp ?? '',
-  nickname: props.student.user.profile?.nickname ?? '',
+  // Fiscales
+  rfc: props.profile?.rfc || '',
+  business_name: props.profile?.business_name || '',
+  street: props.profile?.street || '',
+  external_number: props.profile?.external_number || '',
+  internal_number: props.profile?.internal_number || '',
+  state: props.profile?.state || '',
+  municipality: props.profile?.municipality || '',
+  neighborhood: props.profile?.neighborhood || '',
+  postal_code: props.profile?.postal_code || '',
+  billing_email: props.profile?.billing_email || props.user.email || '',
+  tax_regime: props.profile?.tax_regime || '',
+  cfdi_use: props.profile?.cfdi_use || '',
+
+  // Personales requeridos
+  personal_email: props.profile?.personal_email || props.user.email || '',
+  country: props.profile?.country || '',
+  whatsapp: props.profile?.whatsapp || '',
+  nickname: props.profile?.nickname || '',
+
+  // Archivos (nuevos)
   profile_image: null,
   cover_image: null,
-  website: props.student.user.profile?.website ?? '',
-  facebook: props.student.user.profile?.facebook ?? '',
-  instagram: props.student.user.profile?.instagram ?? '',
-  tiktok: props.student.user.profile?.tiktok ?? '',
-  youtube: props.student.user.profile?.youtube ?? '',
-  description: props.student.user.profile?.description ?? '',
-});
 
+  // Redes
+  website: props.profile?.website || '',
+  facebook: props.profile?.facebook || '',
+  instagram: props.profile?.instagram || '',
+  tiktok: props.profile?.tiktok || '',
+  youtube: props.profile?.youtube || '',
+  description: props.profile?.description || ''
+})
 
+// Persistencia de pestaña
+function switchTab(tab) {
+  activeTab.value = tab
+  localStorage.setItem(TAB_KEY, tab)
+}
 
-const shirtSizes = [
-  { value: 'c', label: 'Chica' },
-  { value: 'm', label: 'Mediana' },
-  { value: 'l', label: 'Grande' },
-  { value: 'xl', label: 'Extragrande' }
-];
-
-const touched = ref({});
-
+// Touched
 const handleBlur = (field) => {
-  touched.value[field] = true;
-};
+  touched.value[field] = true
+}
 
-const validateName = () => {
-  if (!form.name.trim()) return 'El nombre es requerido';
-  if (form.name.length < 3) return 'Debe tener al menos 3 caracteres';
-  return '';
-};
-
+// Validaciones simples de front
 const validateEmail = () => {
-  if (!form.email.trim()) return 'El email es requerido';
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(form.email)) return 'Ingrese un email válido';
-  return '';
-};
-
-const validatePassword = () => {
-  if (form.password && form.password.length < 8) return 'Debe tener al menos 8 caracteres';
-  if (form.password && !/[A-Z]/.test(form.password)) return 'Debe contener una mayúscula';
-  if (form.password && !/[0-9]/.test(form.password)) return 'Debe contener un número';
-  return '';
-};
-
-const validatePasswordConfirmation = () => {
-  if (form.password && form.password !== form.password_confirmation) return 'Las contraseñas no coinciden';
-  return '';
-};
+  const val = (form.personal_email || '').trim()
+  if (!val) return 'El email es requerido'
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(val)) return 'Ingrese un email válido'
+  return ''
+}
 
 const validateField = (field) => {
-  const requiredFields = ['firstname', 'lastname', 'phone', 'shirt_size', 'address', 'country',, 'personal_email', 'nickname'];
-  if (requiredFields.includes(field) && !form[field]) {
-    return `El campo ${field} es obligatorio`;
+  const v = form[field]
+  if (v === undefined || v === null) return `El campo ${field} es obligatorio`
+  if (typeof v === 'string' && v.trim() === '') return `El campo ${field} es obligatorio`
+  return ''
+}
+
+const isFormValid = computed(() =>
+  !validateEmail()
+  && !validateField('firstname')
+  && !validateField('lastname')
+  && !validateField('country')
+  && !validateField('nickname')
+)
+
+// Enviar con transform para incluir flags de eliminación
+function submit() {
+  Object.keys(form).forEach(k => (touched.value[k] = true))
+  if (!isFormValid.value) {
+    focusFirstError()
+    return
   }
-  return '';
-};
 
+  form.transform((data) => ({
+    ...data,
+    remove_profile_image: removeProfileImage.value ? 1 : 0,
+    remove_cover_image: removeCoverImage.value ? 1 : 0
+  })).post(route('admin.students.update', { user: props.user.id }), {
+    preserveScroll: true,
+    forceFormData: true,
+    onError: () => nextTick(() => focusFirstError()),
+  })
+}
 
-const isFormValid = computed(() => {
-  return !validateName() &&
-         !validateEmail() &&
-         !validatePassword() &&
-         !validatePasswordConfirmation() &&
-         !validateField('firstname') &&
-         !validateField('lastname') &&
-         !validateField('phone') &&
-         !validateField('shirt_size') &&
-         !validateField('address') &&
-         !validateField('country');
-});
+// UX: llevar el foco al primer error devuelto por el servidor
+function focusFirstError() {
+  const keys = Object.keys(form.errors || {})
+  if (!keys.length) return
+  const first = keys[0]
+  const el = document.getElementById(first)
+  if (el && typeof el.focus === 'function') el.focus()
+}
 
-const submit = () => {
-  Object.keys(form).forEach(key => touched.value[key] = true);
-  if (isFormValid.value) {
-    form.post(route('admin.students.update', props.student.id), {
-      forceFormData: true,
-      preserveScroll: true
-    });
+// Guardar pestaña activa en cambios de hash o navegación interna
+onMounted(() => {
+  // Si el servidor devuelve errores, permanecer en la pestaña que contiene el primer error
+  const errKeys = Object.keys(form.errors || {})
+  if (errKeys.length) {
+    const billingSet = new Set(['rfc','business_name','street','external_number','internal_number','state','municipality','neighborhood','postal_code','billing_email','tax_regime','cfdi_use'])
+    const first = errKeys[0]
+    activeTab.value = billingSet.has(first) ? 'billing' : 'personal'
+    localStorage.setItem(TAB_KEY, activeTab.value)
   }
-};
+})
 </script>
 
 <style scoped>
@@ -374,4 +500,8 @@ const submit = () => {
   pointer-events: none;
   user-select: none;
 }
+
+/* Transición suave para sección de cuenta */
+.fade-enter-active, .fade-leave-active { transition: opacity .15s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

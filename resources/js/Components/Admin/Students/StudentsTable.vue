@@ -2,12 +2,49 @@
   <!-- Filtros -->
   <section class="section-filters my-2">
     <div class="container-fluid">
-      <CrudFilters
-        v-model:searchQuery="searchQuery"
-        :count="sortedStudents.length"
-        placeholder="Buscar estudiantes..."
-        item-label="estudiante(s)"
-      />
+      <!-- Si tu CrudFilters soporta v-model y slot, úsalo; si no, puedes dejar este toolbar simple -->
+      <div class="card">
+        <div class="card-body d-flex flex-wrap gap-2 align-items-center">
+          <!-- Búsqueda -->
+          <div class="flex-grow-1">
+            <CrudFilters
+              v-model:searchQuery="localSearch"
+              :count="students.meta?.total ?? 0"
+              placeholder="Buscar estudiantes..."
+              item-label="estudiante(s)"
+            />
+          </div>
+
+          <!-- País -->
+          <div class="ms-auto">
+            <select class="form-select" style="min-width: 180px" v-model="localCountry">
+              <option :value="null">Todos los países</option>
+              <option v-for="c in (filters.countries || [])" :key="c" :value="c">
+                {{ c }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Activo -->
+          <div>
+            <select class="form-select" style="min-width: 160px" v-model="localActive">
+              <option :value="null">Todos</option>
+              <option value="1">Activos</option>
+              <option value="0">Inactivos</option>
+            </select>
+          </div>
+
+          <!-- PerPage -->
+          <div>
+            <select class="form-select" style="min-width: 120px" v-model.number="localPerPage">
+              <option :value="10">10</option>
+              <option :value="15">15</option>
+              <option :value="25">25</option>
+              <option :value="50">50</option>
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -20,85 +57,96 @@
             <table class="table table-striped table-hover align-middle mb-0">
               <thead class="table-light">
                 <tr>
-                  <th class="col-id" @click="sortBy('id')" role="button">ID <i :class="sortIcon('id')"></i></th>
-                  <th class="col-name" @click="sortBy('name')" role="button">Nombre <i :class="sortIcon('name')"></i></th>
-                  <th class="col-email" @click="sortBy('email')" role="button">Email <i :class="sortIcon('email')"></i></th>
-                  <th class="col-phone" @click="sortBy('phone')" role="button">Teléfono <i :class="sortIcon('phone')"></i></th>
-                  <th class="col-country" @click="sortBy('country')" role="button">País <i :class="sortIcon('country')"></i></th>
-                  <th class="col-status" @click="sortBy('active')" role="button">Estado <i :class="sortIcon('active')"></i></th>
+                  <th class="col-id" role="button" @click="emitSort('users.id')">
+                    ID <i :class="sortIcon('users.id')"></i>
+                  </th>
+                  <th class="col-name" role="button" @click="emitSort('users.name')">
+                    Nombre <i :class="sortIcon('users.name')"></i>
+                  </th>
+                  <th class="col-email" role="button" @click="emitSort('users.email')">
+                    Email <i :class="sortIcon('users.email')"></i>
+                  </th>
+                  <th class="col-phone" role="button" @click="emitSort('profiles.whatsapp')">
+                    Teléfono <i :class="sortIcon('profiles.whatsapp')"></i>
+                  </th>
+                  <th class="col-country" role="button" @click="emitSort('profiles.country')">
+                    País <i :class="sortIcon('profiles.country')"></i>
+                  </th>
+                  <th class="col-status" role="button" @click="emitSort('users.active')">
+                    Estado <i :class="sortIcon('users.active')"></i>
+                  </th>
                   <th class="text-end pe-4 col-actions">Acciones</th>
                 </tr>
               </thead>
 
               <tbody>
-                <tr v-for="student in paginatedStudents" :key="student.id">
+                <tr v-for="student in rows" :key="student.id">
                   <td class="text-muted">{{ student.id }}</td>
 
                   <td>
-                    <div class="text-truncate" :title="`${student.firstname} ${student.lastname}`">
-                      <strong>{{ student.firstname }} {{ student.lastname }}</strong>
-                    </div>
-                  </td>
-
-                  <td>
-                    <div class="text-truncate" :title="student.user.email">
-                      {{ student.user.email }}
-                    </div>
-                  </td>
-
-                  <td>
-                    <div class="text-truncate" :title="student.phone || ''">
-                      {{ student.phone }}
-                    </div>
-                  </td>
-
-                  <td>
-                    <div class="text-truncate" :title="student.country || ''">
-                      {{ student.country }}
-                    </div>
-                  </td>
-
-                  <td>
-                    <span
-                      class="badge rounded-pill"
-                      :class="student.user.active ? 'bg-success' : 'bg-danger'"
+                    <div
+                      class="text-truncate"
+                      :title="displayFullName(student)"
                     >
-                      {{ student.user.active ? 'Activo' : 'Inactivo' }}
+                      <strong>{{ displayFullName(student) || student.name }}</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="text-truncate" :title="student.email">
+                      {{ student.email }}
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="text-truncate" :title="student.profile?.whatsapp || ''">
+                      {{ student.profile?.whatsapp }}
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="text-truncate" :title="student.profile?.country || ''">
+                      {{ student.profile?.country }}
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="badge rounded-pill" :class="student.active ? 'bg-success' : 'bg-danger'">
+                      {{ student.active ? 'Activo' : 'Inactivo' }}
                     </span>
                   </td>
 
                   <td class="text-end pe-4">
                     <div class="btn-group btn-group-sm">
-                      <button class="btn btn-outline-info" @click="$emit('view', student)" title="Ver">
+                       <Link
+                        :href="route('admin.students.show', { user: student.id })"
+                        class="btn btn-outline-success"
+                        title="Mostrar"
+                      >
                         <i class="bi bi-eye-fill"></i>
-                      </button>
+                      </Link>
 
-                      <Link :href="route('admin.students.edit', student.id)" class="btn btn-outline-warning" title="Editar">
+                      <Link
+                        :href="route('admin.students.edit', { user: student.id })"
+                        class="btn btn-outline-primary"
+                        title="Editar"
+                      >
                         <i class="bi bi-pencil-fill"></i>
                       </Link>
 
                       <button
                         class="btn btn-outline-danger"
-                        @click="$emit('delete', student.id)"
+                        @click="emit('delete', student.id)"
                         :disabled="isDeleting"
                         title="Eliminar"
                       >
                         <i class="bi bi-trash-fill"></i>
                       </button>
 
-                      <Link
-                        :href="route('admin.profiles.edit', student.user.id)"
-                        class="btn btn-outline-secondary"
-                        title="Datos fiscales"
-                      >
-                        <i class="bi bi-receipt-cutoff"></i>
-                      </Link>
-
-                      <!-- Activar solo si está inactivo -->
                       <button
-                        v-if="!student.user.active"
+                        v-if="!student.active"
                         class="btn btn-outline-success"
-                        @click="$emit('activate', student)"
+                        @click="emit('activate', student)"
                         title="Activar usuario"
                       >
                         <i class="bi bi-lightning-charge"></i>
@@ -107,7 +155,7 @@
                   </td>
                 </tr>
 
-                <tr v-if="sortedStudents.length === 0">
+                <tr v-if="rows.length === 0">
                   <td colspan="7" class="text-center py-4 text-muted">
                     <i class="bi bi-exclamation-circle me-2"></i>No se encontraron estudiantes
                   </td>
@@ -120,98 +168,93 @@
     </div>
   </section>
 
-  <!-- Paginación -->
+  <!-- Paginación (servidor) -->
   <CrudPagination
-    :current-page="currentPage"
-    :total-pages="totalPages"
-    @change-page="changePage"
+    :current-page="students.meta?.current_page || 1"
+    :total-pages="students.meta?.last_page || 1"
+    @change-page="page => emit('page', page)"
   />
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import CrudFilters from '@/Components/Admin/Ui/CrudFilters.vue'
 import CrudPagination from '@/Components/Admin/Ui/CrudPagination.vue'
 
 const props = defineProps({
-  students: { type: Array, default: () => [] },
+  // Objeto paginado del backend: { data, meta, links }
+  students: { type: Object, required: true },
+  // Filtros controlados por el padre (estado fuente de la verdad)
+  filters: {
+    type: Object,
+    default: () => ({
+      q: '',
+      country: null,
+      countries: [],
+      active: null,
+      sortBy: 'users.id',
+      sortDir: 'desc',
+      perPage: 15,
+      page: 1
+    })
+  },
   isDeleting: { type: Boolean, default: false }
 })
 
-const searchQuery = ref('')
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
-const sortKey = ref('id')
-const sortOrder = ref('asc')
+const emit = defineEmits([
+  'view', 'delete', 'activate',
+  'update:search', 'update:country', 'update:active', 'update:perPage',
+  'sort', 'page'
+])
 
-const sortBy = (key) => {
-  if (sortKey.value === key) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortKey.value = key
-    sortOrder.value = 'asc'
-  }
+/**
+ * Estado local "controlado" para inputs, rehidratado desde props.filters.
+ * Cada cambio emite al padre; el padre refresca y reinyecta props.filters.
+ */
+const localSearch = ref(props.filters.q ?? '')
+const localCountry = ref(props.filters.country ?? null)
+const localActive = ref(props.filters.active ?? null)
+const localPerPage = ref(Number(props.filters.perPage ?? 15))
+
+watch(() => props.filters.q, v => { if (v !== localSearch.value) localSearch.value = v ?? '' })
+watch(() => props.filters.country, v => { if (v !== localCountry.value) localCountry.value = v ?? null })
+watch(() => props.filters.active, v => { if (v !== localActive.value) localActive.value = v ?? null })
+watch(() => props.filters.perPage, v => { const n = Number(v ?? 15); if (n !== localPerPage.value) localPerPage.value = n })
+
+// Debounce de búsqueda
+let t = null
+watch(localSearch, (val) => {
+  clearTimeout(t)
+  t = setTimeout(() => emit('update:search', val || ''), 300)
+})
+
+watch(localCountry, (val) => emit('update:country', val ?? null))
+watch(localActive, (val) => emit('update:active', val ?? null))
+watch(localPerPage, (val) => emit('update:perPage', Number(val) || 15))
+
+// Filas de la tabla (del servidor)
+const rows = computed(() => Array.isArray(props.students?.data) ? props.students.data : [])
+
+// Utilidades UI
+function displayFullName(s) {
+  const fn = s.profile?.firstname || ''
+  const ln = s.profile?.lastname || ''
+  return `${fn} ${ln}`.trim()
 }
 
-const sortIcon = (key) => {
-  if (sortKey.value !== key) return 'bi bi-arrow-down-up'
-  return sortOrder.value === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down'
+function sortIcon(colKey) {
+  if (props.filters.sortBy !== colKey) return 'bi bi-arrow-down-up'
+  return props.filters.sortDir === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down'
 }
 
-const filteredStudents = computed(() => {
-  if (!searchQuery.value) return props.students
-  const q = searchQuery.value.toLowerCase()
-  return props.students.filter(s =>
-    `${s.firstname} ${s.lastname}`.toLowerCase().includes(q) ||
-    (s.user?.email || '').toLowerCase().includes(q) ||
-    (s.student_id || '').toString().toLowerCase().includes(q) ||
-    (s.phone || '').toLowerCase().includes(q) ||
-    (s.country || '').toLowerCase().includes(q)
-  )
-})
-
-const sortedStudents = computed(() => {
-  const data = [...filteredStudents.value]
-  data.sort((a, b) => {
-    let aVal, bVal
-    switch (sortKey.value) {
-      case 'name':
-        aVal = `${a.firstname} ${a.lastname}`.toLowerCase()
-        bVal = `${b.firstname} ${b.lastname}`.toLowerCase()
-        break
-      case 'email':
-        aVal = (a.user?.email || '').toLowerCase()
-        bVal = (b.user?.email || '').toLowerCase()
-        break
-      case 'active':
-        aVal = a.user?.active ? 1 : 0
-        bVal = b.user?.active ? 1 : 0
-        break
-      default:
-        aVal = (a[sortKey.value] ?? '').toString().toLowerCase()
-        bVal = (b[sortKey.value] ?? '').toString().toLowerCase()
-    }
-    if (aVal < bVal) return sortOrder.value === 'asc' ? -1 : 1
-    if (aVal > bVal) return sortOrder.value === 'asc' ? 1 : -1
-    return 0
-  })
-  return data
-})
-
-const paginatedStudents = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  return sortedStudents.value.slice(start, start + itemsPerPage.value)
-})
-
-const totalPages = computed(() => Math.ceil(sortedStudents.value.length / itemsPerPage.value))
-
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+function emitSort(colKey) {
+  const nextDir =
+    props.filters.sortBy === colKey
+      ? (props.filters.sortDir === 'asc' ? 'desc' : 'asc')
+      : 'asc'
+  emit('sort', { sortBy: colKey, sortDir: nextDir })
 }
 </script>
 

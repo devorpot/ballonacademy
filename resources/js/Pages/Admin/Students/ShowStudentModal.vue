@@ -23,7 +23,7 @@
           </Link>
         </div>
       </div>
- 
+
       <!-- Header Card -->
       <div class="card shadow-sm mb-3 overflow-hidden">
         <div class="row g-0">
@@ -190,19 +190,6 @@
             </div>
           </div>
         </div>
-
-         <div class="col-lg-12">
-           
-             
-              <EnrollmentsTable
-                :enrollments="enrollments"
-                course-route-name="admin.courses.show"  
-                :per-page="10"
-              />
-
-            
-        </div>
-
       </div><!-- /row -->
     </div>
   </AdminLayout>
@@ -214,11 +201,10 @@ import { computed } from 'vue'
 import { route } from 'ziggy-js'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue'
-import EnrollmentsTable from '@/Components/Admin/User/EnrollmentsTable.vue'
+
 const props = defineProps({
   user: { type: Object, required: true },
-  profile: { type: Object, required: true },
-  enrollments: { type: Object, required: true }
+  profile: { type: Object, required: true }
 })
 
 const user = props.user

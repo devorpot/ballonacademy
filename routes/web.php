@@ -25,6 +25,9 @@ use App\Http\Controllers\Admin\EvaluationController;
 
 use App\Http\Controllers\Admin\EvaluationQuestionController;
 use App\Http\Controllers\Admin\EvaluationUsersController;
+use App\Http\Controllers\Admin\ActivationsController;
+use App\Http\Controllers\PublicRegistrationController;
+
 
 use App\Http\Controllers\Frontend\DashboardController as FrontendDashboardController;
 use App\Http\Controllers\Frontend\CoursesController as FrontendCoursesController;
@@ -35,6 +38,7 @@ use App\Http\Controllers\Frontend\EvaluationController as FrontendEvaluationCont
 
 use App\Http\Controllers\Frontend\EvaluationUsersController as FrontendEvaluationUsersController;
 use App\Http\Controllers\Frontend\VideosResourcesController as FrontendVideosResourcesController;
+use App\Http\Controllers\Frontend\SecurityController  as FrontendSecurityController;
 use App\Http\Controllers\Api\VideoActivityController;
 use App\Http\Controllers\Api\ActivityController;
  
@@ -59,6 +63,12 @@ Route::get('/activate/{user}', [UserController::class, 'activate'])
     ->name('users.activate')
     ->middleware('signed'); // exige firma válida
 
+// Ruta pública para usar el hash
+Route::get('/register/student/{hash}', [PublicRegistrationController::class, 'show'])
+    ->name('public.register.student');
+
+Route::post('/register/student/{hash}', [PublicRegistrationController::class, 'store'])
+    ->name('public.register.student.store');
 
 // ----------------------------------
 // Panel de administración (solo admin)
@@ -138,11 +148,6 @@ Route::delete('/videos/{video}/materials/{material}', [VideoMaterialController::
 
     //Estudiantes
 
-    Route::get('students/list', [StudentController::class, 'list'])->name('students.list');
-    Route::get('students/search', [StudentController::class, 'search'])->name('students.search');
-    Route::get('students/search/{id}', [StudentController::class, 'searchById'])->name('students.searchById');
-
-    Route::resource('students', StudentController::class);
 
 
     Route::get('teachers/list', [TeacherController::class, 'list'])->name('teachers.list');
@@ -154,11 +159,18 @@ Route::delete('/videos/{video}/materials/{material}', [VideoMaterialController::
     
   
 
-    Route::get('/students/{user}/profile', [ProfileController::class, 'show'])->name('profiles.show');
-    Route::get('/students/{user}/profile/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
-    Route::put('/students/{user}/profile', [ProfileController::class, 'update'])->name('profiles.update');
-    Route::delete('/students/{user}/profile', [ProfileController::class, 'destroy'])->name('profiles.destroy');
 
+  Route::resource('students', StudentController::class)->except(['create','edit','show'])
+        ->parameters(['students' => 'user']);
+    Route::get('students/create', [StudentController::class, 'create'])->name('students.create');
+    Route::get('students/{user}', [StudentController::class, 'show'])->name('students.show');
+    Route::get('students/{user}/edit', [StudentController::class, 'edit'])->name('students.edit');
+    // Autocomplete
+    Route::get('students-list', [StudentController::class, 'list'])->name('students.list');
+    Route::get('students-search', [StudentController::class, 'search'])->name('students.search');
+    Route::get('students-search/{id}', [StudentController::class, 'searchById'])->name('students.searchById');
+
+ 
 
     //Currency
 
@@ -195,6 +207,8 @@ Route::delete('/videos/{video}/materials/{material}', [VideoMaterialController::
 
 
 
+Route::post('/activations', [ActivationsController::class, 'store'])
+            ->name('activations.store');
 
 
 
@@ -213,6 +227,10 @@ Route::middleware(['auth', 'role:student'])
     ->group(function () {
         Route::get('/', [FrontendDashboardController::class, 'index'])->name('index');
         
+
+
+     Route::get('/security', [FrontendSecurityController::class, 'edit'])->name('security.edit');
+     Route::put('/security', [FrontendSecurityController::class, 'update'])->name('security.update');
 
         Route::post('/user/update-locale', [UserController::class, 'updateLocale'])->name('user.update-locale');
 

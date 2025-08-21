@@ -34,6 +34,16 @@
     <!-- Menú de navegación -->
     <nav class="w-100 px-3">
       <ul class="nav flex-column gap-2">
+          <li class="nav-item">
+          <Link
+            :href="route('dashboard.security.edit')"
+            class="btn btn-nav"
+            :class="{ active: $page.url.startsWith('/dashboard/security') }"
+          >
+            <i class="bi bi-person-circle me-2"></i>
+            {{ L.profile?.security || 'Seguridad' }}
+          </Link>
+        </li>
         <li class="nav-item">
           <Link
             :href="route('dashboard.profile.edit')"

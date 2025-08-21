@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"desc",
+				"description"
+			],
+			[
 				"FieldTe",
 				"FieldText"
 			],
@@ -160,51 +164,110 @@
 	"buffers":
 	[
 		{
-			"file": "resources/js/Pages/Admin/Students/Index.vue",
+			"file": "resources/js/Components/Dashboard/Video/VideoCardPlayer.vue",
 			"settings":
 			{
-				"buffer_size": 5026,
+				"buffer_size": 12824,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			},
 			"undo_stack":
 			[
 				[
-					7,
+					80,
+					1,
+					"",
+					null,
+					"AgAAAKsqAAAAAAAASi0AAAAAAAAAAAAASi0AAAAAAABKLQAAAAAAAJAAAABmdW5jdGlvbiBvblZpZXdFdmFsdWF0aW9ucygpIHsKICBhdXRvQWR2YW5jZUNhbmNlbGxlZC52YWx1ZSA9IHRydWUKICBjbGVhckNvdW50ZG93bigpCiAgc2hvd0V2YWxNb2RhbC52YWx1ZSA9IGZhbHNlCiAgZW1pdCgnc2hvdy1ldmFsdWF0aW9ucycpCn0",
+					"AQAAAAAAAAABAAAAOysAAAAAAACrKgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					85,
 					1,
 					"insert",
 					{
-						"characters": "\n\n"
+						"characters": "\n"
 					},
-					"AgAAAPEBAAAAAAAA8gEAAAAAAAAAAAAA8gEAAAAAAADzAQAAAAAAAAAAAAA",
-					"AQAAAAAAAAABAAAA8QEAAAAAAADxAQAAAAAAAAAAAAAAAPC/"
+					"AQAAAE4SAAAAAAAATxIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAThIAAAAAAABOEgAAAAAAAAAAAAAAAPC/"
 				],
 				[
-					29,
+					87,
+					1,
+					"",
+					null,
+					"AQAAAE8SAAAAAAAA1hIAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAATxIAAAAAAABPEgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					94,
+					1,
+					"insert",
+					{
+						"characters": " "
+					},
+					"AgAAAH0SAAAAAAAAfhIAAAAAAAAAAAAAfhIAAAAAAAB+EgAAAAAAADgAAAAgICAgICAvLyBPIHVzYTogaW1wb3J0IHsgcm91dGVyIH0gZnJvbSAnQGluZXJ0aWFqcy92dWUzJw",
+					"AQAAAAAAAAABAAAAtRIAAAAAAAB9EgAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					107,
+					1,
+					"insert",
+					{
+						"characters": "-"
+					},
+					"AgAAAP8QAAAAAAAAABEAAAAAAAAAAAAAABEAAAAAAAAAEQAAAAAAAAYAAAAtZWxzZS0",
+					"AQAAAAAAAAABAAAABREAAAAAAAD/EAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					113,
 					1,
 					"paste",
 					null,
-					"AgAAAGECAAAAAAAAawIAAAAAAAAAAAAAawIAAAAAAABrAgAAAAAAAAUAAABQYWdlcw",
-					"AQAAAAAAAAABAAAAYQIAAAAAAABmAgAAAAAAAAAAAAAAAPC/"
+					"AgAAADMQAAAAAAAARhAAAAAAAAAAAAAARhAAAAAAAABGEAAAAAAAABUAAAB2LWlmPSJoYXNFdmFsdWF0aW9ucyI",
+					"AQAAAAAAAAABAAAAMxAAAAAAAABIEAAAAAAAAAAAAAAAAPC/"
 				],
 				[
-					34,
+					116,
 					1,
-					"paste",
+					"left_delete",
 					null,
-					"AgAAABQCAAAAAAAAHgIAAAAAAAAAAAAAHgIAAAAAAAAeAgAAAAAAAAUAAABQYWdlcw",
-					"AQAAAAAAAAABAAAAFAIAAAAAAAAZAgAAAAAAAAAAAAAAAPC/"
+					"AQAAADkQAAAAAAAAORAAAAAAAAABAAAAIQ",
+					"AQAAAAAAAAABAAAAOhAAAAAAAAA6EAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					119,
+					1,
+					"insert",
+					{
+						"characters": " mx-2"
+					},
+					"BQAAAGoQAAAAAAAAaxAAAAAAAAAAAAAAaxAAAAAAAABsEAAAAAAAAAAAAABsEAAAAAAAAG0QAAAAAAAAAAAAAG0QAAAAAAAAbhAAAAAAAAAAAAAAbhAAAAAAAABvEAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAAahAAAAAAAABqEAAAAAAAAAAAAAAAAPC/"
 				]
 			]
 		},
 		{
-			"file": "resources/js/Components/Admin/Students/CreateStudentModal.vue",
+			"file": "resources/js/Components/Dashboard/Video/VideoListItem.vue",
 			"settings":
 			{
-				"buffer_size": 9301,
+				"buffer_size": 10657,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
-			}
+			},
+			"undo_stack":
+			[
+				[
+					3,
+					1,
+					"insert",
+					{
+						"characters": " "
+					},
+					"AgAAAEEKAAAAAAAAQgoAAAAAAAAAAAAAQgoAAAAAAABCCgAAAAAAAFIFAAAgPCEtLSBNZW7DuiBkZSBhY2Npb25lcyAKICAgICAgICAgIDxkaXYgY2xhc3M9ImRyb3Bkb3duIj4KICAgICAgICAgICAgPGJ1dHRvbgogICAgICAgICAgICAgIGNsYXNzPSJidG4gYnRuLW91dGxpbmUtc2Vjb25kYXJ5IGJ0bi1zbSIKICAgICAgICAgICAgICB0eXBlPSJidXR0b24iCiAgICAgICAgICAgICAgZGF0YS1icy10b2dnbGU9ImRyb3Bkb3duIgogICAgICAgICAgICAgIGFyaWEtZXhwYW5kZWQ9ImZhbHNlIgogICAgICAgICAgICA+CiAgICAgICAgICAgICAgPGkgY2xhc3M9ImJpIGJpLXRocmVlLWRvdHMiPjwvaT4KICAgICAgICAgICAgICA8c3BhbiBjbGFzcz0idmlzdWFsbHktaGlkZGVuIj5BY2Npb25lczwvc3Bhbj4KICAgICAgICAgICAgPC9idXR0b24+CiAgICAgICAgICAgIDx1bCBjbGFzcz0iZHJvcGRvd24tbWVudSBkcm9wZG93bi1tZW51LWVuZCI+CiAgICAgICAgICAgICAgPGxpPgogICAgICAgICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iZHJvcGRvd24taXRlbSBkLWZsZXggYWxpZ24taXRlbXMtY2VudGVyIGdhcC0yIiBAY2xpY2s9IiRlbWl0KCdvcGVuLXJlc291cmNlcycsIHZpZGVvKSI+CiAgICAgICAgICAgICAgICAgIDxpIGNsYXNzPSJiaSBiaS1mb2xkZXIyLW9wZW4iPjwvaT4gUmVjdXJzb3MKICAgICAgICAgICAgICAgIDwvYnV0dG9uPgogICAgICAgICAgICAgIDwvbGk+CiAgICAgICAgICAgICAgPGxpPgogICAgICAgICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iZHJvcGRvd24taXRlbSBkLWZsZXggYWxpZ24taXRlbXMtY2VudGVyIGdhcC0yIiBAY2xpY2s9IiRlbWl0KCdtYXJrLWNvbXBsZXRlJywgdmlkZW8pIj4KICAgICAgICAgICAgICAgICAgPGkgY2xhc3M9ImJpIGJpLWNoZWNrMi1zcXVhcmUiPjwvaT4gTWFyY2FyIGNvbW8gY29tcGxldGFkbwogICAgICAgICAgICAgICAgPC9idXR0b24+CiAgICAgICAgICAgICAgPC9saT4KICAgICAgICAgICAgICA8bGk+PGhyIGNsYXNzPSJkcm9wZG93bi1kaXZpZGVyIiAvPjwvbGk+CiAgICAgICAgICAgICAgPGxpPgogICAgICAgICAgICAgICAgPExpbmsKICAgICAgICAgICAgICAgICAgY2xhc3M9ImRyb3Bkb3duLWl0ZW0gZC1mbGV4IGFsaWduLWl0ZW1zLWNlbnRlciBnYXAtMiIKICAgICAgICAgICAgICAgICAgOmhyZWY9InZpZGVvSHJlZiIKICAgICAgICAgICAgICAgICAgOmFyaWEtZGlzYWJsZWQ9IiFpc0FjY2Vzc2libGUiCiAgICAgICAgICAgICAgICA+CiAgICAgICAgICAgICAgICAgIDxpIGNsYXNzPSJiaSBiaS1wbGF5LWZpbGwiPjwvaT4gQWJyaXIKICAgICAgICAgICAgICAgIDwvTGluaz4KICAgICAgICAgICAgICA8L2xpPgogICAgICAgICAgICA8L3VsPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgICAtLT4",
+					"AQAAAAAAAAABAAAAkg8AAAAAAABBCgAAAAAAAAAAAAAAAPC/"
+				]
+			]
 		}
 	],
 	"build_system": "",
@@ -254,22 +317,21 @@
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Middleware",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Requests",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Requests/Frontend",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/bootstrap",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/css",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Ui",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Video",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/composables",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Layouts",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Users",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Videos",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Auth",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Courses",
@@ -280,20 +342,55 @@
 	],
 	"file_history":
 	[
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/UserController.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/User.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/StudentController.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Students/Edit.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Users/Edit.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Students/Index.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/translations/es.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/routes/web.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Requests/Frontend/UpdateSecurityRequest.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Frontend/SecurityController.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/config/locales.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Security/Edit.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Ui/Sidebar.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/translations/en.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Videos/Show.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/views/app.blade.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Layouts/AdminLayout.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/app.js",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/css/app.less",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Layouts/StudentLayout.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/css/frontend.less",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Students/Show.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/StudentController.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/User/EnrollmentsTable.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_21_011757_add_shirt_size_and_address_to_profiles_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/User.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/Students/StudentsTable.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Students/Index.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Students/ShowStudentModal.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Students/Edit.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/User/CreateActivationModal.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/SubscriptionController.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_20_222622_make_subscription_columns_nullable.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/ActivationsController.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/Activation.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/Students/CreateStudentModal.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/PublicRegistrationController.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_20_214103_add_course_id_to_activations_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Mail/ActivationInvitationMail.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/views/emails/activation_invitation_plain.blade.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Public/ActivationForm.vue",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/views/public/activation-check.blade.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_20_184045_drop_activations_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_20_165028_create_activations_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_20_183711_drop_activations.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_20_184129_create_activations_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_20_171511_add_contact_fields_to_activations_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_20_183906_create_activations_table.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/UserController.php",
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Users/Edit.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/.env",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Ui/TopNav.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Ui/Sidebar.vue",
 		"/media/daniel/SERVIDOR1/pwd.htaccess",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/views/emails/activation-basic.blade.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/User/ActivationUserModal.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/Students/StudentsTable.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Courses/CourseCardThumb.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_19_223436_add_active_to_users_table.php",
@@ -306,11 +403,9 @@
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Layouts/GuestLayout.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Video/VideoCardPlayer.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Ui/Breadcrumbs.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Videos/Show.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Ui/SpinnerOverlay.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Sidebar.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Middleware/HandleInertiaRequests.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/translations/en.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/TopNav.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/Fields/FieldVideo.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/VideoCaption.php",
@@ -324,14 +419,11 @@
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_19_144540_create_video_captions_table.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_19_132055_add_locale_to_users_table.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Profiles/EditProfile.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/translations/es.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Frontend/ProfileController.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Middleware/SetLocaleManual.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/bootstrap/app.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/traslations/en.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/traslations/es.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Layouts/StudentLayout.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/css/app.less",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Dashboard/Index.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Evaluations/Index.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Evaluations/Preview.vue",
@@ -341,7 +433,6 @@
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Videos/List.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Video/VideoCardList.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Video/VideoListItem.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/views/app.blade.php",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Cards/CardsVideoResources.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Video/VideoCardMini.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Cards/CardVideoThumbList.vue",
@@ -378,36 +469,7 @@
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/Breadcrumbs.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Courses/Index.vue",
 		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/EvaluationUser.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Enums/EvaluationUserStatus.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/EvaluationQuestions/Edit.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Http/Controllers/Admin/EvaluationQuestionController.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Evaluations/Users/Edit.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Evaluations/Users/Create.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_07_224641_add_evaluation_id_to_evaluations_users_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_07_201937_add_data_to_evaluations_users_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Evaluations/Thankyou.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_07_200327_create_evaluations_users_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_07_173233_remove_user_id_from_evaluations_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/EvaluationQuestions/Index.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/EvaluationQuestions/Create.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/EvaluationQuestions/Preview.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Models/EvaluationQuestion.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_07_002735_add_points_to_evaluation_questions_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Evaluations/Preview.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_07_001814_add_hint_to_evaluation_questions_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_06_225834_add_status_to_evaluation_questions_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Admin/Videos/VideosPanel.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_06_180928_create_evaluation_questions_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_06_184656_add_order_to_evaluation_questions_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_06_181143_create_evaluation_questions_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_06_181114_create_evaluation_questions_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Enums/EvaluationStatus.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Enums/EvaluationType.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/database/migrations/2025_08_06_163241_add_eva_type_to_evaluations_table.php",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Pages/Frontend/Courses/CourseVideos.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Courses/CourseCard.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Dashboard/Footer.vue",
-		"/media/daniel/SERVIDOR1/httpd/ballonacademy/resources/js/Components/Admin/Fields/FieldEmail.vue"
+		"/media/daniel/SERVIDOR1/httpd/ballonacademy/app/Enums/EvaluationUserStatus.php"
 	],
 	"find":
 	{
@@ -427,6 +489,17 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"onViewEvaluations",
+			"FrontendLayout",
+			" \n",
+			"enrollments",
+			"redes",
+			"selectedStudent",
+			"submit",
+			"profiles",
+			"filteredStudents",
+			"student",
+			"ActivationsController",
 			"FieldSwitch",
 			"FieldSwi",
 			"FieldSwitch",
@@ -543,18 +616,7 @@
 			"CardVideoMini",
 			"dashboard.courses.show",
 			"VideoActivityController",
-			"onPlayerReady",
-			"FrontendCoursesController",
-			"CoursesController",
-			"FrontendCoursesController",
-			"ToastNotification",
-			"video_player",
-			"videoUrl",
-			"CoursesController",
-			"videoUrl",
-			"StudentsTable",
-			"12",
-			"youtube"
+			"onPlayerReady"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -562,6 +624,8 @@
 		"regex": false,
 		"replace_history":
 		[
+			"StudentLayout",
+			"students",
 			"CourseCardThumb",
 			"import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue';",
 			"DobleU Efe",
@@ -624,19 +688,125 @@
 			[
 				{
 					"buffer": 0,
-					"file": "resources/js/Pages/Admin/Students/Index.vue",
+					"file": "resources/js/Components/Dashboard/Video/VideoCardPlayer.vue",
+					"selected": true,
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5026,
+						"buffer_size": 12824,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								640,
-								658
+								4112,
+								4112
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content"
+							],
+							"syntax": "Packages/Vue/Vue Component.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 650.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "resources/js/Components/Dashboard/Video/VideoListItem.vue",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10657,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5062,
+								5062
 							]
 						],
 						"settings":
@@ -648,8 +818,8 @@
 								{
 									"1":
 									[
-										662,
-										663
+										5061,
+										5062
 									]
 								},
 								"icon":
@@ -664,8 +834,8 @@
 								{
 									"1":
 									[
-										611,
-										612
+										5045,
+										5046
 									]
 								},
 								"unmatched":
@@ -735,116 +905,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 4014.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
-					"stack_multiselect": false,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "resources/js/Components/Admin/Students/CreateStudentModal.vue",
-					"selected": true,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9301,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"bracket_highlighter.busy": false,
-							"bracket_highlighter.locations":
-							{
-								"close":
-								{
-								},
-								"icon":
-								{
-								},
-								"open":
-								{
-								},
-								"unmatched":
-								{
-								}
-							},
-							"bracket_highlighter.regions":
-							[
-								"bh_angle",
-								"bh_angle_center",
-								"bh_angle_open",
-								"bh_angle_close",
-								"bh_angle_content",
-								"bh_c_define",
-								"bh_c_define_center",
-								"bh_c_define_open",
-								"bh_c_define_close",
-								"bh_c_define_content",
-								"bh_curly",
-								"bh_curly_center",
-								"bh_curly_open",
-								"bh_curly_close",
-								"bh_curly_content",
-								"bh_default",
-								"bh_default_center",
-								"bh_default_open",
-								"bh_default_close",
-								"bh_default_content",
-								"bh_double_quote",
-								"bh_double_quote_center",
-								"bh_double_quote_open",
-								"bh_double_quote_close",
-								"bh_double_quote_content",
-								"bh_regex",
-								"bh_regex_center",
-								"bh_regex_open",
-								"bh_regex_close",
-								"bh_regex_content",
-								"bh_round",
-								"bh_round_center",
-								"bh_round_open",
-								"bh_round_close",
-								"bh_round_content",
-								"bh_single_quote",
-								"bh_single_quote_center",
-								"bh_single_quote_open",
-								"bh_single_quote_close",
-								"bh_single_quote_content",
-								"bh_square",
-								"bh_square_center",
-								"bh_square_open",
-								"bh_square_close",
-								"bh_square_content",
-								"bh_tag",
-								"bh_tag_center",
-								"bh_tag_open",
-								"bh_tag_close",
-								"bh_tag_content",
-								"bh_unmatched",
-								"bh_unmatched_center",
-								"bh_unmatched_open",
-								"bh_unmatched_close",
-								"bh_unmatched_content"
-							],
-							"syntax": "Packages/Vue/Vue Component.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
 					"stack_multiselect": false,
 					"type": "text"
 				}

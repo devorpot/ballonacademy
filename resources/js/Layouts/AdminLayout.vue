@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import { Head } from '@inertiajs/vue3';
+ 
 import { route } from 'ziggy-js'
 import Navbar from '@/Components/Admin/Navbar.vue'
 import Footer from '@/Components/Admin/Footer.vue'
@@ -8,7 +8,7 @@ import Footer from '@/Components/Admin/Footer.vue'
 </script>
 
 <template>
-    <div>
+    <div class="admin">
         <Head>
             <slot name="head" />
         </Head>
@@ -28,6 +28,8 @@ import Footer from '@/Components/Admin/Footer.vue'
 </template>
 
 <style scoped>
+
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease, transform 0.5s ease;

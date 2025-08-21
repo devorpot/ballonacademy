@@ -72,41 +72,7 @@
             </span>
           </div>
 
-          <!-- Menú de acciones 
-          <div class="dropdown">
-            <button
-              class="btn btn-outline-secondary btn-sm"
-              type="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <i class="bi bi-three-dots"></i>
-              <span class="visually-hidden">Acciones</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li>
-                <button class="dropdown-item d-flex align-items-center gap-2" @click="$emit('open-resources', video)">
-                  <i class="bi bi-folder2-open"></i> Recursos
-                </button>
-              </li>
-              <li>
-                <button class="dropdown-item d-flex align-items-center gap-2" @click="$emit('mark-complete', video)">
-                  <i class="bi bi-check2-square"></i> Marcar como completado
-                </button>
-              </li>
-              <li><hr class="dropdown-divider" /></li>
-              <li>
-                <Link
-                  class="dropdown-item d-flex align-items-center gap-2"
-                  :href="videoHref"
-                  :aria-disabled="!isAccessible"
-                >
-                  <i class="bi bi-play-fill"></i> Abrir
-                </Link>
-              </li>
-            </ul>
-          </div>
-          -->
+          
         </div>
 
         <!-- Título -->

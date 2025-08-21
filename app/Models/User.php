@@ -80,9 +80,32 @@ class User extends Authenticatable
     }
 
     public function courses()
-    {
-        return $this->belongsToMany(Course::class, 'course_user', 'user_id', 'course_id');
-    }
+{
+    return $this->belongsToMany(Course::class, 'subscriptions', 'user_id', 'course_id')
+        ->as('subscription') // se accede como $course->subscription
+        ->withPivot([
+            'id',
+            'payment_amount',
+        'payment_currency',
+        'payment_description',
+        'payment_type',
+        'payment_card',
+        'payment_card_type',
+        'payment_card_brand',
+        'payment_bank',
+        'payment_date',
+        'payment_refund_date',
+        'payment_refund_desc',
+        'payment_status',
+        'payment_stripe_id',
+        'payment_refund',
+        'used_coupon',
+        'coupon_id',
+        'coupon_discount',
+            'created_at', 'updated_at', // deja estas solo si existen en la tabla
+        ])
+        ->withTimestamps(); // deja esto solo si la tabla subscriptions tiene timestamps
+}
 
      public function getAssignedCourseIdAttribute()
     {

@@ -4,6 +4,7 @@ return [
     'nav' => [
         'courses' => 'Courses',
         'profile' => 'Profile',
+
         'logout'  => 'Logout',
     ],
     'actions' => [
@@ -11,7 +12,8 @@ return [
         'next' => 'Next',
     ],
     'profile'=>[
-        'myProfile'=>'My Profile'
+        'myProfile'=>'My Profile',
+        'security'=>'Security'
     ],
     'greeting' => 'Hello, :name',
 ];

@@ -4,208 +4,432 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Student;
 use App\Models\Profile;
+use App\Models\Course;
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class StudentController extends Controller
 {
-    public function index()
+    /**
+     * Listado de estudiantes con búsqueda, filtros y ordenación.
+     */
+    public function index(Request $request): Response
     {
-        // Carga también profile si lo vas a mostrar en tabla/lista
-        $students = Student::with(['user.profile'])->get();
+        $q        = trim((string) $request->query('q', ''));
+        $country  = $request->query('country');
+        $active   = $request->query('active'); // '1' | '0' | null
+        $sortBy   = $request->query('sortBy', 'users.id');
+        $sortDir  = $request->query('sortDir', 'desc');
+        $perPage  = (int) $request->query('perPage', 15);
+
+        $allowedSorts = [
+            'users.id', 'users.name', 'users.email', 'users.created_at',
+            'profiles.firstname', 'profiles.lastname', 'profiles.country',
+        ];
+        if (! in_array($sortBy, $allowedSorts, true)) {
+            $sortBy = 'users.id';
+        }
+        $sortDir = strtolower($sortDir) === 'asc' ? 'asc' : 'desc';
+
+        $query = User::role('student')
+            ->select(['users.id', 'users.name', 'users.email', 'users.active', 'users.locale', 'users.created_at'])
+            ->with([
+                'profile:id,user_id,firstname,lastname,nickname,country,profile_image',
+            ])
+            ->leftJoin('profiles', 'profiles.user_id', '=', 'users.id');
+
+        if ($q !== '') {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('users.name', 'like', "%{$q}%")
+                    ->orWhere('users.email', 'like', "%{$q}%")
+                    ->orWhere('profiles.firstname', 'like', "%{$q}%")
+                    ->orWhere('profiles.lastname', 'like', "%{$q}%")
+                    ->orWhere('profiles.nickname', 'like', "%{$q}%");
+            });
+        }
+
+        if ($country) {
+            $query->where('profiles.country', $country);
+        }
+
+        if ($active !== null && in_array($active, ['0','1'], true)) {
+            $query->where('users.active', (bool) $active);
+        }
+
+        $students = $query
+            ->orderBy($sortBy, $sortDir)
+            ->paginate($perPage)
+            ->withQueryString();
 
         return Inertia::render('Admin/Students/Index', [
-            'students' => $students
+            'students'  => $students,
+            'courses'   => Course::select('id', 'title')->orderBy('title')->get(),
+            'filters'   => [
+                'q'       => $q,
+                'country' => $country,
+                'active'  => $active,
+                'sortBy'  => $sortBy,
+                'sortDir' => $sortDir,
+                'perPage' => $perPage,
+            ],
+            // Para llenar selects de país si aplica en tu UI
+            'countries' => Profile::query()
+                ->whereNotNull('country')
+                ->distinct()
+                ->orderBy('country')
+                ->pluck('country'),
         ]);
     }
 
-    public function create()
+    /**
+     * Mostrar perfil de un estudiante.
+     */
+ 
+ 
+
+public function show(User $user): Response
+{
+    if (! $user->hasRole('student')) {
+        abort(404);
+    }
+
+    // Carga perfil y cursos (para evitar N+1)
+    $user->load(
+        'profile' // relación via subscriptions
+    );
+
+    $enrollments = $user->courses->map(function ($course) {
+        // por si en algún lado quitaran el alias, caemos a pivot
+        $pivot = $course->subscription ?? $course->pivot;
+
+        return [
+            'id'          => $course->id,
+            'title'       => $course->title,
+            'image_cover' => $course->image_cover,
+             'logo' => $course->logo,
+            'description' => $course->description,
+            'subscription' => [
+                'id'         => $pivot->id        ?? null,
+                'created_at' => $pivot->created_at ?? null,
+                
+ 
+                // agrega aquí otros campos del pivot si los incluyes en withPivot()
+                // 'payment_status' => $pivot->payment_status ?? null,
+            ],
+        ];
+    })->values();
+
+    return Inertia::render('Admin/Students/Show', [
+        'user'        => $user->only(['id', 'name', 'email', 'active', 'locale', 'created_at']),
+        'profile'     => $user->profile,
+        'enrollments' => $enrollments,
+    ]);
+}
+
+
+
+    public function create(): Response
     {
         return Inertia::render('Admin/Students/Create');
     }
 
+    /**
+     * Crear estudiante + profile en transacción.
+     */
     public function store(Request $request)
     {
-        $validated = $this->validateData($request, true);
+        $data = $this->validateStore($request);
 
-        // Crear usuario
-        $user = User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'active'   => (bool)($validated['active'] ?? false),
-            'locale'   => $request->input('locale', 'es'), // opcional, por si decides permitirlo en el form
-        ]);
-
-        // Rol
-        $user->assignRole('student');
-
-        // Crear estudiante
-        $user->student()->create($this->studentData($validated));
-
-        // Crear profile (para evitar null en Sidebar/TopNav)
-        // Puedes mapear aquí lo básico con los mismos datos del student
-        $user->profile()->create([
-            'firstname'      => $validated['firstname'],
-            'lastname'       => $validated['lastname'],
-            'nickname'       => $this->guessNickname($user),
-            'phone'          => $validated['phone'] ?? '',
-            'country'        => $validated['country'] ?? '',
-            'address'        => $validated['address'] ?? '',
-            'profile_image'  => null, // se cargará más tarde
-            'bio'            => null,
-        ]);
-
-        return redirect()
-            ->route('admin.students.index')
-            ->with('success', 'Estudiante creado exitosamente');
-    }
-
-    public function edit(Student $student)
-    {
-        $student->load(['user.profile']);
-
-        return Inertia::render('Admin/Students/Edit', [
-            'student' => $student,
-        ]);
-    }
-
-    public function update(Request $request, Student $student)
-    {
-        $validated = $this->validateData($request, false, $student->user_id);
-
-        // Actualizar usuario
-        $student->user->update([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
-            'active'   => (bool)($validated['active'] ?? false),
-            'password' => !empty($validated['password'])
-                ? Hash::make($validated['password'])
-                : $student->user->password,
-        ]);
-
-        // Actualizar datos del estudiante
-        $student->update($this->studentData($validated));
-
-        // Asegurar que exista profile antes de delegar a ProfileController
-        if (! $student->user->profile) {
-            $student->user->profile()->create([
-                'firstname'      => $validated['firstname'],
-                'lastname'       => $validated['lastname'],
-                'nickname'       => $this->guessNickname($student->user),
-                'phone'          => $validated['phone'] ?? '',
-                'country'        => $validated['country'] ?? '',
-                'address'        => $validated['address'] ?? '',
-                'profile_image'  => null,
-                'bio'            => null,
+        return DB::transaction(function () use ($request, $data) {
+            $user = User::create([
+                'name'     => $data['name'],
+                'email'    => $data['email'],
+                'password' => Hash::make($data['password']),
+                'active'   => (bool) ($data['active'] ?? false),
+                'locale'   => $request->input('locale', 'es'),
             ]);
-            // refrescar la relación para que el ProfileController la encuentre
-            $student->user->load('profile');
+
+            $user->assignRole('student');
+
+            $user->profile()->create([
+                'firstname'     => $data['firstname'],
+                'lastname'      => $data['lastname'],
+                'nickname'      => $this->guessNickname($user),
+                'phone'         => $data['phone'] ?? null,
+                'country'       => $data['country'] ?? null,
+                'address'       => $data['address'] ?? null,
+                'profile_image' => null,
+                'cover_image'   => null,
+                'bio'           => null,
+            ]);
+
+            return redirect()
+                ->route('admin.students.index')
+                ->with('success', 'Estudiante creado exitosamente');
+        });
+    }
+
+    /**
+     * Edita por User (route model binding {user}).
+     */
+    public function edit(User $user): Response
+    {
+        if (! $user->hasRole('student')) {
+            abort(404);
         }
 
-        // Reutilizar ProfileController (asumiendo que espera campos en el mismo request)
-        // Si tu ProfileController espera nombres de campos distintos, asegúrate de enviarlos.
-        app(\App\Http\Controllers\Admin\ProfileController::class)->update($request, $student->user);
+        $user->load('profile');
 
-        return redirect()
-            ->route('admin.students.index')
-            ->with('success', 'Estudiante actualizado correctamente');
+        return Inertia::render('Admin/Students/Edit', [
+            'user'    => $user->only(['id', 'name', 'email', 'active', 'locale']),
+            'profile' => $user->profile,
+        ]);
     }
 
-    public function destroy(Student $student)
+    /**
+     * Actualiza perfil (y opcionalmente datos básicos de User).
+     * Soporta eliminación de imágenes con flags booleanos.
+     */
+    public function update(Request $request, User $user)
     {
-        // Asumiendo que User usa SoftDeletes, esto soft-deletea al usuario.
-        $student->user->delete();
-        $student->delete();
+        if (! $user->hasRole('student')) {
+            abort(404);
+        }
+
+        $data = $this->validateUpdate($request, $user);
+
+        return DB::transaction(function () use ($request, $user, $data) {
+            // Opcional: actualizar algunos campos de User si se envían
+            $user->fill([
+                'name'   => $data['user_name']   ?? $user->name,
+                'email'  => $data['user_email']  ?? $user->email,
+                'active' => array_key_exists('user_active', $data) ? (bool) $data['user_active'] : $user->active,
+                'locale' => $data['user_locale'] ?? $user->locale,
+            ])->save();
+
+            // Manejo de archivos
+            $profilePayload = collect($data)
+                ->only([
+                    // Fiscales / personales / redes / description
+                    'firstname','lastname','rfc','business_name','street','external_number','internal_number','state',
+                    'municipality','neighborhood','postal_code','billing_email','tax_regime','cfdi_use','personal_email',
+                    'country','whatsapp','nickname','website','facebook','instagram','tiktok','youtube','description',
+                ])
+                ->toArray();
+
+            // Remover imágenes existentes si se pide
+            if ($request->boolean('remove_profile_image') && $user->profile?->profile_image) {
+                Storage::disk('public')->delete($user->profile->profile_image);
+                $profilePayload['profile_image'] = null;
+            }
+            if ($request->boolean('remove_cover_image') && $user->profile?->cover_image) {
+                Storage::disk('public')->delete($user->profile->cover_image);
+                $profilePayload['cover_image'] = null;
+            }
+
+            // Nuevos uploads
+            if ($request->hasFile('profile_image')) {
+                if ($user->profile?->profile_image) {
+                    Storage::disk('public')->delete($user->profile->profile_image);
+                }
+                $profilePayload['profile_image'] = $request->file('profile_image')
+                    ->store('profiles/profile_images', 'public');
+            }
+
+            if ($request->hasFile('cover_image')) {
+                if ($user->profile?->cover_image) {
+                    Storage::disk('public')->delete($user->profile->cover_image);
+                }
+                $profilePayload['cover_image'] = $request->file('cover_image')
+                    ->store('profiles/cover_images', 'public');
+            }
+
+            // Crear/actualizar perfil
+            if ($user->profile) {
+                $user->profile->update($profilePayload);
+            } else {
+                $user->profile()->create($profilePayload);
+            }
+
+            return redirect()
+                ->route('admin.students.index')
+                ->with('success', 'Estudiante actualizado correctamente');
+        });
+    }
+
+    /**
+     * Elimina (soft delete si el modelo lo usa).
+     */
+    public function destroy(User $user)
+    {
+        if (! $user->hasRole('student')) {
+            abort(404);
+        }
+
+        $user->delete();
 
         return redirect()
             ->route('admin.students.index')
             ->with('success', 'Estudiante eliminado exitosamente');
     }
 
-    public function list()
+    /**
+     * Autocomplete: lista simple para selects (opcionalmente con ?q=).
+     */
+    public function list(Request $request)
     {
-        $students = Student::with('user')
+        $q = trim((string) $request->query('q', ''));
+
+        $students = User::role('student')
+            ->select('users.id', 'users.name', 'users.email')
+            ->with(['profile:id,user_id,firstname,lastname'])
+            ->when($q !== '', function ($qr) use ($q) {
+                $qr->where(function ($sub) use ($q) {
+                    $sub->where('users.name', 'like', "%{$q}%")
+                        ->orWhere('users.email', 'like', "%{$q}%");
+                });
+            })
+            ->orderBy('users.name')
+            ->limit(20)
             ->get()
-            ->map(function ($student) {
+            ->map(function ($u) {
+                $full = $u->name ?: trim(($u->profile->firstname ?? '') . ' ' . ($u->profile->lastname ?? ''));
                 return [
-                    'id'   => $student->user->id,
-                    'name' => trim(($student->firstname ?? '') . ' ' . ($student->lastname ?? '')),
+                    'id'   => $u->id,
+                    'name' => $full !== '' ? $full : $u->email,
                 ];
             });
 
         return response()->json($students);
     }
 
+    /**
+     * Autocomplete por texto (para inputs tipo vue-select).
+     */
     public function search(Request $request)
     {
-        $search = $request->input('search');
+        $search = trim((string) $request->input('search', ''));
 
-        $students = Student::with('user')
-            ->whereHas('user', function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+        $students = User::role('student')
+            ->select('id', 'name', 'email')
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('name', 'like', "%{$search}%")
+                       ->orWhere('email', 'like', "%{$search}%");
+                });
             })
+            ->orderBy('name')
             ->limit(20)
             ->get()
-            ->map(fn ($student) => [
-                'label' => "{$student->user->name} ({$student->user->email})",
-                'value' => $student->user_id
+            ->map(fn ($u) => [
+                'label' => "{$u->name} ({$u->email})",
+                'value' => $u->id,
             ]);
 
         return response()->json($students);
     }
 
-    public function searchById($id)
+    /**
+     * Buscar por ID para setear valores iniciales en selects.
+     */
+    public function searchById(int $id)
     {
-        $student = Student::with('user')->where('user_id', $id)->firstOrFail();
+        $user = User::role('student')
+            ->select('id', 'name', 'email')
+            ->with(['profile:id,user_id'])
+            ->findOrFail($id);
 
         return response()->json([
-            'value' => $student->user_id,
-            'label' => "{$student->user->name} ({$student->user->email})"
+            'value' => $user->id,
+            'label' => "{$user->name} ({$user->email})",
         ]);
     }
 
-    private function validateData(Request $request, $isStore = true, $userId = null): array
+    /**
+     * -------- VALIDACIONES --------
+     */
+
+    private function validateStore(Request $request): array
     {
-        $rules = [
-            'name'       => 'required|string|max:255',
-            'email'      => ['required', 'email', 'max:255'],
-            'password'   => $isStore ? 'required|string|min:8|confirmed' : 'nullable|string|min:8|confirmed',
-            'firstname'  => 'required|string|max:255',
-            'lastname'   => 'required|string|max:255',
-            'phone'      => 'required|string|max:255',
-            'shirt_size' => 'required|string|max:255',
-            'address'    => 'required|string|max:255',
-            'country'    => 'required|string|max:255',
-            'active'     => 'required|boolean',
-            // 'locale'  => 'nullable|in:es,en' // si decides exponerlo en el formulario
-        ];
+        $messages = $this->validationMessages();
 
-        if ($userId) {
-            $rules['email'][] = 'unique:users,email,' . $userId;
-        } else {
-            $rules['email'][] = 'unique:users,email';
-        }
+        return $request->validate([
+            // User
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'active'   => ['nullable', 'boolean'],
+            'locale'   => ['nullable', 'string', 'max:8'],
 
-        return $request->validate($rules, $this->validationMessages());
+            // Profile mínimos
+            'firstname' => ['required', 'string', 'max:255'],
+            'lastname'  => ['required', 'string', 'max:255'],
+            'phone'     => ['nullable', 'string', 'max:32'],
+            'country'   => ['nullable', 'string', 'max:100'],
+            'address'   => ['nullable', 'string', 'max:255'],
+        ], $messages);
     }
 
-    private function studentData(array $validated): array
+    private function validateUpdate(Request $request, User $user): array
     {
-        return [
-            'firstname'  => $validated['firstname'],
-            'lastname'   => $validated['lastname'],
-            'phone'      => $validated['phone'],
-            'shirt_size' => $validated['shirt_size'],
-            'address'    => $validated['address'],
-            'country'    => $validated['country'],
-        ];
+        $messages = $this->validationMessages();
+
+        return $request->validate([
+            // Opcionalmente actualizar algunos campos de User
+            'user_name'   => ['sometimes', 'required', 'string', 'max:255'],
+            'user_email'  => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users','email')->ignore($user->id)],
+            'user_active' => ['sometimes', 'boolean'],
+            'user_locale' => ['sometimes', 'string', 'max:8'],
+
+            // Fiscales
+            'firstname'        => ['required', 'string', 'max:255'],
+            'lastname'         => ['required', 'string', 'max:255'],
+            'rfc'              => ['nullable', 'string', 'max:13'],
+            'business_name'    => ['nullable', 'string', 'max:255'],
+            'street'           => ['nullable', 'string', 'max:255'],
+            'external_number'  => ['nullable', 'string', 'max:20'],
+            'internal_number'  => ['nullable', 'string', 'max:20'],
+            'state'            => ['nullable', 'string', 'max:100'],
+            'municipality'     => ['nullable', 'string', 'max:100'],
+            'neighborhood'     => ['nullable', 'string', 'max:100'],
+            'postal_code'      => ['nullable', 'string', 'max:10'],
+            'billing_email'    => ['nullable', 'email', 'max:255'],
+            'tax_regime'       => ['nullable', 'string', 'max:100'],
+            'cfdi_use'         => ['nullable', 'string', 'max:100'],
+
+            // Personales
+            'personal_email'   => ['required', 'email', 'max:255', Rule::unique('profiles','personal_email')->ignore(optional($user->profile)->id)],
+            'country'          => ['required', 'string', 'max:100'],
+            'whatsapp'         => ['nullable', 'string', 'max:20'],
+            'nickname'         => ['required', 'string', 'max:50', Rule::unique('profiles','nickname')->ignore(optional($user->profile)->id)],
+
+            // Archivos
+            'profile_image'        => ['nullable', 'image', 'max:5120'],
+            'cover_image'          => ['nullable', 'image', 'max:5120'],
+            'remove_profile_image' => ['sometimes', 'boolean'],
+            'remove_cover_image'   => ['sometimes', 'boolean'],
+
+            // Redes sociales
+            'website'   => ['nullable', 'url', 'max:255'],
+            'facebook'  => ['nullable', 'url', 'max:255'],
+            'instagram' => ['nullable', 'url', 'max:255'],
+            'tiktok'    => ['nullable', 'url', 'max:255'],
+            'youtube'   => ['nullable', 'url', 'max:255'],
+
+            'description' => ['nullable', 'string'],
+        ], $messages);
     }
 
+    /**
+     * Utilidades
+     */
     private function guessNickname(User $user): string
     {
         if ($user->email) {
@@ -226,12 +450,9 @@ class StudentController extends Controller
             'password.confirmed'  => 'Las contraseñas no coinciden.',
             'firstname.required'  => 'El nombre del estudiante es obligatorio.',
             'lastname.required'   => 'El apellido es obligatorio.',
-            'phone.required'      => 'El teléfono es obligatorio.',
-            'shirt_size.required' => 'La talla de camiseta es obligatoria.',
-            'address.required'    => 'La dirección es obligatoria.',
             'country.required'    => 'El país es obligatorio.',
-            'active.required'     => 'El estado activo/inactivo es obligatorio.',
-            'active.boolean'      => 'El estado activo debe ser verdadero o falso.',
+            'personal_email.required' => 'El correo personal es obligatorio.',
+            'nickname.required'   => 'El nickname es obligatorio.',
         ];
     }
 }

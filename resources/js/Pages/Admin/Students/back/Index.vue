@@ -1,7 +1,7 @@
 <script setup>
 import { Inertia } from '@inertiajs/inertia'
 import { Head, usePage } from '@inertiajs/vue3'
-import { ref, reactive, watch, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { route } from 'ziggy-js'
 
 import AdminLayout from '@/Layouts/AdminLayout.vue'
@@ -16,109 +16,33 @@ import StudentsTable from '@/Components/Admin/Students/StudentsTable.vue'
 
 // Modal de activación existente (por usuario)
 import ActivationUserModal from '@/Components/Admin/User/ActivationUserModal.vue'
+
 // Nuevo: crear activación manual
 import CreateActivationModal from '@/Components/Admin/User/CreateActivationModal.vue'
 
 const props = defineProps({
-  // students paginado desde el backend: { data, links, meta }
-  students: { type: Object, required: true },
-  courses: { type: Array, default: () => [] },
-  // Filtros enviados por el backend para rehidratar el estado de la tabla
-  filters: {
-    type: Object,
-    default: () => ({
-      q: '',
-      country: null,
-      active: null,
-      sortBy: 'users.id',
-      sortDir: 'desc',
-      perPage: 15,
-    })
-  },
-  countries: { type: Array, default: () => [] }
+  // IMPORTANTE: ahora 'students' es realmente una lista de USERS con rol student (con relación 'profile')
+  students: Array,
+  courses: Array
 })
 
-const page = usePage()
-
-// Estado de UI
 const deletingId = ref(null)
 const showDeleteModal = ref(false)
 const isDeleting = ref(false)
 const showCreateModal = ref(false)
 const showViewModal = ref(false)
-const selectedStudent = ref(null)
+const selectedStudent = ref(null) // ahora será un USER
 const toast = ref(null)
 
-// Activaciones
+// Activación por usuario existente
 const showActivateModal = ref(false)
 const userToActivate = ref(null)
+
+// Crear activación manual
 const showCreateActivationModal = ref(false)
 
-// Estado de filtros controlado por la vista
-const state = reactive({
-  q: props.filters.q ?? '',
-  country: props.filters.country ?? null,
-  active: props.filters.active ?? null,
-  sortBy: props.filters.sortBy ?? 'users.id',
-  sortDir: props.filters.sortDir ?? 'desc',
-  perPage: Number(props.filters.perPage ?? 15),
-  page: Number(props.students?.meta?.current_page ?? 1),
-})
+const page = usePage()
 
-const currentPage = computed(() => Number(props.students?.meta?.current_page ?? state.page))
-
-// Debounce para búsqueda
-let searchTimer = null
-function debouncedRefresh() {
-  clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => {
-    state.page = 1
-    refreshIndex()
-  }, 350)
-}
-
-// Sincroniza con el backend usando Inertia, manteniendo scroll y estado visual
-function refreshIndex(partials = ['students', 'filters']) {
-  Inertia.get(
-    route('admin.students.index'),
-    {
-      q: state.q || undefined,
-      country: state.country || undefined,
-      active: state.active ?? undefined,
-      sortBy: state.sortBy,
-      sortDir: state.sortDir,
-      perPage: state.perPage,
-      page: state.page,
-    },
-    {
-      preserveState: true,
-      preserveScroll: true,
-      replace: true,
-      only: partials
-    }
-  )
-}
-
-// Watchers de filtros
-watch(() => state.q, debouncedRefresh)
-watch(() => state.country, () => { state.page = 1; refreshIndex() })
-watch(() => state.active, () => { state.page = 1; refreshIndex() })
-watch(() => state.perPage, () => { state.page = 1; refreshIndex() })
-
-// Eventos de la tabla
-function onSort({ sortBy, sortDir }) {
-  state.sortBy = sortBy
-  state.sortDir = sortDir
-  state.page = 1
-  refreshIndex()
-}
-
-function onPageChange(pageNumber) {
-  state.page = pageNumber
-  refreshIndex()
-}
-
-// Flashes
 onMounted(() => {
   if (page.props.flash?.success) {
     toast.value = { message: page.props.flash.success, type: 'success' }
@@ -128,42 +52,37 @@ onMounted(() => {
   }
 })
 
-// Detalle
-function openViewModal(user) {
+// Recibe un USER y abre el modal de detalle
+const openViewModal = (user) => {
   selectedStudent.value = user
   showViewModal.value = true
 }
 
-// Crear
-function onCreated() {
+const onCreated = () => {
   toast.value = { message: 'Estudiante creado exitosamente', type: 'success' }
   showCreateModal.value = false
-  // Refrescar solo la lista
-  refreshIndex()
 }
 
-// Eliminar
-function prepareDelete(userId) {
+const prepareDelete = (userId) => {
   deletingId.value = userId
   showDeleteModal.value = true
 }
 
-function cancelDelete() {
+const cancelDelete = () => {
   showDeleteModal.value = false
   deletingId.value = null
   isDeleting.value = false
 }
 
-function deleteStudent() {
+const deleteStudent = () => {
   if (!deletingId.value) return
   isDeleting.value = true
-  Inertia.delete(route('admin.students.destroy', { user: deletingId.value }), {
+  // IMPORTANTE: la ruta debe aceptar {user} o id del usuario
+  Inertia.delete(route('admin.students.destroy', deletingId.value), {
     preserveScroll: true,
     onSuccess: () => {
       cancelDelete()
       toast.value = { message: 'Estudiante eliminado exitosamente', type: 'success' }
-      // Mantiene filtros y página actual si la paginación aún es válida
-      refreshIndex()
     },
     onError: () => {
       isDeleting.value = false
@@ -175,19 +94,19 @@ function deleteStudent() {
   })
 }
 
-// Activación
-function openActivateModal(user) {
-  userToActivate.value = user
+// Abrir modal de activación desde la tabla: ahora el emisor debe mandar el USER
+const openActivateModal = (user) => {
+  userToActivate.value = user // ya no user.user
   showActivateModal.value = true
 }
-function onActivationSent() {
+
+const onActivationSent = () => {
   toast.value = { message: 'Se envió la activación al correo indicado', type: 'success' }
 }
 </script>
 
 <template>
   <Head title="Gestión de Estudiantes" />
-
   <AdminLayout>
     <Breadcrumbs
       username="admin"
@@ -215,29 +134,21 @@ function onActivationSent() {
       </div>
     </section>
 
-    <!-- Tabla con filtros y paginación controlados -->
+    <!-- IMPORTANTE:
+         StudentsTable ahora debe leer directamente propiedades de USER:
+         - id, name, email
+         - profile?.firstname, profile?.lastname, profile?.phone, etc.
+         Y debe emitir:
+         @view="openViewModal(user)"
+         @delete="prepareDelete(user.id)"
+         @activate="openActivateModal(user)"
+    -->
     <StudentsTable
       :students="students"
-      :filters="{
-        q: state.q,
-        country: state.country,
-        countries,
-        active: state.active,
-        sortBy: state.sortBy,
-        sortDir: state.sortDir,
-        perPage: state.perPage,
-        page: currentPage
-      }"
       :isDeleting="isDeleting"
       @view="openViewModal"
       @delete="prepareDelete"
       @activate="openActivateModal"
-      @update:search="val => state.q = val"
-      @update:country="val => state.country = val"
-      @update:active="val => state.active = val"
-      @update:perPage="val => state.perPage = Number(val)"
-      @sort="onSort"
-      @page="onPageChange"
     />
 
     <ConfirmDeleteModal
@@ -261,15 +172,23 @@ function onActivationSent() {
 
     <CreateStudentModal
       v-if="showCreateModal"
-      :courses="courses"
+      :courses="props.courses"
       :show="showCreateModal"
       @saved="onCreated"
       @close="showCreateModal = false"
     />
 
- 
+    <!-- ShowStudentModal: si internamente esperaba un objeto 'student' (modelo Student),
+         ahora recibirá un USER. Ajusta su implementación para leer de user/profile.
+         Puedes mantener la prop name como 'student' para no romper, pero su shape es de USER. -->
+    <ShowStudentModal
+      v-if="showViewModal"
+      :show="showViewModal"
+      :student="selectedStudent"
+      @close="showViewModal = false"
+    />
 
-    <!-- Activación existente por usuario -->
+    <!-- Modal de Activación existente (por usuario) -->
     <ActivationUserModal
       v-if="showActivateModal && userToActivate"
       :show="showActivateModal"
@@ -282,7 +201,7 @@ function onActivationSent() {
     <CreateActivationModal
       v-if="showCreateActivationModal"
       :show="showCreateActivationModal"
-      :courses="courses"
+      :courses="props.courses"
       @close="showCreateActivationModal = false"
     />
   </AdminLayout>

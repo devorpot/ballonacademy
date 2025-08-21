@@ -114,15 +114,15 @@
             <button class="btn btn-outline-secondary" @click="closeEvalModal">Cerrar</button>
 
             <button
-              v-if="hasEvaluations"
-              class="btn btn-primary"
+              v-if="isLastVideo"
+              class="btn btn-primary mx-2"
               @click="onViewEvaluations"
             >
               Ver evaluaciones
             </button>
 
             <button
-              v-else-if="!isLastVideo"
+              v-if="!isLastVideo"
               class="btn btn-success"
               @click="onNextFromModal"
             >
@@ -137,6 +137,8 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { Inertia } from '@inertiajs/inertia'   
+import { route } from 'ziggy-js'
 import { Link, usePage } from '@inertiajs/vue3'
 import videojs from 'video.js'
 import 'video.js/dist/video-js.css'
@@ -354,7 +356,24 @@ function onViewEvaluations() {
   autoAdvanceCancelled.value = true
   clearCountdown()
   showEvalModal.value = false
-  emit('show-evaluations')
+
+  const courseId = props.course?.id ?? props.video?.course_id
+  if (!courseId) {
+    console.warn('No se encontró courseId para navegar a evaluaciones')
+    return
+  }
+
+  // Preferido: usando Ziggy si tienes una ruta nombrada
+  // Ajusta el nombre si el tuyo es distinto (ej. 'frontend.courses.evaluations.index')
+  let url
+  try {
+    url = route('frontend.courses.evaluations.index', { course: courseId })
+  } catch {
+    // Fallback: URL directa
+    url = `/frontend/courses/${courseId}/evaluations`
+  }
+
+  Inertia.visit(url) // o: router.visit(url)
 }
 
 function onNextFromModal() {
