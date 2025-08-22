@@ -76,6 +76,11 @@ function logout() {
                                 <i class="bi bi-people me-1"></i> Evaluciones
                             </Link>
                         </li>
+                         <li class="nav-item">
+                            <Link class="nav-link" :href="route('admin.distributors.index')">
+                                <i class="bi bi-people me-1"></i> Distribuidores
+                            </Link>
+                        </li>
                         <li class="nav-item">
                             <Link class="nav-link" :href="route('admin.certificates.index')">
                                 <i class="bi bi-people me-1"></i> Certificados

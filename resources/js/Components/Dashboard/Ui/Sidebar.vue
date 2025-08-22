@@ -56,6 +56,16 @@
         </li>
         <li class="nav-item">
           <Link
+            :href="route('dashboard.distributors.index')"
+            class="btn btn-nav"
+            :class="{ active: $page.url.startsWith('/dashboard/distributors') }"
+          >
+            <i class="bi bi-person-circle me-2"></i>
+            {{ L.profile?.btnDistributors || 'Distribuidores' }}
+          </Link>
+        </li>
+        <li class="nav-item">
+          <Link
             :href="route('dashboard.courses.index')"
             class="btn btn-nav"
             :class="{ active: $page.url.startsWith('/dashboard/courses') }"

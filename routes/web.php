@@ -5,7 +5,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdministratorController;
-use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserController; 
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController; 
 use App\Http\Controllers\Admin\CertificateController;
@@ -16,13 +16,14 @@ use App\Http\Controllers\Admin\VideoController;
 use App\Http\Controllers\Admin\VideoResourcesController; 
 use App\Http\Controllers\Admin\VideoMaterialController;
 use App\Http\Controllers\Admin\VideoCaptionsController;
-
-
+use App\Http\Controllers\Admin\LessonController;
+use App\Http\Controllers\Admin\LessonVideosController;
+use App\Http\Controllers\Admin\LessonEvaluationsController;
 use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\PaymentTypeController;
 use App\Http\Controllers\Admin\PaymentStatusController;
 use App\Http\Controllers\Admin\EvaluationController;
-
+use App\Http\Controllers\Admin\DistributorController;
 use App\Http\Controllers\Admin\EvaluationQuestionController;
 use App\Http\Controllers\Admin\EvaluationUsersController;
 use App\Http\Controllers\Admin\ActivationsController;
@@ -39,6 +40,9 @@ use App\Http\Controllers\Frontend\EvaluationController as FrontendEvaluationCont
 use App\Http\Controllers\Frontend\EvaluationUsersController as FrontendEvaluationUsersController;
 use App\Http\Controllers\Frontend\VideosResourcesController as FrontendVideosResourcesController;
 use App\Http\Controllers\Frontend\SecurityController  as FrontendSecurityController;
+use App\Http\Controllers\Frontend\DistributorController  as FrontendDistributorController;
+
+use App\Http\Controllers\Frontend\LessonsController  as FrontendLessonsController;
 use App\Http\Controllers\Api\VideoActivityController;
 use App\Http\Controllers\Api\ActivityController;
  
@@ -97,7 +101,47 @@ Route::middleware(['auth', 'role:admin'])
 
     Route::delete('courses/{course}/videos/{video}', [VideoController::class, 'deleteVideo'])->name('courses.videos.delete');
 
+   // Adjuntar videos a una lección
+   Route::post('/lessons/{lesson}/videos', [LessonVideosController::class, 'attach'])
+        ->name('lessons.videos.attach');
 
+    // Quitar video de una lección (opcional, para el botón Eliminar)
+    Route::delete('lessons/{lesson}/videos/{video}', [LessonVideosController::class, 'detach'])
+        ->name('lessons.videos.detach');
+
+    Route::post('lessons/{lesson}/videos/reorder', [LessonVideosController::class, 'reorder'])
+        ->name('lessons.videos.reorder');
+
+/*Evaluations*/
+       
+   Route::post('/lessons/{lesson}/evaluations', [LessonEvaluationsController::class, 'attach'])
+        ->name('lessons.evaluations.attach');
+
+    // Quitar video de una lección (opcional, para el botón Eliminar)
+    Route::delete('lessons/{lesson}/evaluations/{evaluation}', [LessonEvaluationsController::class, 'detach'])
+        ->name('lessons.evaluations.detach');
+
+    Route::post('lessons/{lesson}/evaluations/reorder', [LessonEvaluationsController::class, 'reorder'])
+        ->name('lessons.evaluations.reorder');
+
+Route::resource('lessons', LessonController::class);
+
+
+
+Route::get('courses/{course}/lessons-panel', [LessonController::class, 'lessonsPanel'])
+    ->name('courses.lessons.panel');
+
+Route::get('courses/{course}/lessons/list', [LessonController::class, 'list'])
+    ->name('courses.lessons.list');
+
+Route::post('courses/{course}/lessons/reorder', [LessonController::class, 'reorderLessons'])
+    ->name('courses.lessons.reorder');
+
+Route::delete('courses/{course}/lessons/{lesson}', [LessonController::class, 'deleteLesson'])
+    ->name('courses.lessons.delete');
+
+
+ 
 
     //Route::resource('courses.videos', VideoController::class);
 
@@ -125,6 +169,9 @@ Route::delete('/videos/{video}/materials/{material}', [VideoMaterialController::
  Route::put('/videos/{video}/materials/{material}', [VideoMaterialController::class, 'update'])->name('videos.materials.update');
 
 
+ Route::get('/videos/by-course/{course}', [VideoController::class, 'getByCourse'])
+        ->name('videos.by-course');
+
   Route::resource('videos.resources', VideoResourcesController::class)
              ->parameters(['videos' => 'video']); // /admin/videos/{video}/resources/{resource}
 
@@ -138,6 +185,8 @@ Route::delete('/videos/{video}/materials/{material}', [VideoMaterialController::
                 Route::put('captions/{caption}',          [VideoCaptionsController::class, 'update'])->name('captions.update');
                 Route::delete('captions/{caption}',       [VideoCaptionsController::class, 'destroy'])->name('captions.destroy');
             });
+
+
 
 
     Route::resource('users', UserController::class);
@@ -154,6 +203,7 @@ Route::delete('/videos/{video}/materials/{material}', [VideoMaterialController::
     Route::resource('teachers', TeacherController::class);
 
     Route::resource('certificates', CertificateController::class);
+    Route::resource('distributors', DistributorController::class);
     Route::resource('subscriptions', SubscriptionController::class);
 
     
@@ -180,6 +230,12 @@ Route::delete('/videos/{video}/materials/{material}', [VideoMaterialController::
 
     
     Route::get('/evaluations/videos/combo/{course}', [EvaluationController::class, 'videosByCourse'])->name('evaluations.videos.combo');
+
+    Route::get('/evaluations/lessons/combo/{course}', [EvaluationController::class, 'lessonsByCourse'])->name('evaluations.lessons.combo');
+    
+
+     Route::get('/evaluations/by-course/{course}', [EvaluationController::class, 'getByCourse'])->name('evaluations.by-course');
+
     Route::resource('evaluations', EvaluationController::class);
 
 
@@ -211,6 +267,9 @@ Route::post('/activations', [ActivationsController::class, 'store'])
             ->name('activations.store');
 
 
+ 
+
+
 
 
 });
@@ -227,6 +286,24 @@ Route::middleware(['auth', 'role:student'])
     ->group(function () {
         Route::get('/', [FrontendDashboardController::class, 'index'])->name('index');
         
+    Route::get('/distributors', [FrontendDistributorController::class, 'index'])->name('distributors.index');
+
+
+   Route::get('/courses/{course}/lessons', [FrontendLessonsController::class, 'index'])
+            ->whereNumber('course')
+            ->name('courses.lessons.index');
+
+   Route::get('/courses/{course}/lessons/{lesson}', [FrontendLessonsController::class, 'show'])
+            ->whereNumber('course')
+            ->whereNumber('lesson')
+            ->name('courses.lessons.show');
+
+  Route::get('/courses/{course}/lessons/{lesson}/videos/{video}',
+            [\App\Http\Controllers\Frontend\LessonsController::class, 'showVideo']
+        )
+        ->whereNumber(['course','lesson','video'])
+        ->name('courses.lessons.videos.show');
+
 
 
      Route::get('/security', [FrontendSecurityController::class, 'edit'])->name('security.edit');

@@ -317,5 +317,45 @@ private function validateData(Request $request, $includeFiles = true)
 }
 
 
+  public function getByCourse(Request $request, Course $course)
+    {
+        $q = trim((string) $request->query('q', ''));
+        $lessonId = $request->query('lesson_id');
+
+        $query = Video::query()
+            ->where('course_id', $course->id);
+
+        if ($q !== '') {
+            $query->where('title', 'LIKE', "%{$q}%");
+        }
+
+        // excluir ya vinculados a la lección, si se provee
+        if ($lessonId) {
+            $query->whereDoesntHave('lessons', function ($sub) use ($lessonId) {
+                $sub->where('lessons.id', $lessonId);
+            });
+        }
+
+        // limita resultados para autocomplete
+        $videos = $query
+            ->select('id', 'title', 'image_cover', 'duration', 'size')
+            ->orderBy('title')
+            ->limit(15)
+            ->get()
+            ->map(function ($v) {
+                return [
+                    'id'       => $v->id,
+                    'title'    => $v->title,
+                    'image'    => $v->image_cover ? asset('storage/' . $v->image_cover) : null,
+                    'duration' => $v->duration, // en segundos o formato que manejes
+                    'size'     => $v->size,     // bytes/MB, según tu columna
+                ];
+            });
+
+        return response()->json([
+            'data' => $videos,
+        ]);
+    }
+
 
 }

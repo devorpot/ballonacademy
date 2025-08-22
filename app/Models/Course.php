@@ -24,11 +24,14 @@ class Course extends Model
         'currency_id'
     ];
 
-    public function videos()
-    {
-        return $this->hasMany(Video::class);
-    }
-
+   public function videos()
+{
+    // belongsToMany usando course_id como FK "propia" en el pivote
+    return $this->belongsToMany(Video::class, 'lesson_videos', 'course_id', 'video_id')
+        ->withPivot(['lesson_id', 'order', 'active'])
+        ->withTimestamps()
+        ->orderBy('lesson_videos.order');
+}
     
     public function subscriptions()
     {
@@ -53,10 +56,23 @@ class Course extends Model
         return $this->belongsToMany(User::class, 'course_user', 'course_id', 'user_id');
     }
 
-
+  
     public function currency()
     {
         return $this->belongsTo(Currency::class);
     }
+
+    public function lessonVideos()
+{
+    return $this->hasMany(LessonVideo::class);
+}
+
+
+
+public function lessons()
+{
+    // Si quieres también las lecciones conectadas por pivote
+   return $this->hasMany(\App\Models\Lesson::class);
+}
 
 }

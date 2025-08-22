@@ -99,8 +99,9 @@
                         v-model="form.photo"
                         :showValidation="touched.photo"
                         :formError="form.errors.photo"
-                        @blur="() => handleBlur('photo')"
                         :initialPreview="photoPreview"
+                        @blur="() => handleBlur('photo')"
+                        @image-removed="onRemovePhoto"
                       />
                     </div>
 
@@ -111,8 +112,9 @@
                         v-model="form.logo"
                         :showValidation="touched.logo"
                         :formError="form.errors.logo"
-                        @blur="() => handleBlur('logo')"
                         :initialPreview="logoPreview"
+                        @blur="() => handleBlur('logo')"
+                        @image-removed="onRemoveLogo"
                       />
                     </div>
                   </div>
@@ -136,81 +138,125 @@
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3';
-import { useForm } from '@inertiajs/vue3';
-import { route } from 'ziggy-js';
-import { ref, computed } from 'vue';
+import { Head, useForm } from '@inertiajs/vue3'
+import { route } from 'ziggy-js'
+import { ref, computed } from 'vue'
 
-import AdminLayout from '@/Layouts/AdminLayout.vue';
-import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
-import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
-import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue'
+import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue'
+import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue'
+import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue'
 
-import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
-import FieldText from '@/Components/Admin/Fields/FieldText.vue';
-import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
-import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
-import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
+import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue'
+import FieldText from '@/Components/Admin/Fields/FieldText.vue'
+import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue'
+import FieldDate from '@/Components/Admin/Fields/FieldDate.vue'
+import FieldImage from '@/Components/Admin/Fields/FieldImage.vue'
 
 const props = defineProps({
-  certificate: Object,
-  users: Array,
-  teachers: Array
-});
+  certificate: { type: Object, required: true },
+  users: { type: Array, default: () => [] },
+  teachers: { type: Array, default: () => [] }
+})
 
+/**
+ * Form: aplica mismo patrón de manejo de imágenes que Courses/Edit.vue
+ * - photo y logo inician en null (solo si se sube archivo se envía)
+ * - flags remove_photo y remove_logo para indicar borrado en backend
+ */
 const form = useForm({
   _method: 'PUT',
-  user_id: props.certificate.user_id,
-  master_id: props.certificate.master_id,
-  authorized_by: props.certificate.authorized_by,
-  date_start: props.certificate.date_start,
-  date_end: props.certificate.date_end,
-  date_expedition: props.certificate.date_expedition,
-  comments: props.certificate.comments,
-  photo: '',
-  logo: ''
-});
+  user_id: props.certificate.user_id ?? null,
+  master_id: props.certificate.master_id ?? null,
+  authorized_by: props.certificate.authorized_by ?? '',
+  date_start: props.certificate.date_start ?? '',
+  date_end: props.certificate.date_end ?? '',
+  date_expedition: props.certificate.date_expedition ?? '',
+  comments: props.certificate.comments ?? '',
 
-const logoPreview = props.certificate.logo ? '/storage/' + props.certificate.logo : null;
-const photoPreview = props.certificate.photo ? '/storage/' + props.certificate.photo : null;
+  // Manejo de imágenes (nuevo archivo)
+  photo: null,
+  logo: null,
 
-const touched = ref({});
+  // Flags de borrado para backend
+  remove_photo: false,
+  remove_logo: false
+})
+
+const logoPreview = props.certificate.logo ? '/storage/' + props.certificate.logo : null
+const photoPreview = props.certificate.photo ? '/storage/' + props.certificate.photo : null
+
+const touched = ref({})
+
 const userOptions = props.users.map(u => ({
   value: u.id,
   label: `${u.name} (${u.email})`
-}));
+}))
+
 const teacherOptions = props.teachers.map(t => ({
   value: t.id,
   label: `${t.firstname} ${t.lastname}`
-}));
+}))
 
 const handleBlur = (field) => {
-  touched.value[field] = true;
-};
+  touched.value[field] = true
+}
 
 const validateField = (field) => {
-  if (!form[field] || (typeof form[field] === 'string' && !form[field].trim())) {
-    return `El campo ${field.replace('_', ' ')} es obligatorio`;
+  if (field === 'user_id' && (!form.user_id || String(form.user_id).trim() === '')) {
+    return 'El campo usuario es obligatorio'
   }
-  return '';
-};
+  if (field === 'master_id' && (!form.master_id || String(form.master_id).trim() === '')) {
+    return 'El campo maestro es obligatorio'
+  }
+  if (field === 'authorized_by' && (!form.authorized_by || form.authorized_by.trim() === '')) {
+    return 'El campo autorizado por es obligatorio'
+  }
+  return ''
+}
 
 const isFormValid = computed(() => {
   return !validateField('user_id') &&
          !validateField('master_id') &&
-         !validateField('authorized_by');
-});
+         !validateField('authorized_by')
+})
+
+/** Handlers de imágenes: marcan flags y limpian v-model */
+const onRemovePhoto = () => {
+  form.remove_photo = true
+  form.photo = null
+  touched.value.photo = true
+}
+
+const onRemoveLogo = () => {
+  form.remove_logo = true
+  form.logo = null
+  touched.value.logo = true
+}
+
+const touchCoreFields = () => {
+  touched.value.user_id = true
+  touched.value.master_id = true
+  touched.value.authorized_by = true
+  touched.value.photo = true
+  touched.value.logo = true
+}
 
 const submit = () => {
-  Object.keys(form).forEach(key => touched.value[key] = true);
+  touchCoreFields()
+
   if (isFormValid.value) {
-    form.post(route('admin.certificates.update', props.certificate.id), {
-      _method: 'put',
-      forceFormData: true,
-      preserveScroll: true,
-    });
+    form
+      .post(route('admin.certificates.update', props.certificate.id), {
+        forceFormData: true,
+        preserveScroll: true,
+        onError: (errors) => {
+          // Puedes integrar aquí tu Toast/Alert si lo deseas
+          console.error('Errores al guardar:', errors)
+        }
+      })
   }
-};
+}
 </script>
 
 <style scoped>

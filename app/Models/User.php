@@ -107,6 +107,11 @@ class User extends Authenticatable
         ->withTimestamps(); // deja esto solo si la tabla subscriptions tiene timestamps
 }
 
+ public function lessons()
+    {
+        return $this->hasMany(\App\Models\Lesson::class);
+    }
+
      public function getAssignedCourseIdAttribute()
     {
         return $this->courses()->first()?->id;

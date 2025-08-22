@@ -11,4 +11,5 @@ class Currency extends Model
     {
         return $this->hasMany(Course::class);
     }
+    
 }

@@ -23,9 +23,7 @@ class CoursesController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-
         $courses = $user->courses()->withCount('videos')->get();
-
         return Inertia::render('Frontend/Dashboard/Index', [
             'courses' => $courses,
         ]);

@@ -61,13 +61,13 @@
                         :showValidation="touched.type"
                         :formError="form.errors.type"
                         :validateFunction="() => validateField('type')"
-                        :options="typeOptions"
+                        :options="typeOptionsComputed"
                         @blur="() => handleBlur('type')"
                       />
                     </div>
 
                     <!-- Video dependiente del curso (solo si type = VIDEO) -->
-                    <div class="col-md-6 mb-3" v-if="form.type === 2">
+                    <div class="col-md-6 mb-3" v-if="Number(form.type) === 2">
                       <FieldSelect
                         id="video_id"
                         label="Video del curso"
@@ -85,9 +85,27 @@
                       <small v-else-if="!loadingVideos && videoOptions.length === 0" class="text-muted">Este curso no tiene videos disponibles.</small>
                     </div>
 
+                    <!-- Lesson dependiente del curso (solo si type = LESSON) -->
+                    <div class="col-md-6 mb-3" v-if="Number(form.type) === 3">
+                      <FieldSelect
+                        id="lesson_id"
+                        label="Lección del curso"
+                        v-model="form.lesson_id"
+                        :required="true"
+                        :showValidation="touched.lesson_id"
+                        :formError="form.errors.lesson_id"
+                        :validateFunction="() => validateField('lesson_id')"
+                        :options="lessonOptions"
+                        :disabled="!form.course_id || loadingLessons"
+                        @blur="() => handleBlur('lesson_id')"
+                        placeholder="Selecciona una lección"
+                      />
+                      <small v-if="!form.course_id" class="text-muted">Selecciona primero un curso.</small>
+                      <small v-else-if="!loadingLessons && lessonOptions.length === 0" class="text-muted">Este curso no tiene lecciones disponibles.</small>
+                    </div>
+
                     <!-- Fecha de envío -->
                     <div class="col-md-4 mb-3">
-                 
                       <FieldDate
                         id="eva_send_date"
                         label="Fecha de envío"
@@ -114,8 +132,9 @@
                         @blur="() => handleBlur('eva_type')"
                       />
                     </div>
-                     <div class="col-md-4 mb-3">
-                     <FieldNumber
+
+                    <div class="col-md-4 mb-3">
+                      <FieldNumber
                         id="points_min"
                         label="Puntaje mínimo"
                         v-model="form.points_min"
@@ -223,6 +242,7 @@ import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue';
 import FieldNumber from '@/Components/Admin/Fields/FieldNumber.vue';
+
 const props = defineProps({
   evaluation: Object,
   courses: Array,
@@ -234,9 +254,10 @@ const props = defineProps({
 const form = useForm({
   course_id: props.evaluation.course_id ?? '',
   video_id: props.evaluation.video_id ?? '',
+  lesson_id: props.evaluation.lesson_id ?? '',    // <-- nuevo
   eva_send_date: props.evaluation.eva_send_date ?? '',
-  eva_type: props.evaluation.eva_type ?? 1, // modalidad
-  type: props.evaluation.type ?? 1,         // ámbito
+  eva_type: props.evaluation.eva_type ?? 1,       // modalidad
+  type: props.evaluation.type ?? 1,               // ámbito
   eva_comments: props.evaluation.eva_comments ?? '',
   title: props.evaluation.title ?? '',
   eva_video_file: null,
@@ -249,25 +270,32 @@ const keepVideo = ref(true);
 const touched = ref({});
 
 // Opciones selects
-const courseOptions = props.courses.map(c => ({
+const courseOptions = (props.courses || []).map(c => ({
   value: c.id,
   label: c.title
 }));
 
-const typeOptions = props.typeOptions && props.typeOptions.length
-  ? props.typeOptions
-  : [
-      { value: 1, label: 'Evaluación general del Curso' },
-      { value: 2, label: 'Evaluación para el Video' }
-    ];
+const typeOptionsComputed = computed(() => {
+  return (props.typeOptions && props.typeOptions.length)
+    ? props.typeOptions
+    : [
+        { value: 1, label: 'Evaluación general del Curso' },
+        { value: 2, label: 'Evaluación para el Video' },
+        { value: 3, label: 'Evaluación para la Lección' } // <-- nuevo
+      ];
+});
 
 const evaTypeOptions = [
   { value: 1, label: 'Cuestionario' },
   { value: 2, label: 'Video' }
 ];
 
+// Estado dependientes
 const loadingVideos = ref(false);
 const videoOptions = ref([]);
+
+const loadingLessons = ref(false);     // <-- nuevo
+const lessonOptions = ref([]);         // <-- nuevo
 
 const initialVideoUrl = computed(() =>
   props.evaluation?.eva_video_file ? `/storage/${props.evaluation.eva_video_file}` : ''
@@ -283,7 +311,11 @@ const validateField = (field) => {
   if (field === 'eva_send_date' && !form.eva_send_date) return 'La fecha de envío es obligatoria';
   if (field === 'eva_type' && !form.eva_type) return 'La modalidad de evaluación es obligatoria';
   if (field === 'type' && !form.type) return 'El tipo de evaluación es obligatorio';
-  if (form.type === 2 && field === 'video_id' && !form.video_id) return 'Debes seleccionar un video del curso';
+
+  // Dependientes
+  if (Number(form.type) === 2 && field === 'video_id' && !form.video_id) return 'Debes seleccionar un video del curso';
+  if (Number(form.type) === 3 && field === 'lesson_id' && !form.lesson_id) return 'Debes seleccionar una lección del curso';
+
   return '';
 };
 
@@ -292,8 +324,11 @@ const isFormValid = computed(() => {
                  !validateField('eva_send_date') &&
                  !validateField('eva_type') &&
                  !validateField('type');
-  const videoOk = form.type === 2 ? !validateField('video_id') : true;
-  return baseOk && videoOk;
+
+  const videoOk  = Number(form.type) === 2 ? !validateField('video_id')  : true;
+  const lessonOk = Number(form.type) === 3 ? !validateField('lesson_id') : true;
+
+  return baseOk && videoOk && lessonOk;
 });
 
 // Cargar videos por curso
@@ -325,27 +360,68 @@ const loadVideosForCourse = async (courseId, keepSelection = false) => {
   }
 };
 
+// Cargar lecciones por curso
+const loadLessonsForCourse = async (courseId, keepSelection = false) => {
+  if (!courseId || Number(form.type) !== 3) {
+    lessonOptions.value = [];
+    form.lesson_id = '';
+    return;
+  }
+
+  loadingLessons.value = true;
+  try {
+    const url = route('admin.evaluations.lessons.combo', { course: Number(courseId) || courseId });
+    const { data } = await axios.get(url);
+    lessonOptions.value = Array.isArray(data) ? data.map(l => ({ value: l.id, label: l.title })) : [];
+
+    if (keepSelection && form.lesson_id) {
+      const exists = lessonOptions.value.some(o => String(o.value) === String(form.lesson_id));
+      if (!exists) form.lesson_id = '';
+    } else if (!keepSelection) {
+      form.lesson_id = '';
+    }
+  } catch (e) {
+    console.error('Error cargando lecciones del curso:', e);
+    lessonOptions.value = [];
+    if (!keepSelection) form.lesson_id = '';
+  } finally {
+    loadingLessons.value = false;
+  }
+};
+
 // Inicial
 onMounted(() => {
-  loadVideosForCourse(form.course_id, true);
+  if (Number(form.type) === 2) loadVideosForCourse(form.course_id, true);
+  if (Number(form.type) === 3) loadLessonsForCourse(form.course_id, true);
 });
 
 // Watchers
 watch(() => form.course_id, (newCourseId, oldCourseId) => {
-  if (String(newCourseId) !== String(oldCourseId)) {
-    loadVideosForCourse(newCourseId, false);
-  }
+  if (String(newCourseId) === String(oldCourseId)) return;
+
+  // Reinicia dependientes
+  videoOptions.value = [];
+  lessonOptions.value = [];
+  form.video_id = '';
+  form.lesson_id = '';
+
+  if (Number(form.type) === 2) loadVideosForCourse(newCourseId, false);
+  if (Number(form.type) === 3) loadLessonsForCourse(newCourseId, false);
 });
 
 watch(() => form.type, (newType, oldType) => {
-  if (Number(newType) !== 2) {
-    // Pasó a COURSE: limpiar selección de video
-    videoOptions.value = [];
-    form.video_id = '';
-  } else if (Number(newType) === 2 && form.course_id) {
-    // Pasó a VIDEO: cargar lista para el curso actual
-    loadVideosForCourse(form.course_id, true);
-  }
+  const t = Number(newType);
+
+  // Limpia ambos dependientes siempre que cambia
+  videoOptions.value = [];
+  lessonOptions.value = [];
+  form.video_id = '';
+  form.lesson_id = '';
+
+  if (!form.course_id) return;
+
+  if (t === 2) loadVideosForCourse(form.course_id, true);
+  if (t === 3) loadLessonsForCourse(form.course_id, true);
 });
 
 // Envío
@@ -353,7 +429,10 @@ const submit = () => {
   Object.keys(form).forEach(key => (touched.value[key] = true));
   if (!isFormValid.value) return;
 
-  form.post(route('admin.evaluations.update', props.evaluation.id), {
+  // Si usas bandera para conservar video en backend:
+  const payload = { ...form.data(), keep_video: keepVideo.value ? 1 : 0 };
+
+  form.transform(() => payload).post(route('admin.evaluations.update', props.evaluation.id), {
     forceFormData: true,
     preserveScroll: true
   });

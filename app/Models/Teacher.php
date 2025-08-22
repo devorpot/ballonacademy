@@ -36,4 +36,8 @@ class Teacher extends Model
     {
         return $this->hasMany(Certificate::class, 'master_id');
     }
+     public function lessons()
+    {
+        return $this->hasMany(\App\Models\Lesson::class);
+    }
 }

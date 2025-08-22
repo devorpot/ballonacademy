@@ -6,12 +6,14 @@ enum EvaluationsTypes: int
 {
     case COURSE = 1; // Evaluación general del Curso
     case VIDEO  = 2; // Evaluación para el Video
+    case LESSON  = 3; // Evaluación para el Video
 
     public function label(): string
     {
         return match ($this) {
-            self::COURSE => 'Evaluación general del Curso',
-            self::VIDEO  => 'Evaluación para el Video',
+            self::COURSE => 'Evaluación Curso',
+            self::VIDEO  => 'Evaluación Video',
+             self::LESSON  => 'Evaluación Lección',
         };
     }
 

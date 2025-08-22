@@ -85,6 +85,25 @@
                       <small v-else-if="!loadingVideos && videoOptions.length === 0" class="text-muted">Este curso no tiene videos disponibles.</small>
                     </div>
 
+                    <!-- Lesson dependiente del curso (solo si type = LESSON) -->
+                  <div class="col-md-6 mb-3" v-if="Number(form.type) === 3">
+                    <FieldSelect
+                      id="lesson_id"
+                      label="Lección del curso"
+                      v-model="form.lesson_id"
+                      :required="true"
+                      :showValidation="touched.lesson_id"
+                      :formError="form.errors.lesson_id"
+                      :validateFunction="() => validateField('lesson_id')"
+                      :options="lessonOptions"
+                      :disabled="!form.course_id || loadingLessons"
+                      @blur="() => handleBlur('lesson_id')"
+                      placeholder="Selecciona una lección"
+                    />
+                    <small v-if="!form.course_id" class="text-muted">Selecciona primero un curso.</small>
+                    <small v-else-if="!loadingLessons && lessonOptions.length === 0" class="text-muted">Este curso no tiene lecciones disponibles.</small>
+                  </div>
+
                     <!-- Fecha envío -->
                     <div class="col-md-4 mb-3">
                       <FieldDate
@@ -203,162 +222,220 @@
 </template>
 
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
-import { route } from 'ziggy-js';
-import { ref, computed, watch } from 'vue';
-import axios from 'axios';
+import { Head, useForm } from '@inertiajs/vue3'
+import { route } from 'ziggy-js'
+import { ref, computed, watch } from 'vue'
+import axios from 'axios'
 
-import AdminLayout from '@/Layouts/AdminLayout.vue';
-import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
-import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
-import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
+// Layouts & UI
+import AdminLayout from '@/Layouts/AdminLayout.vue'
+import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue'
+import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue'
+import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue'
 
-import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
-import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
-import FieldText from '@/Components/Admin/Fields/FieldText.vue';
-import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
-import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue';
-import FieldNumber from '@/Components/Admin/Fields/FieldNumber.vue';
+// Fields
+import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue'
+import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue'
+import FieldText from '@/Components/Admin/Fields/FieldText.vue'
+import FieldDate from '@/Components/Admin/Fields/FieldDate.vue'
+import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue'
+import FieldNumber from '@/Components/Admin/Fields/FieldNumber.vue'
 
+// Props recibidos desde el controlador (create)
 const props = defineProps({
   users: Array,
   courses: Array,
   statusOptions: Array,
-  typeOptions: Array // opciones del enum EvaluationsTypes
-});
+  typeOptions: Array // opciones del enum EvaluationsTypes (1=COURSE, 2=VIDEO, 3=LESSON)
+})
 
-// Form
+// Form principal
 const form = useForm({
   course_id: '',
   video_id: '',
+  lesson_id: '',         // <-- nuevo
   eva_send_date: '',
-  eva_type: 1,   // modalidad (quiz/video), independiente
-  type: 1,       // ámbito (Course/Video)
+  eva_type: 1,           // modalidad (quiz/video), independiente del "type"
+  type: 1,               // ámbito (Course/Video/Lesson)
   eva_comments: '',
   title: '',
   eva_video_file: '',
   status: 'SEND',
-  points_min:1
-});
+  points_min: 1
+})
 
-const keepVideo = ref(false);
-const touched = ref({});
+const keepVideo = ref(false)
+const touched = ref({})
 
-// Opciones de selects
-const courseOptions = props.courses.map(c => ({
+// Opciones base para selects
+const courseOptions = (props.courses || []).map(c => ({
   value: c.id,
   label: c.title
-}));
+}))
 
+// Fallback por si no llegan desde backend
 const typeOptions = props.typeOptions && props.typeOptions.length
   ? props.typeOptions
   : [
       { value: 1, label: 'Evaluación general del Curso' },
-      { value: 2, label: 'Evaluación para el Video' }
-    ];
+      { value: 2, label: 'Evaluación para el Video' },
+      { value: 3, label: 'Evaluación para la Lección' }
+    ]
 
 const evaTypeOptions = [
   { value: 1, label: 'Cuestionario' },
   { value: 2, label: 'Video' }
-];
+]
 
-const loadingVideos = ref(false);
-const videoOptions = ref([]);
+// Estado para cargas dependientes
+const loadingVideos = ref(false)
+const videoOptions = ref([])
+
+const loadingLessons = ref(false)
+const lessonOptions = ref([])
 
 // UX helpers
 const handleBlur = (field) => {
-  touched.value[field] = true;
-};
+  touched.value[field] = true
+}
 
 const validateField = (field) => {
-  if (field === 'course_id' && !form.course_id) return 'El curso es obligatorio';
-  if (field === 'eva_send_date' && !form.eva_send_date) return 'La fecha de envío es obligatoria';
-  if (field === 'eva_type' && !form.eva_type) return 'La modalidad de evaluación es obligatoria';
-  if (field === 'type' && !form.type) return 'El tipo de evaluación es obligatorio';
-  if (form.type === 2 && field === 'video_id' && !form.video_id) return 'Debes seleccionar un video del curso';
-  return '';
-};
+  if (field === 'course_id' && !form.course_id) return 'El curso es obligatorio'
+  if (field === 'eva_send_date' && !form.eva_send_date) return 'La fecha de envío es obligatoria'
+  if (field === 'eva_type' && !form.eva_type) return 'La modalidad de evaluación es obligatoria'
+  if (field === 'type' && !form.type) return 'El tipo de evaluación es obligatorio'
+
+  // Dependientes por tipo
+  if (Number(form.type) === 2 && field === 'video_id' && !form.video_id) {
+    return 'Debes seleccionar un video del curso'
+  }
+  if (Number(form.type) === 3 && field === 'lesson_id' && !form.lesson_id) {
+    return 'Debes seleccionar una lección del curso'
+  }
+
+  // Extras
+  if (field === 'title' && !form.title) return 'El título es obligatorio'
+  if (field === 'points_min') {
+    const n = Number(form.points_min)
+    if (!Number.isFinite(n) || n < 1 || n > 100) return 'El puntaje mínimo debe estar entre 1 y 100'
+  }
+
+  return ''
+}
 
 const isFormValid = computed(() => {
   const baseOk = !validateField('course_id') &&
                  !validateField('eva_send_date') &&
                  !validateField('eva_type') &&
-                 !validateField('type');
-  const videoOk = form.type === 2 ? !validateField('video_id') : true;
-  return baseOk && videoOk;
-});
+                 !validateField('type') &&
+                 !validateField('title') &&
+                 !validateField('points_min')
 
-// Al cambiar type a COURSE, limpiar video_id
-watch(() => form.type, (newType) => {
-  if (Number(newType) !== 2) {
-    form.video_id = '';
+  const videoOk  = Number(form.type) === 2 ? !validateField('video_id')  : true
+  const lessonOk = Number(form.type) === 3 ? !validateField('lesson_id') : true
+
+  return baseOk && videoOk && lessonOk
+})
+
+// Limpieza de FKs al cambiar el tipo
+watch(() => form.type, async (newType) => {
+  const t = Number(newType)
+
+  // Siempre limpia ambos antes de volver a cargar
+  form.video_id = ''
+  videoOptions.value = []
+  form.lesson_id = ''
+  lessonOptions.value = []
+
+  // Cargar opciones según el tipo si ya hay curso seleccionado
+  if (form.course_id) {
+    if (t === 2) {
+      loadingVideos.value = true
+      try {
+        const url = route('admin.evaluations.videos.combo', { course: Number(form.course_id) || form.course_id })
+        const { data } = await axios.get(url)
+        videoOptions.value = Array.isArray(data) ? data.map(v => ({ value: v.id, label: v.title })) : []
+      } catch (e) {
+        console.error('Error cargando videos del curso:', e)
+        videoOptions.value = []
+      } finally {
+        loadingVideos.value = false
+      }
+    }
+
+    if (t === 3) {
+      loadingLessons.value = true
+      try {
+        const url = route('admin.evaluations.lessons.combo', { course: Number(form.course_id) || form.course_id })
+        const { data } = await axios.get(url)
+        lessonOptions.value = Array.isArray(data) ? data.map(l => ({ value: l.id, label: l.title })) : []
+      } catch (e) {
+        console.error('Error cargando lecciones del curso:', e)
+        lessonOptions.value = []
+      } finally {
+        loadingLessons.value = false
+      }
+    }
   }
-});
+})
 
-// Watcher: cargar videos cuando cambia el curso (si type = VIDEO)
+// Carga dependiente por curso
 watch(
   () => form.course_id,
   async (newCourseId) => {
-    form.video_id = '';
-    videoOptions.value = [];
+    // Reset de dependientes
+    form.video_id = ''
+    videoOptions.value = []
+    form.lesson_id = ''
+    lessonOptions.value = []
 
-    if (!newCourseId || Number(form.type) !== 2) return;
+    if (!newCourseId) return
 
-    loadingVideos.value = true;
-    try {
-      const courseId = Number(newCourseId) || newCourseId;
-      const url = route('admin.evaluations.videos.combo', { course: courseId });
-      const { data } = await axios.get(url);
-
-      videoOptions.value = Array.isArray(data)
-        ? data.map(v => ({ value: v.id, label: v.title }))
-        : [];
-    } catch (e) {
-      console.error('Error cargando videos del curso:', e);
-      videoOptions.value = [];
-    } finally {
-      loadingVideos.value = false;
-    }
-  }
-);
-
-// Si cambian a VIDEO y ya hay curso, cargar opciones
-watch(
-  () => form.type,
-  async (newType) => {
-    if (Number(newType) === 2 && form.course_id) {
-      loadingVideos.value = true;
+    // Si el tipo actual es VIDEO, cargar videos
+    if (Number(form.type) === 2) {
+      loadingVideos.value = true
       try {
-        const url = route('admin.evaluations.videos.combo', { course: Number(form.course_id) || form.course_id });
-        const { data } = await axios.get(url);
-        videoOptions.value = Array.isArray(data)
-          ? data.map(v => ({ value: v.id, label: v.title }))
-          : [];
+        const url = route('admin.evaluations.videos.combo', { course: Number(newCourseId) || newCourseId })
+        const { data } = await axios.get(url)
+        videoOptions.value = Array.isArray(data) ? data.map(v => ({ value: v.id, label: v.title })) : []
       } catch (e) {
-        console.error('Error cargando videos del curso:', e);
-        videoOptions.value = [];
+        console.error('Error cargando videos del curso:', e)
+        videoOptions.value = []
       } finally {
-        loadingVideos.value = false;
+        loadingVideos.value = false
       }
-    } else {
-      // Si pasan a COURSE, limpiar lista
-      videoOptions.value = [];
-      form.video_id = '';
+    }
+
+    // Si el tipo actual es LESSON, cargar lessons
+    if (Number(form.type) === 3) {
+      loadingLessons.value = true
+      try {
+        const url = route('admin.evaluations.lessons.combo', { course: Number(newCourseId) || newCourseId })
+        const { data } = await axios.get(url)
+        lessonOptions.value = Array.isArray(data) ? data.map(l => ({ value: l.id, label: l.title })) : []
+      } catch (e) {
+        console.error('Error cargando lecciones del curso:', e)
+        lessonOptions.value = []
+      } finally {
+        loadingLessons.value = false
+      }
     }
   }
-);
+)
 
 // Envío
 const submit = () => {
-  Object.keys(form).forEach(key => (touched.value[key] = true));
-  if (!isFormValid.value) return;
+  // Marcar todo como "tocado" para mostrar validaciones
+  Object.keys(form.data()).forEach(key => (touched.value[key] = true))
+  if (!isFormValid.value) return
 
   form.post(route('admin.evaluations.store'), {
     forceFormData: true,
     preserveScroll: true
-  });
-};
+  })
+}
 </script>
+
 
 <style scoped>
 .blur-overlay {

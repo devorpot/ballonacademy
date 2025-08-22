@@ -51,4 +51,20 @@ class Video extends Model
     }
 
 
+    // app/Models/Video.php
+
+public function lessonVideos()
+{
+    return $this->hasMany(LessonVideo::class);
+}
+
+public function lessons()
+{
+    return $this->belongsToMany(Lesson::class, 'lesson_videos', 'video_id', 'lesson_id')
+        ->withPivot(['course_id', 'order', 'active'])
+        ->withTimestamps()
+        ->orderBy('lesson_videos.order');
+}
+
+
 }

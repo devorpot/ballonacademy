@@ -9,7 +9,7 @@ use App\Models\Video;  // Importar el modelo de Video
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-
+ 
 class CourseController extends Controller
 {
     public function index(Request $request)

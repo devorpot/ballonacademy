@@ -56,3 +56,11 @@ export default {
   }
 };
 </script>
+
+
+<style>
+  textarea{
+    height: auto;
+    min-height: 200px;
+  }
+</style>

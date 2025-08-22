@@ -12,7 +12,7 @@ use Inertia\Inertia;
 
 class CertificateController extends Controller
 {
-      public function index(Request $request)
+    public function index(Request $request)
     {
         $allowedSorts = ['id', 'date_expedition', 'created_at'];
         $sortBy = in_array($request->get('sortBy'), $allowedSorts) ? $request->get('sortBy') : 'created_at';
@@ -45,8 +45,9 @@ class CertificateController extends Controller
     {
         $validated = $this->validateData($request);
 
+        // Carga inicial de archivos (cuando se suben en creación)
         $validated['photo'] = $this->handleUpload($request, 'photo', 'certificates/photos');
-        $validated['logo'] = $this->handleUpload($request, 'logo', 'certificates/logos');
+        $validated['logo']  = $this->handleUpload($request, 'logo', 'certificates/logos');
 
         Certificate::create($validated);
 
@@ -66,12 +67,28 @@ class CertificateController extends Controller
 
     public function update(Request $request, Certificate $certificate)
     {
+        // Al editar, no exigimos reglas de archivo si no vienen; igual que en CourseController
         $validated = $this->validateData($request, false);
 
         $certificate->fill($validated);
 
-        $certificate->photo = $this->updateFile($request, $certificate->photo, 'photo', 'certificates/photos');
-        $certificate->logo = $this->updateFile($request, $certificate->logo, 'logo', 'certificates/logos');
+        // Photo: soporta reemplazo o borrado con flag remove_photo
+        if ($request->hasFile('photo')) {
+            $this->deleteFile($certificate->photo);
+            $certificate->photo = $request->file('photo')->store('certificates/photos', 'public');
+        } elseif ($request->boolean('remove_photo')) {
+            $this->deleteFile($certificate->photo);
+            $certificate->photo = null;
+        }
+
+        // Logo: soporta reemplazo o borrado con flag remove_logo
+        if ($request->hasFile('logo')) {
+            $this->deleteFile($certificate->logo);
+            $certificate->logo = $request->file('logo')->store('certificates/logos', 'public');
+        } elseif ($request->boolean('remove_logo')) {
+            $this->deleteFile($certificate->logo);
+            $certificate->logo = null;
+        }
 
         $certificate->save();
 
@@ -99,6 +116,10 @@ class CertificateController extends Controller
         ]);
     }
 
+    /**
+     * $includeFiles=true: exige validación de archivos (crear).
+     * $includeFiles=false: no exige reglas de archivo (editar) para permitir flags remove_* sin adjuntar archivo.
+     */
     private function validateData(Request $request, $includeFiles = true)
     {
         $rules = [
@@ -109,11 +130,15 @@ class CertificateController extends Controller
             'date_end' => 'nullable|date',
             'date_expedition' => 'nullable|date',
             'comments' => 'nullable|string|max:1000',
+
+            // Flags de borrado desde el formulario de edición (no obligatorios)
+            'remove_photo' => 'sometimes|boolean',
+            'remove_logo'  => 'sometimes|boolean',
         ];
 
         if ($includeFiles) {
             $rules['photo'] = 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048';
-            $rules['logo'] = 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048';
+            $rules['logo']  = 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048';
         }
 
         return $request->validate($rules);
@@ -134,6 +159,10 @@ class CertificateController extends Controller
         }
     }
 
+    /**
+     * Aún disponible por si quieres usarla en otros contextos.
+     * En update() ya seguimos el patrón de flags como en cursos.
+     */
     private function updateFile(Request $request, $currentPath, $field, $path)
     {
         if ($request->hasFile($field)) {

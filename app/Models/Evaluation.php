@@ -18,6 +18,7 @@ class Evaluation extends Model
         'course_id',
         'teacher_id',
         'video_id',
+        'lesson_id',
         'eva_send_date',
         'eva_video_file',
         'eva_comments',
@@ -106,6 +107,10 @@ class Evaluation extends Model
         return $this->belongsTo(Video::class);
     }
 
+    public function lesson() {
+        return $this->belongsTo(\App\Models\Lesson::class);
+    }
+
 
 
     public function submissions() // entregas (EvaluationUser)
@@ -129,6 +134,13 @@ class Evaluation extends Model
     {
         return $query->where('status', \App\Enums\EvaluationUserStatus::SEND); // o el que uses como “enviada”
     }
+
+    public function lessons()
+{
+    return $this->belongsToMany(\App\Models\Lesson::class, 'lesson_evaluations')
+        ->withPivot(['order', 'active'])
+        ->withTimestamps();
+}
 
 
 

@@ -87,8 +87,7 @@
         <i class="bi bi-x-circle"></i> Quitar video actual
       </button>
     </div>
-}
-}
+ 
   </div>
 </template>
 

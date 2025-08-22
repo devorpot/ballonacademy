@@ -101,6 +101,14 @@
                         >
                           <i class="bi bi-play-circle me-1"></i> Videos
                         </Link>
+
+                        <Link
+                          :href="route('admin.courses.lessons.panel', course.id)"
+                          class="btn btn-outline-primary btn-sm"
+                          title="Gestionar Lecciones del curso"
+                        >
+                          <i class="bi bi-play-circle me-1"></i> Lecciones
+                        </Link>
                       </div>
                     </td>
                   </tr>
