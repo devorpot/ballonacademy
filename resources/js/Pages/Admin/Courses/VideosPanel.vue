@@ -32,7 +32,7 @@
  
 
       <!-- Tabla de Videos -->
-      <CourseVideosTable :course-id="props.course.id" :videos="props.videos" />
+ 
 
       <!-- Spinner global -->
       <SpinnerOverlay v-if="form.processing" />
@@ -54,7 +54,7 @@ import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
-import CourseVideosTable from '@/Pages/Admin/Courses/CourseVideosTable.vue';
+ 
 
 
 
