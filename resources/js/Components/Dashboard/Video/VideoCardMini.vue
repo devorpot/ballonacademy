@@ -1,4 +1,6 @@
 <template>
+
+ 
   <article
     class="card card-mini shadow-sm d-flex flex-row align-items-stretch overflow-hidden position-relative"
     :class="{ 'locked': !isAccessible, 'playing': isPlaying }"
@@ -34,6 +36,8 @@
         <h6 class="mb-0 text-primary text-uppercase fw-bold small line-clamp-2" :title="video.title">
   {{ video.title ?? '—' }}
 </h6>
+
+
 
         <!-- Badge Capítulo / Orden (opcional) -->
         <span v-if="video.order !== undefined && video.order !== null" class="badge text-bg-light">

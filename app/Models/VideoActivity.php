@@ -7,7 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class VideoActivity extends Model
 {
-    protected $fillable = ['user_id', 'course_id', 'video_id', 'event', 'second'];
+    protected $fillable = [
+    'user_id', 
+    'course_id', 
+    'video_id',
+    'lesson_id',
+    'event', 
+    'second'];
 
     public function user() {
         return $this->belongsTo(User::class);

@@ -7,6 +7,7 @@ use App\Models\Evaluation;
 use App\Models\Course;
 use App\Models\Video;
 use App\Models\Lesson; 
+use App\Models\LessonEvaluation; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -97,7 +98,7 @@ class EvaluationController extends Controller
 
     return redirect()->route('admin.evaluations.index')->with('success', 'Evaluación actualizada correctamente');
 }
-
+ 
 
     public function destroy(Evaluation $evaluation)
     {

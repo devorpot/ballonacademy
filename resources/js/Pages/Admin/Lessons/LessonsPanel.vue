@@ -50,6 +50,10 @@
       </div>
     </section>
 
+
+ 
+
+ 
     <!-- Tabla -->
     <section class="section-data">
       <div class="container-fluid">
@@ -92,19 +96,22 @@
                           {{ lesson.active ? 'Sí' : 'No' }}
                         </span>
                       </td>
-                      <td class="text-center">
-                        <div class="d-flex gap-2 justify-content-center flex-wrap">
-                          <span class="badge" :class="lesson.add_video ? 'bg-primary' : 'bg-light text-dark'">
-                            <i class="bi bi-film me-1"></i>{{ (lesson.videos?.length ?? 0) }}
-                          </span>
-                          <span class="badge" :class="lesson.add_evaluation ? 'bg-info text-dark' : 'bg-light text-dark'">
-                            <i class="bi bi-ui-checks-grid me-1"></i>{{ (lesson.evaluations?.length ?? 0) }}
-                          </span>
-                          <span class="badge" :class="lesson.add_materials ? 'bg-warning text-dark' : 'bg-light text-dark'">
-                            <i class="bi bi-paperclip me-1"></i>{{ (lesson.materials?.length ?? 0) }}
-                          </span>
-                        </div>
-                      </td>
+                     <!-- dentro de la celda Extras, en ambos <tr> -->
+ 
+                  <td class="text-center">
+                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                      <span class="badge" :class="countVideos(lesson) > 0 ? 'bg-primary' : 'bg-light text-dark'">
+                        <i class="bi bi-film me-1"></i>{{ countVideos(lesson) }}
+                      </span>
+                      <span class="badge" :class="countEvaluations(lesson) > 0 ? 'bg-info text-dark' : 'bg-light text-dark'">
+                        <i class="bi bi-ui-checks-grid me-1"></i>{{ countEvaluations(lesson) }}
+                      </span>
+                      <span class="badge" :class="countMaterials(lesson) > 0 ? 'bg-warning text-dark' : 'bg-light text-dark'">
+                        <i class="bi bi-paperclip me-1"></i>{{ countMaterials(lesson) }}
+                      </span>
+                    </div>
+                  </td>
+
                       <td class="text-end pe-4">
                         <div class="btn-group btn-group-sm">
                           <Link
@@ -133,6 +140,8 @@
                     </tr>
                   </template>
                 </draggable>
+
+
 
                 <!-- Modo filtrado sin drag -->
                 <tbody v-else>
@@ -286,6 +295,40 @@ const onDragEnd = async () => {
   }
 };
 
+/** Cuenta videos desde lesson_videos; fallback a videos si existiera. Por defecto solo activos. */
+const countVideos = (lesson, onlyActive = true) => {
+  const arr = Array.isArray(lesson.lesson_videos) ? lesson.lesson_videos
+            : Array.isArray(lesson.videos) ? lesson.videos
+            : [];
+  if (onlyActive) {
+    return arr.filter(v => typeof v.active === 'boolean' ? v.active : true).length;
+  }
+  return arr.length;
+};
+
+/** Cuenta evaluaciones desde lesson_evaluations; fallback a evaluations si existiera. */
+const countEvaluations = (lesson, onlyActive = true) => {
+  const arr = Array.isArray(lesson.lesson_evaluations) ? lesson.lesson_evaluations
+            : Array.isArray(lesson.evaluations) ? lesson.evaluations
+            : [];
+  if (onlyActive) {
+    return arr.filter(e => typeof e.active === 'boolean' ? e.active : true).length;
+  }
+  return arr.length;
+};
+
+/** Ajusta a tu estructura real si manejas materiales a nivel de lección. */
+const countMaterials = (lesson, onlyActive = true) => {
+  const arr = Array.isArray(lesson.lesson_materials) ? lesson.lesson_materials
+            : Array.isArray(lesson.materials) ? lesson.materials
+            : [];
+  if (onlyActive) {
+    return arr.filter(m => typeof m.active === 'boolean' ? m.active : true).length;
+  }
+  return arr.length;
+};
+
+
 // Eliminar lección
 const prepareDelete = (id) => {
   deletingId.value = id;
@@ -305,7 +348,8 @@ const deleteLesson = () => {
   Inertia.delete(route('admin.lessons.destroy', deletingId.value), {
     preserveScroll: true,
     onSuccess: () => {
-      lessonList.value = lessonList.value.filter(l => l.id !== deletingId.value);
+      lessonList.value = [...(props.course.lessons || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
       toast.value = { message: 'Lección eliminada correctamente', type: 'success' };
       cancelDelete();
     },

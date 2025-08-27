@@ -15,7 +15,7 @@
       <slot name="badge">
         <span v-if="level" class="badge bg-primary position-absolute top-0 start-0 m-2">
           {{ level }}
-        </span>
+        </span> 
       </slot>
     </div>
 

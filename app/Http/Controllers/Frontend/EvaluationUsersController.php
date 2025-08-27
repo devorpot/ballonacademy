@@ -12,7 +12,7 @@ use App\Models\EvaluationUser;
 use App\Models\Activity;
 use App\Enums\ActivityType;
 use App\Enums\EvaluationUserStatus;
-use App\Models\CourseActivity;
+use App\Models\CourseActivity; 
 
 class EvaluationUsersController extends Controller
 {
@@ -23,7 +23,7 @@ class EvaluationUsersController extends Controller
         // El status_label y otros accessors están disponibles en el modelo
         return response()->json($evaluations);
     }
-
+    
     // Guarda una nueva evaluación del usuario
     public function store(Request $request)
     {
@@ -128,10 +128,15 @@ class EvaluationUsersController extends Controller
             ->latest('created_at')
             ->first();
 
+
+        $evaluation->load(['course:id,title', 'lesson:id,course_id,teacher_id,order,active,title,instructions,description_short,publish_on,image,image_cover']);
+
+
         return Inertia::render('Frontend/Evaluations/Preview', [
             'evaluation' => $evaluation->load(['course']),
             'course'     => $course, // <- Agrega esto
             'questions'  => $questions,
+            'lesson'             => $evaluation->lesson,  
             'userHasSubmitted' => $userHasSubmitted,
             'lastEvaluationUser' => $lastEvaluationUser,
         ]);

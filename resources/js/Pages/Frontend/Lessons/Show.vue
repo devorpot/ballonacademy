@@ -11,17 +11,17 @@
         { label: course.title, route: 'dashboard.courses.lessons.index', params: course.id },
         { label: lesson.title, route: '' }
       ]"
-    />
+    /> 
  
-    
-
+ Lesson/Show
+ 
  <section class="section-panel">
    <div class="container-fluid">
        <!-- Encabezado lección -->
         <div class="card shadow-sm mb-3">
           <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between">
             <div class="mb-2 mb-md-0">
-              <h1 class="h4 mb-1">{{ lesson.order }}. {{ lesson.title }}</h1>
+              
               <p class="text-muted mb-0">{{ lesson.description_short }}</p>
             </div>
 
@@ -55,6 +55,10 @@
         </div>
    </div>
  </section>
+
+
+ 
+
  <section class="section-panel py-3">
       <div class="container-fluid">
           <div v-if="lesson.instructions" class="card shadow-sm mt-3">
@@ -64,9 +68,9 @@
           </div>
         </div>
       </div>
-    </section>
+  </section>
 
-    <section class="section-panel py-3">
+  <section class="section-panel py-3">
       <div class="container-fluid">
 
        <div class="row g-3">
@@ -85,80 +89,79 @@
                 </div>
 
                 <div v-else class="row">
-                  <div
+                   <div
                     v-for="video in videos"
                     :key="video.id"
-                    class="col-12 col-md-6 col-lg-4 mb-4"
-                  >
+                    class="col-12 col-md-6 col-lg-4 mb-4" >
                     <div class="card video-card h-100 shadow-sm">
-            <!-- Thumbnail -->
-                <div class="video-thumb-wrapper">
-                  <img
-                    :src="video.thumbnail ? `/storage/${video.thumbnail}` : 'https://placehold.co/300x180?text=Sin+imagen'"
-                    class="video-thumb"
-                    :alt="video.title || 'Video sin título'"
-                    :class="{ 'locked': !video.is_accessible }"
-                  />
+                  <!-- Thumbnail -->
+                      <div class="video-thumb-wrapper">
+                        <img
+                          :src="video.thumbnail ? `/storage/${video.thumbnail}` : 'https://placehold.co/300x180?text=Sin+imagen'"
+                          class="video-thumb"
+                          :alt="video.title || 'Video sin título'"
+                          :class="{ 'locked': !video.is_accessible }"
+                        />
 
-                  <!-- Duración -->
-                  <span class="video-duration">{{ video.duration || '00:00' }}</span>
+                        <!-- Duración -->
+                        <span class="video-duration">{{ video.duration || '00:00' }}</span>
 
-                  <!-- Candado overlay -->
-                  <div v-if="!video.is_accessible" class="video-locked-overlay">
-                    <i class="bi bi-lock-fill"></i>
-                  </div>
-                </div>
+                        <!-- Candado overlay -->
+                        <div v-if="!video.is_accessible" class="video-locked-overlay">
+                          <i class="bi bi-lock-fill"></i>
+                        </div>
+                      </div>
 
-                <!-- Body -->
-                <div class="card-body d-flex flex-column">
-                  <h6 class="card-title fw-bold mb-2">{{ video.title }}</h6>
+                      <!-- Body -->
+                      <div class="card-body d-flex flex-column">
+                        <h6 class="card-title fw-bold mb-2">{{ video.title }}</h6>
 
-                  <p class="text-muted small mb-2">
-                    Tamaño: {{ video.size || '—' }}
-                  </p>
+                        <p class="text-muted small mb-2">
+                          Tamaño: {{ video.size || '—' }}
+                        </p>
 
-                  <!-- Badges -->
-                  <div class="mb-3">
-                    <span
-                      class="badge me-2"
-                      :class="video.is_ended ? 'bg-success' : 'bg-secondary'"
-                    >
-                      {{ video.is_ended ? 'Completado' : 'Pendiente' }}
-                    </span>
+                        <!-- Badges -->
+                        <div class="mb-3">
+                          <span
+                            class="badge me-2"
+                            :class="video.is_ended ? 'bg-success' : 'bg-secondary'"
+                          >
+                            {{ video.is_ended ? 'Completado' : 'Pendiente' }}
+                          </span>
 
-                    <span
-                      class="badge"
-                      :class="video.is_accessible ? 'bg-primary' : 'bg-warning text-dark'"
-                    >
-                      {{ video.is_accessible ? 'Accesible' : 'Bloqueado' }}
-                    </span>
-                  </div>
+                          <span
+                            class="badge"
+                            :class="video.is_accessible ? 'bg-primary' : 'bg-warning text-dark'"
+                          >
+                            {{ video.is_accessible ? 'Accesible' : 'Bloqueado' }}
+                          </span>
+                        </div>
 
-                  <!-- Footer -->
-                  <div class="mt-auto">
-             
+                        <!-- Footer -->
+                        <div class="mt-auto" > 
+                   
 
-                    <Link
-  :href="route('dashboard.courses.lessons.videos.show', {
-    course: course.id,
-    lesson: lesson.id,
-    video: video.id
-  })" class="btn btn-outline-primary w-100"
->
-  Ver video
-</Link>
-                  </div>
-                </div>
-              </div>
+                           <Link
+                              v-if="video.is_accessible  == '1'"
+                              :href="route('dashboard.courses.lessons.videos.show', {
+                                course: course.id,
+                                lesson: lesson.id,
+                                video: video.id
+                              })"
+                              class="btn btn-outline-primary w-100"
+                            >
+                              Ver video
+                            </Link>
 
-
+                        </div>
+                      </div>
+                    </div>
                   </div> <!-- /col -->
                 </div>
               </div>
             </div>
           </div>
-
-         
+ 
         </div>
 
         <!-- Instrucciones -->
@@ -167,8 +170,10 @@
       </div>
     </section>
 
-
-   <section class="section-panel">
+<pre>
+  {{evaluations}}
+</pre>
+ <section class="section-panel">
   <div class="container-fluid">
     <!-- Evaluaciones en filas -->
     <div class="col-12" v-if="evaluations.length">
@@ -250,7 +255,7 @@
 
                 <a
                   class="btn btn-sm btn-outline-success"
-                  :href="evaluationsIndexUrl"
+                  :href="route('dashboard.courses.evaluations.evaluation.preview', { course: props.course.id, evaluation: ev.id })"
                   title="Ir a evaluaciones del curso"
                 >
                   Ver detalles
@@ -310,7 +315,9 @@ function videoDetailUrl(videoId) {
  * Si tienes una route name, puedes usar:
  *   return route('dashboard.courses.evaluations.index', props.course.id)
  */
-const evaluationsIndexUrl = computed(() => `/frontend/courses/${props.course.id}/evaluations`)
+const evaluationsIndexUrl = computed(() =>
+  route('courses.evaluations.evaluation.preview', { course: props.course.id })
+)
 </script>
 
 <style scoped>

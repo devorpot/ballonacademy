@@ -142,6 +142,11 @@ class Evaluation extends Model
         ->withTimestamps();
 }
 
+public function files()
+{
+    return $this->hasMany(EvaluationFile::class, 'evaluation_id')->orderBy('order');
+}
+
 
 
 

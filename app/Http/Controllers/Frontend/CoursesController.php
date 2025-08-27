@@ -33,15 +33,20 @@ class CoursesController extends Controller
      * Lista de cursos asignados al estudiante
      */
     public function index()
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        $courses = $user->courses()->withCount('videos')->get();
+    $courses = $user->courses()
+        ->select('courses.*')            // asegura selección de la tabla base
+        ->distinct('courses.id')       
+        ->withCount('videos')
+        ->get();
 
-        return Inertia::render('Frontend/Courses/Index', [
-            'courses' => $courses,
-        ]);
-    }
+    return Inertia::render('Frontend/Courses/Index', [
+        'courses' => $courses,
+    ]);
+}
+
 
     /**
      * Muestra los videos de un curso específico asignado al estudiante

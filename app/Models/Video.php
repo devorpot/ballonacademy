@@ -18,7 +18,7 @@ class Video extends Model
         'teacher_id',
         'comments',
         'image_cover',
- 
+        'lesson_id',
         'video_path',
         'order',
         'duration',

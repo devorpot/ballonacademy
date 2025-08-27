@@ -11,6 +11,7 @@
             { label: 'Crear', route: '' }
           ]"
         />
+ 
 
         <section class="section-heading my-2">
           <div class="container-fluid">
@@ -61,9 +62,7 @@
                         @blur="() => handleBlur('title')"
                       />
                     </div>
-                    <div class="col-md-6 mb-3">
-                       
-                    </div>
+           
 
                     <div class="col-md-6 mb-3">
                       <FieldText
@@ -87,17 +86,7 @@
                       />
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                      <FieldText
-                        id="comments"
-                        label="Comentarios"
-                        v-model="form.comments"
-                        :showValidation="touched.comments"
-                        :formError="form.errors.comments"
-                        @blur="() => handleBlur('comments')"
-                      />
-                    </div>
-
+                   
                     <div class="col-md-6 mb-3">
                       <FieldSelect
                         id="course_id"
@@ -111,6 +100,25 @@
                         @blur="() => handleBlur('course_id')"
                       />
                     </div>
+
+                    <!-- Nuevo select para lección -->
+                    <div class="col-md-6 mb-3">
+                      
+                        <FieldSelect
+                          id="lesson_id"
+                          :key="form.course_id"     
+                          label="Lección (opcional)"
+                          v-model="form.lesson_id"
+                          :options="lessonOptions"
+                          :disabled="!form.course_id || loadingLessons"
+                          :showValidation="touched.lesson_id"
+                          :formError="form.errors.lesson_id"
+                          @blur="() => handleBlur('lesson_id')"
+                          helper="Selecciona primero un curso para cargar sus lecciones"
+                        />
+                        <small v-if="loadingLessons" class="text-muted">Cargando lecciones…</small>
+                      </div>
+                  
 
                     <div class="col-md-6 mb-3">
                       <FieldSelect
@@ -158,9 +166,12 @@
   </AdminLayout>
 </template>
 
+
+
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { Head, useForm, router } from '@inertiajs/vue3'
+import { ref, computed, watch } from 'vue'
+ 
 import { route } from 'ziggy-js';
 
 import AdminLayout from '@/Layouts/AdminLayout.vue';
@@ -176,16 +187,20 @@ import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue';
 
 const props = defineProps({
   courses: Array,
-  teachers: Array
+  teachers: Array,
+  lessons: Array,
+  selected_course:Number
 });
+
+
 
 const form = useForm({
   title: '',
   description: '',
   description_short: '',
   comments: '',
- 
-  course_id: '',
+  lesson_id: '',
+  course_id: props.selected_course,
   teacher_id: '',
   image_cover: null,
   video_path: null
@@ -193,8 +208,15 @@ const form = useForm({
 
 const touched = ref({});
 
+
+const loadingLessons = ref(false)
+
 const courseOptions = computed(() =>
   props.courses.map(c => ({ value: c.id, label: c.title }))
+);
+
+const lessonOptions = computed(() =>
+  props.lessons.map(l => ({ value: l.id, label: l.title }))
 );
 
 const teacherOptions = computed(() =>
@@ -235,6 +257,27 @@ const submit = () => {
     });
   }
 };
+
+watch(
+  () => form.course_id,
+  (newVal, oldVal) => {
+    // Limpia selección de lección al cambiar curso
+    form.lesson_id = ''
+
+    // Si no hay curso seleccionado, deja vacío el listado de lecciones
+    if (!newVal) return
+
+    // Recarga solo las props necesarias desde el backend
+    router.visit(route('admin.videos.create', { course_id: newVal }), {
+      preserveScroll: true,
+      preserveState: true,
+      replace: true,
+      only: ['lessons', 'selected_course'],
+      onStart: () => (loadingLessons.value = true),
+      onFinish: () => (loadingLessons.value = false),
+    })
+  }
+)
 </script>
 
 <style scoped>

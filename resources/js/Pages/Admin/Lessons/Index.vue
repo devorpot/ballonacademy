@@ -8,6 +8,7 @@
         { label: 'Lecciones', route: '' }
       ]"
     />
+ 
 
     <!-- Heading -->
     <section class="section-heading">
@@ -145,34 +146,40 @@
                       </span>
                       <span v-else class="text-muted">N/A</span>
                     </td>
-                    <td class="text-center">
-                      <div class="d-flex gap-2 justify-content-center flex-wrap">
-                        <span
-                          class="badge"
-                          :class="lesson.add_video ? 'bg-primary' : 'bg-light text-dark'"
-                          title="Videos"
-                        >
-                          <i class="bi bi-film me-1"></i>
-                          {{ (lesson.videos?.length ?? 0) }}
-                        </span>
-                        <span
-                          class="badge"
-                          :class="lesson.add_evaluation ? 'bg-info text-dark' : 'bg-light text-dark'"
-                          title="Evaluaciones"
-                        >
-                          <i class="bi bi-ui-checks-grid me-1"></i>
-                          {{ (lesson.evaluations?.length ?? 0) }}
-                        </span>
-                        <span
-                          class="badge"
-                          :class="lesson.add_materials ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                          title="Materiales"
-                        >
-                          <i class="bi bi-paperclip me-1"></i>
-                          {{ (lesson.materials?.length ?? 0) }}
-                        </span>
-                      </div>
-                    </td>
+                   <td class="text-center">
+  <div class="d-flex gap-2 justify-content-center flex-wrap">
+    <!-- Videos -->
+    <span
+      class="badge"
+      :class="countVideos(lesson) > 0 ? 'bg-primary' : 'bg-light text-dark'"
+      title="Videos asignados a la lección"
+    >
+      <i class="bi bi-film me-1"></i>
+      {{ countVideos(lesson) }}
+    </span>
+
+    <!-- Evaluaciones -->
+    <span
+      class="badge"
+      :class="countEvaluations(lesson) > 0 ? 'bg-info text-dark' : 'bg-light text-dark'"
+      title="Evaluaciones asignadas a la lección"
+    >
+      <i class="bi bi-ui-checks-grid me-1"></i>
+      {{ countEvaluations(lesson) }}
+    </span>
+
+    <!-- Materiales (opcional, si lo manejas igual) -->
+    <span
+      class="badge"
+      :class="countMaterials(lesson) > 0 ? 'bg-warning text-dark' : 'bg-light text-dark'"
+      title="Materiales de apoyo"
+    >
+      <i class="bi bi-paperclip me-1"></i>
+      {{ countMaterials(lesson) }}
+    </span>
+  </div>
+</td>
+
                     <td class="text-end pe-4">
                       <div class="btn-group btn-group-sm">
                         <Link
@@ -315,6 +322,41 @@ const formatDate = (d) => {
   return date.toISOString().slice(0, 10);
 };
 
+/** Cuenta videos desde lesson_videos; fallback a videos si existiera. Por defecto solo activos. */
+const countVideos = (lesson, onlyActive = true) => {
+  const arr = Array.isArray(lesson.lesson_videos) ? lesson.lesson_videos
+            : Array.isArray(lesson.videos) ? lesson.videos
+            : [];
+  if (onlyActive) {
+    // lesson_videos: item.active; videos (fallback) puede no tener active
+    return arr.filter(v => typeof v.active === 'boolean' ? v.active : true).length;
+  }
+  return arr.length;
+};
+
+/** Cuenta evaluaciones desde lesson_evaluations; fallback a evaluations si existiera. */
+const countEvaluations = (lesson, onlyActive = true) => {
+  const arr = Array.isArray(lesson.lesson_evaluations) ? lesson.lesson_evaluations
+            : Array.isArray(lesson.evaluations) ? lesson.evaluations
+            : [];
+  if (onlyActive) {
+    // lesson_evaluations: item.active; evaluations (fallback) a veces no trae active
+    return arr.filter(e => typeof e.active === 'boolean' ? e.active : true).length;
+  }
+  return arr.length;
+};
+
+/** Si vas a manejar materiales igual que videos/evals. Ajusta a tu estructura real. */
+const countMaterials = (lesson, onlyActive = true) => {
+  const arr = Array.isArray(lesson.lesson_materials) ? lesson.lesson_materials
+            : Array.isArray(lesson.materials) ? lesson.materials
+            : [];
+  if (onlyActive) {
+    return arr.filter(m => typeof m.active === 'boolean' ? m.active : true).length;
+  }
+  return arr.length;
+};
+
 const filteredLessons = computed(() => {
   let data = props.lessons || [];
   // texto
@@ -361,6 +403,12 @@ const sortedLessons = computed(() => {
         aVal = a.order ?? 0;
         bVal = b.order ?? 0;
         break;
+        case 'videos_count':
+          aVal = countVideos(a); bVal = countVideos(b); 
+        break;
+        case 'evals_count':
+         aVal = countEvaluations(a); bVal = countEvaluations(b); 
+      break;
       default:
         aVal = (a[sortKey.value] ?? '').toString().toLowerCase();
         bVal = (b[sortKey.value] ?? '').toString().toLowerCase();

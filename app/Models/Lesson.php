@@ -58,7 +58,7 @@ class Lesson extends Model
     }
 
     public function scopePublished($query)
-    {
+     {
         return $query->whereDate('publish_on', '<=', now()->toDateString());
     }
 

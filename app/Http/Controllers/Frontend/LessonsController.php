@@ -11,8 +11,8 @@ use Inertia\Inertia;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Video;
-
- 
+use App\Models\LessonVideo;
+  
 use App\Models\Teacher;
 
 
@@ -172,6 +172,8 @@ class LessonsController extends Controller
         abort(403, 'No estás suscrito a este curso.');
     }
 
+   
+
     $course = Course::findOrFail($courseId);
 
     // Cargar lección con videos y evaluaciones con los campos solicitados
@@ -206,7 +208,7 @@ class LessonsController extends Controller
                     'evaluations.points_min',
                 ])
                 ->with([
-                    'teacher:id,firstname,lastname',
+                    'teacher:id,firstname',
                     'video:id,title',
                 ])
                 ->where('evaluations.course_id', $courseId)
@@ -410,7 +412,7 @@ $assignedVideos = $lesson->assignedVideos()
             ->exists();
 
         if (! $hasEndedPrevious) {
-            abort(403, 'Debes completar el video anterior de esta lección antes de continuar.');
+            abort(403, 'Debes completar el  video anterior de esta lección antes de continuar.');
         }
     }
 
@@ -490,16 +492,20 @@ $assignedVideos = $lesson->assignedVideos()
         ->select('id','title','description','type','uploaded','file_src','video_src','img_src')
         ->get();
 
+
+ $allVideos = $this->videosByCourseOrderedByLesson((int)$courseId);
+ $lastVideoIdLesson = $this->lastVideoIdByCourseOrderedByLesson($courseId);
+ $firstVideoIdLesson = $this->firstVideoIdByCourseOrderedByLesson($courseId);
     // 12) Respuesta
-    return Inertia::render('Frontend/Lessons/Videos/Show', [
+    return Inertia::render('Frontend/Lessons/Videos/ShowVideo', [
         'course'              => $course->only(['id','title','image_cover']),
         'lesson'              => $lesson->only(['id','title','order']),
         'video'               => [
             ...$video->toArray(),
             'captions' => $captions,
         ],
-        'previousVideo'       => $previousVideo?->only(['id','title']),
-        'nextVideo'           => $nextVideo?->only(['id','title']),
+        'previousVideo'       => $previousVideo?->only(['id','title','image_cover']),
+        'nextVideo'           => $nextVideo?->only(['id','title','image_cover']),
         'nextVideoAccessible' => $nextVideoAccessible,
         'videos'              => $videos->map(fn ($v) => [
             'id'            => $v->id,
@@ -513,8 +519,63 @@ $assignedVideos = $lesson->assignedVideos()
         'videoEvaluations'    => $videoEvaluations,
         'courseEvaluations'   => $courseEvaluations,
         'videoResources'      => $videoResources,
+        'allVideos' => $allVideos,
+        'firstVideoIdLesson' => $firstVideoIdLesson,
+        'lastVideoIdLesson' => $lastVideoIdLesson
     ]);
 }
+
+  protected function videosByCourseOrderedByLesson(int $courseId)
+    {
+        return LessonVideo::query() // si tu modelo es singular, cámbialo por LessonVideo::query()
+            ->where('lesson_videos.course_id', $courseId)
+            ->join('lessons', function ($q) use ($courseId) {
+                $q->on('lessons.id', '=', 'lesson_videos.lesson_id')
+                  ->where('lessons.course_id', '=', $courseId);
+            })
+            ->join('videos', 'videos.id', '=', 'lesson_videos.video_id')
+            ->orderBy('lessons.order')   // número/orden de la lección
+            ->orderBy('videos.id')       // desempate dentro de la misma lección (opcional)
+            ->get([
+                'videos.id',
+                'videos.title',
+                'videos.image_cover',
+                'videos.duration',
+                'videos.size',
+                'lesson_videos.lesson_id',
+                'lessons.order as lesson_number',
+                'lessons.title as lesson_title',
+            ]);
+    }
+
+    protected function lastVideoIdByCourseOrderedByLesson(int $courseId): ?int
+    {
+        return \App\Models\LessonVideo::query() // usa LessonVideo si tu modelo es singular
+            ->where('lesson_videos.course_id', $courseId)
+            ->join('lessons', function ($q) use ($courseId) {
+                $q->on('lessons.id', '=', 'lesson_videos.lesson_id')
+                  ->where('lessons.course_id', '=', $courseId);
+            })
+            ->join('videos', 'videos.id', '=', 'lesson_videos.video_id')
+            ->orderByDesc('lessons.order')   // última lección
+            ->orderByDesc('videos.id')       // último dentro de esa lección (desempate)
+            ->value('videos.id');            // devuelve solo el id o null
+    }
+
+    protected function firstVideoIdByCourseOrderedByLesson(int $courseId): ?int
+{
+    return LessonVideo::query()
+        ->where('lesson_videos.course_id', $courseId)
+        ->join('lessons', function ($q) use ($courseId) {
+            $q->on('lessons.id', '=', 'lesson_videos.lesson_id')
+              ->where('lessons.course_id', '=', $courseId);
+        })
+        ->join('videos', 'videos.id', '=', 'lesson_videos.video_id')
+        ->orderBy('lessons.order')   // primera lección del curso
+        ->orderBy('videos.id')       // primer video dentro de esa lección
+        ->value('videos.id');        // retorna solo el ID o null si no hay
+}
+
 
 
 }

@@ -10,6 +10,10 @@
       ]"
     />
 
+
+
+ 
+
     <section class="section-panel py-3">
       <div class="container-fluid">
         <!-- Empty -->
@@ -73,13 +77,7 @@
                     Ver Lecciones
                   </Link>
 
-                  <Link
-                    :href="showUrl(course.id)"
-                    class="btn btn-outline-primary btn-sm"
-                    :title="`Ver curso ${course.title}`"
-                  >
-                    Ver curso
-                  </Link>
+                   
                 </div>
               </div>
             </article>

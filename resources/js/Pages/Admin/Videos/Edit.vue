@@ -69,6 +69,21 @@
                         @blur="() => handleBlur('course_id')"
                       />
                     </div>
+                      <div class="col-md-6 mb-3">
+                      <FieldSelect
+                        id="lesson_id"
+                        :key="form.course_id"              
+                        label="Lección (opcional)"
+                        v-model="form.lesson_id"
+                        :options="lessonOptions"
+                        :disabled="!form.course_id || loadingLessons"
+                        :showValidation="touched.lesson_id"
+                        :formError="form.errors.lesson_id"
+                        @blur="() => handleBlur('lesson_id')"
+                      />
+                      <small v-if="loadingLessons" class="text-muted">Cargando lecciones…</small>
+                    </div>
+
 
                     <div class="col-md-6 mb-3">
                       <FieldSelect
@@ -122,16 +137,7 @@
                       />
                     </div>
 
-                    <div class="col-md-12 mb-3">
-                      <FieldTextarea
-                        id="comments"
-                        label="Comentarios"
-                        v-model="form.comments"
-                        :showValidation="touched.comments"
-                        :formError="form.errors.comments"
-                        @blur="() => handleBlur('comments')"
-                      />
-                    </div>
+                     
 
                    
 
@@ -210,8 +216,8 @@
 </template>
 
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { Head, useForm, router } from '@inertiajs/vue3'
+import { ref, computed, watch } from 'vue'
 import { route } from 'ziggy-js';
 
 import AdminLayout from '@/Layouts/AdminLayout.vue';
@@ -237,6 +243,8 @@ const props = defineProps({
   courses: Array,
   teachers: Array,
   course:Object,
+    lessons: Array,
+      selected_course: Number, 
   initialMaterials: {
     type: Array,
     default: () => []
@@ -249,7 +257,7 @@ const form = useForm({
   description: props.video.description,
   description_short: props.video.description_short,
   comments: props.video.comments,
- 
+  lesson_id: props.video.lesson_id ?? '', 
   course_id: props.video.course_id,
   teacher_id: props.video.teacher_id,
   image_cover: null,     // si suben una nueva
@@ -257,6 +265,8 @@ const form = useForm({
   keep_image: !!props.video.image_cover,
   keep_video: !!props.video.video_path
 });
+
+const loadingLessons = ref(false)
 
 const imagePreview = props.video.image_cover ? '/storage/' + props.video.image_cover : null;
 const touched = ref({});
@@ -272,6 +282,9 @@ const teacherOptions = computed(() =>
   }))
 );
 
+const lessonOptions = computed(() =>
+  (props.lessons ?? []).map(l => ({ value: l.id, label: l.title }))
+)
 
  
  
@@ -349,6 +362,24 @@ function getLabel(lang) {
     default: return lang.toUpperCase()
   }
 }
+
+watch(
+  () => form.course_id,
+  (newVal) => {
+    form.lesson_id = '' // limpiar selección
+
+    if (!newVal) return
+
+    router.visit(route('admin.videos.edit', { video: props.video.id, course_id: newVal }), {
+      preserveScroll: true,
+      preserveState: true,
+      replace: true,
+      only: ['lessons', 'selected_course', 'course'], // course es útil para breadcrumbs
+      onStart: () => (loadingLessons.value = true),
+      onFinish: () => (loadingLessons.value = false),
+    })
+  }
+)
 
 </script>
 

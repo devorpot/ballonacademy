@@ -2,10 +2,10 @@
   <nav class="top-nav navbar-card d-flex justify-content-between align-items-center px-3 py-2">
     <!-- Logo -->
     <div class="d-flex align-items-center gap-2">
-      <div class="logo-circle shadow-sm">
-        <img src="https://placehold.co/100x100" alt="Logo" height="38" />
-      </div>
-      <span class="fs-5 fw-semibold app-title d-none d-md-inline ms-2">Academia de Globos</span>
+  <Link :href="route('dashboard.index')">
+     <span class="fs-5 fw-semibold app-title d-none d-md-inline ms-2">Academia Internacional de Globos</span>
+   </Link>
+      
     </div>
 
     <!-- Menú derecho -->

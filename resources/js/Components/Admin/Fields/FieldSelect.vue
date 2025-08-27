@@ -12,7 +12,7 @@
         <option value="">Seleccione una opción</option>
         <option v-for="option in options" :key="option.value" :value="option.value">
           {{ option.label }}
-        </option>
+        </option> 
       </select>
       <label :for="id">{{ label }} <strong v-if="required">*</strong></label>
       <div v-if="(showValidation && validationMessage) || formError" class="invalid-feedback">

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\EvaluationUser;
 use App\Models\User;
+use App\Models\Lesson; 
+use App\Models\LessonEvaluation; 
 use App\Models\Course;
 use App\Enums\EvaluationUserStatus;  
 use Inertia\Inertia;

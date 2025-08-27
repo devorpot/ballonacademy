@@ -8,10 +8,16 @@
       :breadcrumbs="[
         { label: 'Dashboard', route: 'dashboard.index' },
         { label: 'Mis Cursos', route: 'dashboard.courses.index' },
-        { label: course.title, route: 'dashboard.courses.show', params: course.id },
-        { label: 'Lecciones', route: '' }
+  
+        { label: course.title+ ` Lecciones`, route: '' }
       ]"
     />
+
+    Lessons/Index
+ 
+
+
+ 
     <section class="section-panel py-3">
       <div class="container-fluid">
         <div class="row">
@@ -135,15 +141,13 @@
                             <div class="fw-semibold" :class="{ 'text-muted': !video.is_accessible }">
                               {{ video.title }}
                             </div>
-                            <small v-if="video.description" class="text-muted d-block">
-                              {{ video.description }}
-                            </small>
+                    
                           </div>
 
                           <small class="text-muted text-nowrap" v-if="video.duration">{{ video.duration }}</small>
 
                           <div class="ms-2 d-flex gap-2">
-                            <button
+                            <!--<button
                               class="btn btn-sm btn-outline-primary"
                               @click="openPreview(video)"
                               :disabled="!video.is_accessible || !previewUrl(video)"
@@ -151,7 +155,21 @@
                             >
                               <i class="bi bi-eye"></i>
                               <span class="d-none d-sm-inline ms-1">Vista previa</span>
-                            </button>
+                            </button>-->
+                            <Link
+                                v-if="video.is_accessible"
+                                :href="route('dashboard.courses.lessons.videos.show', {
+                                  course: course.id,
+                                  lesson: lesson.id,
+                                  video: video.id
+                                })"
+                                class="btn btn-outline-primary w-100"
+                              >
+                                Ver video
+                              </Link>
+
+                               
+
                           </div>
                         </div>
                       </li>
@@ -275,10 +293,17 @@ function embedUrl(video) {
   return ''
 }
 function openPreview(video) {
+
+  /*
   if (!previewUrl(video) || !video.is_accessible) return
   currentVideo.value = video
   showPreview.value = true
   document.body.classList.add('modal-open')
+  */
+
+
+
+
 }
 function closePreview() {
   showPreview.value = false

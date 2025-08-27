@@ -61,6 +61,6 @@ export default {
 <style>
   textarea{
     height: auto;
-    min-height: 200px;
+    min-height: 200px!important;
   }
 </style>

@@ -7,7 +7,9 @@ import { route } from 'ziggy-js';
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue';
 import FieldText from '@/Components/Admin/Fields/FieldText.vue';
-
+import EvaluationStatusHeader from '@/Components/Dashboard/Evaluation/EvaluationStatusHeader.vue';
+import EvaluationForm from '@/Components/Dashboard/Evaluation/EvaluationForm.vue';
+import EvaluationVideo from '@/Components/Dashboard/Evaluation/EvaluationVideo.vue';
 const props = defineProps({
   evaluation: Object,
   questions: Array,
@@ -15,6 +17,10 @@ const props = defineProps({
   userHasSubmitted: Boolean,
   lastEvaluationUser: Object, 
 });
+
+const evaType = computed(() => parseInt(props.evaluation?.eva_type ?? 1))
+const isQuiz = computed(() => evaType.value === 1)
+const isVideoOnly = computed(() => evaType.value === 2)
 
 const responses = ref({});
 const currentIndex = ref(0);
@@ -134,264 +140,46 @@ function submitEvaluation() {
         { label: 'Evaluaciones', route: '' },
       ]"
     />
-    <div class="container-fluid">
-      <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8">
 
-          <!-- Encabezado de estado, ícono y puntaje -->
-          <div class="pt-4 pb-2 text-center">
-            <!-- Ícono según estado -->
-            <span v-if="lastEvaluationUser && lastEvaluationUser.status === 999">
-              <i class="bi bi-award-fill text-success" style="font-size:2.5rem;"></i>
-            </span>
-            <span v-else-if="lastEvaluationUser && lastEvaluationUser.status === 111">
-              <i class="bi bi-send-check-fill text-primary" style="font-size:2.5rem;"></i>
-            </span>
-            <span v-else-if="lastEvaluationUser && lastEvaluationUser.status === 222">
-              <i class="bi bi-hourglass-split text-warning" style="font-size:2.5rem;"></i>
-            </span>
-            <span v-else-if="lastEvaluationUser && lastEvaluationUser.status === 333">
-              <i class="bi bi-x-octagon-fill text-danger" style="font-size:2.5rem;"></i>
-            </span>
 
-            <!-- Estado -->
-            <div class="fs-5 mb-1 mt-2" v-if="lastEvaluationUser">
-              Estado:
-              <span :class="{
-                  'text-success fw-bold': lastEvaluationUser.status === 999,
-                  'text-primary fw-bold': lastEvaluationUser.status === 111,
-                  'text-warning fw-bold': lastEvaluationUser.status === 222,
-                  'text-danger fw-bold': lastEvaluationUser.status === 333
-                }">
-                {{
-                  lastEvaluationUser.status === 111 ? 'Enviado' :
-                  lastEvaluationUser.status === 222 ? 'En revisión' :
-                  lastEvaluationUser.status === 333 ? 'No aprobado' :
-                  lastEvaluationUser.status === 999 ? 'Aprobado' : 'Desconocido'
-                }}
-              </span>
-            </div>
-            <div class="small text-muted mb-3" v-if="lastEvaluationUser">
-              Fecha de envío: {{ lastCreatedAt }}
-            </div>
+  
+<!-- Dentro del template donde tenías el bloque original -->
+<EvaluationStatusHeader
+  :lastEvaluationUser="lastEvaluationUser"
+  :userScore="userScore"
+  :lastCreatedAt="lastCreatedAt"
+/>
 
-            <!-- Puntaje si es APROBADO -->
-            <div v-if="lastEvaluationUser && lastEvaluationUser.status === 999 && typeof userScore === 'number'" class="mb-2">
-              <div class="d-flex flex-column align-items-center justify-content-center my-3">
-                <div class="display-2 fw-bold text-success" style="line-height: 1;">
-                  {{ userScore }}
-                </div>
-                <div class="fs-5 fw-bold text-success mt-1">¡Felicidades, has aprobado!</div>
-                <div class="text-muted" style="font-size:1.1rem;">¡Excelente trabajo!</div>
-              </div>
-            </div>
+ 
+ 
+<!--si es formulario-->
+<section v-if="evaType === 1">
+ 
 
-            <!-- Puntaje si es NO APROBADO -->
-            <div v-if="lastEvaluationUser && lastEvaluationUser.status === 333 && typeof userScore === 'number'" class="mb-2">
-              <div class="d-flex flex-column align-items-center justify-content-center my-3">
-                <div class="display-4 fw-bold text-danger" style="line-height: 1;">
-                  {{ userScore }}
-                </div>
-                <div class="fs-5 fw-bold text-danger mt-1">No aprobado</div>
-                <div class="text-muted mb-1" style="font-size:1.1rem;">Puedes volver a intentarlo</div>
-              </div>
-            </div>
-          </div>
+  <EvaluationForm
+  :evaluation="evaluation"
+  :questions="questions"
+  :user-has-submitted="userHasSubmitted"
+  :last-evaluation-user="lastEvaluationUser"
+  :last-comments="lastComments"
+  :last-files="lastFiles"
+/>
+ 
+</section>
 
-          <!-- Si ha enviado alguna evaluación -->
-          <div v-if="userHasSubmitted && lastEvaluationUser">
-            <div class="row g-3">
-              <!-- Comentarios -->
-              <div class="col-12" v-if="lastComments">
-                <div class="card mb-2">
-                  <div class="card-header">Comentarios</div>
-                  <div class="card-body">
-                    <div class="border rounded p-2 bg-light">{{ lastComments }}</div>
-                  </div>
-                </div>
-              </div>
-              <!-- Archivo -->
-              <div class="col-12" v-if="lastFiles">
-                <div class="card mb-2">
-                  <div class="card-header">Archivo adjunto</div>
-                  <div class="card-body text-center">
-                    <video
-                      v-if="/\.(mp4|webm|ogg)$/i.test(lastFiles)"
-                      controls style="max-width:300px;"
-                      :src="`/storage/${lastFiles}`"
-                    ></video>
-                    <img
-                      v-else-if="/\.(jpe?g|png|gif|webp)$/i.test(lastFiles)"
-                      :src="`/storage/${lastFiles}`"
-                      style="max-width: 300px; border-radius: 0.5rem;"
-                      class="shadow"
-                    />
-                    <div v-else>
-                      <a :href="`/storage/${lastFiles}`" download class="btn btn-outline-secondary btn-sm" target="_blank">
-                        Descargar archivo
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
+<section v-if="evaType === 2">
 
-              <!-- Respuestas SOLO si es APROBADO -->
-              <div class="col-12" v-if="lastEvaluationUser.status === 999">
-                <div class="card mb-3">
-                  <div class="card-header">Tus respuestas</div>
-                  <ul class="list-group list-group-flush">
-                    <li
-                      v-for="q in questions"
-                      :key="q.id"
-                      class="list-group-item d-flex justify-content-between align-items-center"
-                    >
-                      <span>
-                        {{ q.order ? q.order + '. ' : '' }}{{ q.question }}
-                      </span>
-                      <span>
-                        <template v-if="q.type === 0">
-                          {{ q.options_json?.find(opt => opt.value == userAnswers[q.id])?.label || userAnswers[q.id] || 'Sin respuesta' }}
-                          <span v-if="q.response_option && userAnswers[q.id] == q.response_option" class="text-success ms-2">
-                            <i class="bi bi-check-circle-fill"></i>
-                          </span>
-                          <span v-else-if="q.response_option" class="text-danger ms-2">
-                            <i class="bi bi-x-circle-fill"></i>
-                          </span>
-                        </template>
-                        <template v-else>
-                          {{ userAnswers[q.id] || 'Sin respuesta' }}
-                        </template>
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+    <EvaluationVideo
+  :evaluation="evaluation"
+  :user-has-submitted="userHasSubmitted"
+  :last-evaluation-user="lastEvaluationUser"
+  :last-comments="lastComments"
+  :last-files="lastFiles"
+/>
+</section>
 
-              <!-- Respuestas detalladas SI es NO APROBADO -->
-              <div class="col-12" v-if="lastEvaluationUser.status === 333">
-                <div class="card mb-3">
-                  <div class="card-header">Tus respuestas</div>
-                  <ul class="list-group list-group-flush">
-                    <li
-                      v-for="q in questions"
-                      :key="q.id"
-                      class="list-group-item d-flex justify-content-between align-items-center"
-                    >
-                      <span>
-                        {{ q.order ? q.order + '. ' : '' }}{{ q.question }}
-                      </span>
-                      <span>
-                        <template v-if="q.type === 0">
-                          {{ q.options_json?.find(opt => opt.value == userAnswers[q.id])?.label || userAnswers[q.id] || 'Sin respuesta' }}
-                          <span v-if="q.response_option">
-                            <i
-                              v-if="userAnswers[q.id] == q.response_option"
-                              class="bi bi-check-circle-fill text-success ms-2"></i>
-                            <i
-                              v-else
-                              class="bi bi-x-circle-fill text-danger ms-2"></i>
-                          </span>
-                        </template>
-                        <template v-else>
-                          {{ userAnswers[q.id] || 'Sin respuesta' }}
-                        </template>
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
 
-              <!-- Botón para volver a realizar test SI NO ES APROBADO -->
-              <div class="col-12 text-center" v-if="lastEvaluationUser.status !== 999">
-                <button
-                  class="btn btn-outline-danger btn-lg"
-                  :disabled="retrying"
-                  @click="retryTest"
-                >
-                  <span v-if="retrying" class="spinner-border spinner-border-sm me-2"></span>
-                  Quiero hacer el test otra vez
-                </button>
-              </div>
-            </div>
-          </div>
 
-          <!-- Si nunca ha enviado ninguna evaluación -->
-          <div v-else-if="userHasSubmitted && !lastEvaluationUser">
-            <div class="alert alert-info text-center my-4">
-              No se encontró información de tu evaluación. Si crees que es un error, contacta a soporte.
-            </div>
-          </div>
-
-          <!-- FORMULARIO SOLO SI NO HA ENVIADO -->
-          <template v-else>
-            <form v-if="!completed && currentQuestion">
-              <div class="card mb-4">
-                <div class="card-body">
-                  <div class="mb-2 fw-bold fs-5">
-                    {{ currentQuestion.order }}. {{ currentQuestion.question }}
-                    <span class="badge bg-secondary ms-2" v-if="currentQuestion.points">Puntos: {{ currentQuestion.points }}</span>
-                  </div>
-                  <FieldText
-                    v-if="currentQuestion.type === 1"
-                    :id="`q-${currentQuestion.id}`"
-                    v-model="responses[currentQuestion.id]"
-                    :label="null"
-                    placeholder="Escribe tu respuesta aquí"
-                  />
-                  <ul v-else class="list-group mt-3 mb-4">
-                    <li
-                      v-for="option in currentQuestion.options_json"
-                      :key="option.value"
-                      class="list-group-item list-group-item-action"
-                      :class="{ 'active': responses[currentQuestion.id] == option.value }"
-                      style="cursor:pointer; font-size:1.15rem;"
-                      @click="selectOption(currentQuestion.id, option.value)"
-                      tabindex="0"
-                    >
-                      {{ option.label }}
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              <div class="text-end">
-                <button
-                  type="button"
-                  class="btn btn-success btn-lg"
-                  :disabled="!responses[currentQuestion.id] || (currentQuestion.type === 1 && !responses[currentQuestion.id]?.trim())"
-                  @click="nextQuestion"
-                >
-                  {{ isLast ? 'Finalizar' : 'Siguiente' }}
-                </button>
-              </div>
-            </form>
-            <!-- Formulario final para comentarios y archivo -->
-            <div v-if="completed" class="card py-5 text-center">
-              <div class="card-body">
-                <div class="mb-4 fs-4 fw-bold">¡Has terminado la evaluación!</div>
-                <div class="mb-4">
-                  <label class="form-label fw-bold">¿Comentarios adicionales?</label>
-                  <textarea v-model="comments" class="form-control" rows="3"></textarea>
-                </div>
-                <div class="mb-4">
-                  <label class="form-label fw-bold">Adjunta tu archivo/video (opcional):</label>
-                  <input type="file" class="form-control" @change="onFileChange" />
-                </div>
-                <button class="btn btn-primary btn-lg" :disabled="sending" @click="submitEvaluation">
-                  <span v-if="sending" class="spinner-border spinner-border-sm me-2"></span>
-                  Enviar Evaluación
-                </button>
-                <div class="mt-4">
-                  <button class="btn btn-link text-secondary" @click="resetQuiz">Volver a intentar</button>
-                </div>
-              </div>
-            </div>
-            <div class="alert alert-info mt-4" v-if="!completed">
-              Contesta cada pregunta y avanza usando el botón. Recuerda dar clic en "Enviar Evaluación" al finalizar.
-            </div>
-          </template>
-        </div>
-      </div>
-    </div>
   </StudentLayout>
 </template>
 

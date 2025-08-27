@@ -13,18 +13,27 @@ use Inertia\Inertia;
 class LessonController extends Controller
 {
     // ===== CRUD base de lecciones =====
-
+ 
     public function index()
-    {
-        $lessons = Lesson::with(['course:id,title', 'teacher:id,firstname,lastname'])
-            ->latest()
-            ->get();
+{
+    $lessons = Lesson::with([
+            'course:id,title',
+            'teacher:id,firstname,lastname',
+            // pivote + hijo
+            'lessonVideos' => fn ($q) => $q->select('id','lesson_id','video_id','course_id','order','active')->orderBy('order'),
+            'lessonVideos.video:id,title,image_cover,duration,size',
+            'lessonEvaluations' => fn ($q) => $q->select('id','lesson_id','evaluation_id','course_id','order','active')->orderBy('order'),
+            'lessonEvaluations.evaluation:id,title,status',
+        ])
+        ->latest()
+        ->get();
 
-        return Inertia::render('Admin/Lessons/Index', [
-            'lessons' => $lessons
-        ]);
-    }
+    return Inertia::render('Admin/Lessons/Index', [
+        'lessons' => $lessons
+    ]);
+}
 
+ 
     public function create()
     {
         $courses  = Course::select('id', 'title')->get();
@@ -58,32 +67,54 @@ class LessonController extends Controller
     }
 
     public function show(Lesson $lesson)
-    {
-        $courses  = Course::select('id', 'title')->get();
-        $teachers = Teacher::select('id', 'firstname', 'lastname')->get();
+{
+    $lesson->load([
+        'course:id,title',
+        'teacher:id,firstname,lastname',
+        'lessonVideos' => fn ($q) => $q->select('id','lesson_id','video_id','course_id','order','active')->orderBy('order'),
+        'lessonVideos.video:id,title,image_cover,duration,size',
+        'lessonEvaluations' => fn ($q) => $q->select('id','lesson_id','evaluation_id','course_id','order','active')->orderBy('order'),
+        'lessonEvaluations.evaluation:id,title,status',
+        // si sigues usando también estas:
+        'assignedVideos' => fn ($q) => $q->select('videos.id','videos.title','videos.image_cover','videos.duration','videos.size')->orderBy('lesson_videos.order'),
+        'assignedEvaluations' => fn ($q) => $q->select('evaluations.id','evaluations.title','evaluations.status')->orderBy('lesson_evaluations.order'),
+    ]);
 
-        return Inertia::render('Admin/Lessons/Show', [
-            'lesson'   => $lesson,
-            'courses'  => $courses,
-            'teachers' => $teachers,
-        ]);
-    }
+    $courses  = Course::select('id', 'title')->get();
+    $teachers = Teacher::select('id', 'firstname', 'lastname')->get();
 
-    public function edit(Lesson $lesson)
+    return Inertia::render('Admin/Lessons/Show', [
+        'lesson'   => $lesson,
+        'courses'  => $courses,
+        'teachers' => $teachers,
+    ]);
+}
+
+
+public function edit(Lesson $lesson)
 {
     $courses  = Course::select('id', 'title')->get();
     $teachers = Teacher::select('id', 'firstname', 'lastname')->get();
 
     $lesson->load([
-        // Videos asignados
+        // belongsToMany existentes
         'assignedVideos' => fn ($q) => $q
-            ->select('videos.id', 'videos.title', 'videos.image_cover', 'videos.duration', 'videos.size')
+            ->select('videos.id','videos.title','videos.image_cover','videos.duration','videos.size')
             ->orderBy('lesson_videos.order'),
-
-        // Evaluaciones asignadas
         'assignedEvaluations' => fn ($q) => $q
-            ->select('evaluations.id', 'evaluations.title', 'evaluations.status')
+            ->select('evaluations.id','evaluations.title','evaluations.status')
             ->orderBy('lesson_evaluations.order'),
+
+        // pivotes + hijos
+        'lessonVideos' => fn ($q) => $q
+            ->select('id','lesson_id','video_id','course_id','order','active')
+            ->orderBy('order'),
+        'lessonVideos.video:id,title,image_cover,duration,size',
+
+        'lessonEvaluations' => fn ($q) => $q
+            ->select('id','lesson_id','evaluation_id','course_id','order','active')
+            ->orderBy('order'),
+        'lessonEvaluations.evaluation:id,title,status',
     ]);
 
     $lessonPayload = [
@@ -101,8 +132,8 @@ class LessonController extends Controller
         'add_materials'     => (bool) $lesson->add_materials,
         'image'             => $lesson->image,
         'image_cover'       => $lesson->image_cover,
-
-        // Videos ya asignados
+        'course'            => optional($lesson->course)->only(['id','title']),
+        // arrays existentes
         'videos' => $lesson->assignedVideos->map(fn ($v) => [
             'id'          => $v->id,
             'title'       => $v->title,
@@ -115,7 +146,6 @@ class LessonController extends Controller
             ],
         ])->values(),
 
-        // Evaluaciones ya asignadas
         'evaluations' => $lesson->assignedEvaluations->map(fn ($e) => [
             'id'    => $e->id,
             'title' => $e->title,
@@ -124,6 +154,22 @@ class LessonController extends Controller
                 'order'  => $e->pivot->order,
                 'active' => (bool) $e->pivot->active,
             ],
+        ])->values(),
+
+        // NUEVO: acceso crudo a los pivotes por si lo quieres directamente en la UI
+        'lesson_videos' => $lesson->lessonVideos->map(fn ($lv) => [
+            'id'        => $lv->id,
+            'video_id'  => $lv->video_id,
+            'order'     => $lv->order,
+            'active'    => (bool) $lv->active,
+            'video'     => optional($lv->video)->only(['id','title','image_cover','duration','size']),
+        ])->values(),
+        'lesson_evaluations' => $lesson->lessonEvaluations->map(fn ($le) => [
+            'id'            => $le->id,
+            'evaluation_id' => $le->evaluation_id,
+            'order'         => $le->order,
+            'active'        => (bool) $le->active,
+            'evaluation'    => optional($le->evaluation)->only(['id','title','status']),
         ])->values(),
     ];
 
@@ -134,6 +180,7 @@ class LessonController extends Controller
         'course'   => $lesson->course()->select('id','title')->first(),
     ]);
 }
+
 
 
     public function update(Request $request, Lesson $lesson)
@@ -185,27 +232,41 @@ class LessonController extends Controller
     // ===== Panel y utilidades =====
 
     public function lessonsPanel(Course $course)
-    {
-        $course->load(['lessons' => fn ($q) => $q->orderBy('order')]);
+{
+    $course->load([
+        'lessons' => fn ($q) => $q->orderBy('order')
+            ->with([
+                'lessonVideos' => fn ($q2) => $q2->select('id','lesson_id','video_id','course_id','order','active')->orderBy('order'),
+                'lessonVideos.video:id,title,image_cover,duration,size',
+                'lessonEvaluations' => fn ($q3) => $q3->select('id','lesson_id','evaluation_id','course_id','order','active')->orderBy('order'),
+                'lessonEvaluations.evaluation:id,title,status',
+            ]),
+    ]);
 
-        return Inertia::render('Admin/Lessons/LessonsPanel', [
-            'course'  => $course,
-            'lessons' => $course->lessons,
-        ]);
-    }
+    return Inertia::render('Admin/Lessons/LessonsPanel', [
+        'course'  => $course,
+        'lessons' => $course->lessons,
+    ]);
+}
+
 
     public function list(Course $course)
-    {
-        $lessons = $course->lessons()
-            ->with([
-                'teacher:id,firstname,lastname',
-                'course:id,title'
-            ])
-            ->orderBy('order')
-            ->get();
+{
+    $lessons = $course->lessons()
+        ->with([
+            'teacher:id,firstname,lastname',
+            'course:id,title',
+            'lessonVideos' => fn ($q) => $q->select('id','lesson_id','video_id','course_id','order','active')->orderBy('order'),
+            'lessonVideos.video:id,title,image_cover,duration,size',
+            'lessonEvaluations' => fn ($q) => $q->select('id','lesson_id','evaluation_id','course_id','order','active')->orderBy('order'),
+            'lessonEvaluations.evaluation:id,title,status',
+        ])
+        ->orderBy('order')
+        ->get();
 
-        return response()->json($lessons);
-    }
+    return response()->json($lessons);
+}
+
 
     public function reorderLessons(Request $request, Course $course)
     {
@@ -243,7 +304,7 @@ class LessonController extends Controller
             'videos.*'          => 'integer|exists:videos,id',
 
             'evaluations'       => 'nullable|array',
-            'evaluations.*'     => 'integer|exists:evaluations,id',
+            
 
             'materials'         => 'nullable|array',
             'materials.*'       => 'integer|exists:video_materials,id',

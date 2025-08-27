@@ -286,7 +286,7 @@ onMounted(() => {
       video_id: props.video.id
     }).catch(() => {})
 
-    clearCountdown()
+    clearCountdown() 
     autoAdvanceCancelled.value = true
 
     if (isLastVideo.value) {
