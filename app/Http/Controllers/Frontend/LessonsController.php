@@ -29,129 +29,135 @@ class LessonsController extends Controller
      * - Bloqueo progresivo entre lecciones (is_unlocked)
      * - Bloqueo secuencial de videos dentro de cada lección (is_accessible)
      */
-    public function index($courseId)
-    {
-        $user = Auth::user();
+   public function index($courseId)
+{
+    $user = Auth::user();
 
-        // Verificar suscripción
-        $subscription = $user->subscriptions()
-            ->where('course_id', $courseId)
-            ->first();
+    // Verificar suscripción
+    $subscription = $user->subscriptions()
+        ->where('course_id', $courseId)
+        ->first();
 
-        if (! $subscription) {
-            abort(403, 'No estás suscrito a este curso.');
+    if (! $subscription) {
+        abort(403, 'No estás suscrito a este curso.');
+    }
+
+    $course = Course::findOrFail($courseId);
+    $userId = (int) $user->id;
+
+    // IDs de videos completados (evento "ended") como enteros
+    $completedVideoIds = DB::table('video_activities')
+        ->where('user_id', $userId)
+        ->where('course_id', $courseId)
+        ->where('event', 'ended')
+        ->pluck('video_id')
+        ->map(fn ($id) => (int) $id)
+        ->all();
+
+    // Set para búsqueda O(1)
+    $completedSet = array_flip($completedVideoIds);
+
+    // Lecciones + videos (ordenados por pivot)
+    $lessons = Lesson::query()
+        ->with([
+            'assignedVideos' => function ($q) {
+                $q->select(
+                    'videos.id',
+                    'videos.title',
+                    'videos.description_short',
+                    'videos.duration',
+                    'videos.size',
+                    'videos.image_cover',
+                    'videos.video_path'
+                )->orderBy('lesson_videos.order');
+            },
+            'assignedEvaluations:id,title,status',
+        ])
+        ->withCount([
+            'assignedVideos as videos_count',
+            'assignedEvaluations as evaluations_count',
+        ])
+        ->where('course_id', $courseId)
+        ->active()
+        ->published()
+        ->orderBy('order')
+        ->get();
+
+    // Determinar desbloqueo por lección: la primera desbloqueada, las siguientes solo si la anterior está completa
+    $previousLessonCompleted = true;
+    $lessonsPayload = [];
+
+    foreach ($lessons as $lesson) {
+        // Progreso de la lección
+        $videoIds = $lesson->assignedVideos->pluck('id')->map(fn($id) => (int) $id);
+        $total    = $videoIds->count();
+        $completedCount = $videoIds->filter(fn ($id) => isset($completedSet[$id]))->count();
+        $isCompleted = $total > 0 ? ($completedCount === $total) : false;
+
+        $isUnlocked = $previousLessonCompleted;
+        $previousLessonCompleted = $isCompleted;
+
+        // Desbloqueo secuencial de videos dentro de la lección
+        $innerUnlocked = $isUnlocked;
+        $videos = [];
+
+        foreach ($lesson->assignedVideos as $v) {
+            $vid = (int) $v->id;
+            $isEnded = isset($completedSet[$vid]);
+            $isAccessible = $innerUnlocked;
+
+            if (! $isEnded) {
+                $innerUnlocked = false; // El siguiente queda bloqueado
+            }
+
+            $videos[] = [
+                'id'            => $vid,
+                'title'         => $v->title,
+                'description'   => $v->description_short,
+                'duration'      => $v->duration,
+                'size'          => $v->size,
+                'thumbnail'     => $v->image_cover,
+                'preview_url'   => $v->video_path ? \Illuminate\Support\Facades\Storage::url($v->video_path) : null,
+                'lesson_id'     => $lesson->id,
+                'is_ended'      => $isEnded,
+                'is_accessible' => $isAccessible,
+            ];
         }
 
-        $course = Course::findOrFail($courseId);
-        $userId = $user->id;
+        $lessonsPayload[] = [
+            'id'                 => $lesson->id,
+            'title'              => $lesson->title,
+            'description_short'  => $lesson->description_short,
+            'order'              => $lesson->order,
+            'publish_on'         => optional($lesson->publish_on)->toDateString(),
+            'active'             => (bool) $lesson->active,
 
-        // IDs de videos completados (evento "ended")
-        $completedVideoIds = DB::table('video_activities')
-            ->where('user_id', $userId)
-            ->where('course_id', $courseId)
-            ->where('event', 'ended')
-            ->pluck('video_id')
-            ->toArray();
+            'videos_count'       => $lesson->videos_count ?? $lesson->assignedVideos->count(),
+            'evaluations_count'  => $lesson->evaluations_count ?? $lesson->assignedEvaluations->count(),
+            'thumbnail'          => $lesson->image_cover ?: null,
 
-        // Lecciones + videos (ordenados por pivot)
-        $lessons = Lesson::query()
-            ->with([
-                'assignedVideos' => function ($q) {
-                    $q->select(
-                        'videos.id',
-                        'videos.title',
-                        'videos.description_short',
-                        'videos.duration',
-                        'videos.size',
-                        'videos.image_cover',
-                        'videos.video_path'
-                    )->orderBy('lesson_videos.order');
-                },
-                'assignedEvaluations:id,title,status',
-            ])
-            ->withCount([
-                'assignedVideos as videos_count',
-                'assignedEvaluations as evaluations_count',
-            ])
-            ->where('course_id', $courseId)
-            ->active()
-            ->published()
-            ->orderBy('order')
-            ->get();
+            'progress' => [
+                'completed_videos' => $completedCount,
+                'total_videos'     => $total,
+                'is_completed'     => $isCompleted,
+            ],
 
-        // Determinar desbloqueo por lección: la primera desbloqueada, las siguientes solo si la anterior está completa
-        $previousLessonCompleted = true;
+            'add_video'      => (bool) $lesson->add_video,
+            'add_evaluation' => (bool) $lesson->add_evaluation,
+            'add_materials'  => (bool) $lesson->add_materials,
 
-        $lessonsPayload = $lessons->map(function (Lesson $lesson) use (&$previousLessonCompleted, $completedVideoIds) {
-            // Progreso de la lección (basado en videos completados)
-            $videoIds       = $lesson->assignedVideos->pluck('id');
-            $completedCount = $videoIds->filter(fn ($id) => in_array($id, $completedVideoIds, true))->count();
-            $total          = $videoIds->count();
-            $isCompleted    = $total > 0 ? ($completedCount === $total) : false;
-
-            // La lección está desbloqueada solo si la anterior estuvo completa
-            $isUnlocked = $previousLessonCompleted;
-
-            // Para la siguiente iteración, esta lección debe estar completa
-            $previousLessonCompleted = $isCompleted;
-
-            // Desbloqueo secuencial de videos dentro de la lección (solo si la lección está desbloqueada)
-            $innerUnlocked = $isUnlocked;
-            $videos = $lesson->assignedVideos->map(function (Video $v) use (&$innerUnlocked, $completedVideoIds, $lesson, $isUnlocked) {
-                $isEnded      = in_array($v->id, $completedVideoIds, true);
-                $isAccessible = $isUnlocked && $innerUnlocked;
-
-                if (! $isEnded) {
-                    $innerUnlocked = false; // el siguiente queda bloqueado
-                }
-
-                return [
-                    'id'          => $v->id,
-                    'title'       => $v->title,
-                    'description' => $v->description_short,
-                    'duration'    => $v->duration,
-                    'size'        => $v->size,
-                    'thumbnail'   => $v->image_cover,
-                    'preview_url' => $v->video_path ? Storage::url($v->video_path) : null,
-                    'lesson_id'   => $lesson->id,
-                    'is_ended'      => $isEnded,
-                    'is_accessible' => $isAccessible,
-                ];
-            })->values();
-
-            return [
-                'id'                 => $lesson->id,
-                'title'              => $lesson->title,
-                'description_short'  => $lesson->description_short,
-                'order'              => $lesson->order,
-                'publish_on'         => optional($lesson->publish_on)->toDateString(),
-                'active'             => (bool) $lesson->active,
-
-                'videos_count'       => $lesson->videos_count ?? $lesson->assignedVideos->count(),
-                'evaluations_count'  => $lesson->evaluations_count ?? $lesson->assignedEvaluations->count(),
-                'thumbnail'          => $lesson->image_cover ?: null,
-
-                'progress' => [
-                    'completed_videos' => $completedCount,
-                    'total_videos'     => $total,
-                    'is_completed'     => $isCompleted,
-                ],
-
-                'add_video'      => (bool) $lesson->add_video,
-                'add_evaluation' => (bool) $lesson->add_evaluation,
-                'add_materials'  => (bool) $lesson->add_materials,
-
-                'is_unlocked'    => $isUnlocked,   // NUEVO: para bloquear la lección en la UI
-                'videos'         => $videos,       // con is_ended e is_accessible
-            ];
-        })->values();
-
-        return Inertia::render('Frontend/Lessons/Index', [
-            'course'            => $course->only(['id', 'title', 'image_cover']),
-            'lessons'           => $lessonsPayload,
-            'completedVideoIds' => $completedVideoIds,
-        ]);
+            'is_unlocked'    => $isUnlocked,
+            'videos'         => collect($videos)->values(),
+        ];
     }
+
+    return Inertia::render('Frontend/Lessons/Index', [
+        'course'            => $course->only(['id', 'title', 'image_cover']),
+        'lessons'           => collect($lessonsPayload)->values(),
+        'completedVideoIds' => $completedVideoIds,
+    ]);
+}
+
 
     /**
      * GET /frontend/courses/{course}/lessons/{lesson}
@@ -159,11 +165,10 @@ class LessonsController extends Controller
      * - Bloqueo si la lección anterior no está completa
      * - Desbloqueo secuencial de videos dentro de la lección
      */
-    public function show($courseId, $lessonId)
+public function show($courseId, $lessonId)
 {
     $user = Auth::user();
 
-    // Verificar suscripción del usuario al curso
     $isSubscribed = $user->subscriptions()
         ->where('course_id', $courseId)
         ->exists();
@@ -172,11 +177,8 @@ class LessonsController extends Controller
         abort(403, 'No estás suscrito a este curso.');
     }
 
-   
-
     $course = Course::findOrFail($courseId);
 
-    // Cargar lección con videos y evaluaciones con los campos solicitados
     $lesson = Lesson::query()
         ->with([
             'assignedVideos' => function ($q) {
@@ -208,7 +210,7 @@ class LessonsController extends Controller
                     'evaluations.points_min',
                 ])
                 ->with([
-                    'teacher:id,firstname',
+                    'teacher:id,firstname,lastname',
                     'video:id,title',
                 ])
                 ->where('evaluations.course_id', $courseId)
@@ -230,61 +232,71 @@ class LessonsController extends Controller
         ->first();
 
     if ($previousLesson) {
-        $prevLessonVideoIds = $previousLesson->assignedVideos()->pluck('videos.id')->toArray();
+        $prevLessonVideoIds = $previousLesson->assignedVideos()->pluck('videos.id')
+            ->map(fn($id) => (int) $id)
+            ->all();
 
-        $prevCompletedCount = DB::table('video_activities')
-            ->where('user_id', $user->id)
-            ->where('course_id', $courseId)
-            ->whereIn('video_id', $prevLessonVideoIds)
-            ->where('event', 'ended')
-            ->distinct()
-            ->count('video_id');
+        if (! empty($prevLessonVideoIds)) {
+            $prevCompletedCount = DB::table('video_activities')
+                ->where('user_id', $user->id)
+                ->where('course_id', $courseId)
+                ->whereIn('video_id', $prevLessonVideoIds)
+                ->where('event', 'ended')
+                ->distinct()
+                ->count('video_id');
 
-        $prevTotal = count($prevLessonVideoIds);
+            $prevTotal = count($prevLessonVideoIds);
 
-        if ($prevTotal > 0 && $prevCompletedCount < $prevTotal) {
-            abort(403, 'Debes completar la lección anterior antes de continuar.');
+            if ($prevTotal > 0 && $prevCompletedCount < $prevTotal) {
+                abort(403, 'Debes completar la lección anterior antes de continuar.');
+            }
         }
     }
 
-    // Videos completados del usuario en el curso
+    // Videos completados del usuario en el curso (enteros + set)
     $completedVideoIds = DB::table('video_activities')
         ->where('user_id', $user->id)
         ->where('course_id', $courseId)
         ->where('event', 'ended')
         ->pluck('video_id')
-        ->toArray();
+        ->map(fn ($id) => (int) $id)
+        ->all();
 
-    // Desbloqueo secuencial de videos dentro de la lección
+    $completedSet = array_flip($completedVideoIds);
+
+    // Desbloqueo secuencial dentro de la lección
     $innerUnlocked = true;
-    $videos = $lesson->assignedVideos->map(function (Video $v) use (&$innerUnlocked, $completedVideoIds, $lesson) {
-        $isEnded      = in_array($v->id, $completedVideoIds, true);
+    $videosArr = [];
+
+    foreach ($lesson->assignedVideos as $v) {
+        $vid = (int) $v->id;
+        $isEnded = isset($completedSet[$vid]);
         $isAccessible = $innerUnlocked;
 
         if (! $isEnded) {
             $innerUnlocked = false;
         }
 
-        return [
-            'id'            => $v->id,
+        $videosArr[] = [
+            'id'            => $vid,
             'title'         => $v->title,
             'duration'      => $v->duration,
             'size'          => $v->size,
             'thumbnail'     => $v->image_cover,
-            'preview_url'   => $v->video_path ? Storage::url($v->video_path) : null,
+            'preview_url'   => $v->video_path ? \Illuminate\Support\Facades\Storage::url($v->video_path) : null,
             'description'   => $v->description_short,
             'lesson_id'     => $lesson->id,
             'is_ended'      => $isEnded,
             'is_accessible' => $isAccessible,
         ];
-    })->values();
+    }
 
     // Progreso de la lección
-    $completedCount = $videos->where('is_ended', true)->count();
-    $total          = $videos->count();
+    $completedCount = collect($videosArr)->where('is_ended', true)->count();
+    $total          = count($videosArr);
     $isCompleted    = $total > 0 ? ($completedCount === $total) : false;
 
-    // Payload de evaluaciones con los campos exactos solicitados
+    // Evaluaciones payload
     $evaluationsPayload = $lesson->assignedEvaluations->map(function ($e) {
         return [
             'id'              => $e->id,
@@ -332,122 +344,138 @@ class LessonsController extends Controller
                 'is_completed'     => $isCompleted,
             ],
         ],
-        'videos'            => $videos,
+        'videos'            => collect($videosArr)->values(),
         'evaluations'       => $evaluationsPayload,
         'completedVideoIds' => $completedVideoIds,
     ]);
 }
+
 
 public function showVideo($courseId, $lessonId, $videoId)
 {
     $user = auth()->user();
 
     // 1) Verificar suscripción al curso
-    $subscription = $user->subscriptions()
-        ->where('course_id', $courseId)
-        ->first();
+    $isSubscribed = $user->subscriptions()
+        ->where('course_id', (int) $courseId)
+        ->exists();
 
-    if (! $subscription) {
+    if (! $isSubscribed) {
         abort(403, 'No estás suscrito a este curso.');
     }
 
     // 2) Cargar curso y lección
-    $course = Course::findOrFail($courseId);
+    $course = Course::findOrFail((int) $courseId);
 
     $lesson = Lesson::query()
-        ->where('id', $lessonId)
-        ->where('course_id', $courseId)
+        ->where('id', (int) $lessonId)
+        ->where('course_id', (int) $courseId)
         ->firstOrFail();
 
-    // 3) Videos asignados a la lección (ordenados por pivot lesson_videos.order)
-    //    Nota: usa el nombre de relación que tengas en tu modelo (p.ej. assignedVideos o videos)
-$assignedVideos = $lesson->assignedVideos()
-    ->select('videos.*') // todas las columnas del video, ej: title, description, video_path, etc.
-    ->with('captions')
-    ->withPivot(['order','active','course_id'])
-    ->orderBy('lesson_videos.order')
-    ->get();
+    // 3) Videos asignados a la lección (ordenados por pivot)
+    $assignedVideos = $lesson->assignedVideos()
+        ->select('videos.*')
+        ->with('captions')
+        ->withPivot(['order','active','course_id'])
+        ->orderBy('lesson_videos.order')
+        ->get();
 
     if ($assignedVideos->isEmpty()) {
         abort(404, 'Esta lección no tiene videos asignados.');
     }
 
     // 4) Validar que el video actual pertenezca a la lección
-    /** @var \App\Models\Video $video */
-    $video = $assignedVideos->firstWhere('id', (int) $videoId);
+    $videoId = (int) $videoId;
+    /** @var \App\Models\Video|null $video */
+    $video = $assignedVideos->firstWhere('id', $videoId);
     if (! $video) {
         abort(404, 'El video no pertenece a esta lección.');
     }
 
-    // 5) Mapear captions con etiqueta y default
-    $captions = $video->captions->map(function ($cap) {
+    // 5) Mapear captions con etiqueta y default (según locale del usuario; fallback 'es')
+    $preferredLang = $user->locale ?? 'es';
+    $captions = $video->captions->map(function ($cap) use ($preferredLang) {
+        $label = match ($cap->lang) {
+            'es' => 'Español',
+            'en' => 'English',
+            'fr' => 'Français',
+            'pt' => 'Português',
+            default => strtoupper($cap->lang),
+        };
         return [
             'id'      => $cap->id,
             'lang'    => $cap->lang,
             'file'    => $cap->file,
-            'label'   => match ($cap->lang) {
-                'es' => 'Español',
-                'en' => 'English',
-                'fr' => 'Français',
-                'pt' => 'Português',
-                default => strtoupper($cap->lang),
-            },
-            'default' => $cap->lang === 'es',
+            'label'   => $label,
+            'default' => $cap->lang === $preferredLang || ($preferredLang !== 'es' && $cap->lang === 'es'),
         ];
     });
 
     // 6) Calcular anterior/siguiente dentro de la LECCIÓN
-    $idx = $assignedVideos->search(fn ($v) => (int) $v->id === (int) $videoId);
-
+    $idx = $assignedVideos->search(fn ($v) => (int) $v->id === $videoId);
     $previousVideo = $idx > 0 ? $assignedVideos[$idx - 1] : null;
     $nextVideo     = ($idx < $assignedVideos->count() - 1) ? $assignedVideos[$idx + 1] : null;
 
     // 7) Bloqueo: exigir haber terminado el video anterior (dentro de la lección)
     if ($previousVideo) {
         $hasEndedPrevious = DB::table('video_activities')
-            ->where('user_id', $user->id)
-            ->where('course_id', $courseId)
-            ->where('video_id', $previousVideo->id)
+            ->where('user_id', (int) $user->id)
+            ->where('course_id', (int) $courseId)
+            ->where('video_id', (int) $previousVideo->id)
             ->where('event', 'ended')
             ->exists();
 
         if (! $hasEndedPrevious) {
-            abort(403, 'Debes completar el  video anterior de esta lección antes de continuar.');
+            abort(403, 'Debes completar el video anterior de esta lección antes de continuar.');
         }
     }
 
-    // 8) ¿Terminó el video actual? (para habilitar el siguiente dentro de la lección)
+    // 8) ¿Terminó el video actual? (para habilitar el siguiente)
     $nextVideoAccessible = DB::table('video_activities')
-        ->where('user_id', $user->id)
-        ->where('course_id', $courseId)
-        ->where('video_id', $video->id)
+        ->where('user_id', (int) $user->id)
+        ->where('course_id', (int) $courseId)
+        ->where('video_id', $videoId)
         ->where('event', 'ended')
         ->exists();
 
-    // 9) Lista COMPLETA de videos (pero solo los de la lección) con flags de acceso secuencial
+    // 9) Set de videos completados (enteros) para flags de acceso secuencial
     $completedVideoIds = DB::table('video_activities')
-        ->where('user_id', $user->id)
-        ->where('course_id', $courseId)
+        ->where('user_id', (int) $user->id)
+        ->where('course_id', (int) $courseId)
         ->where('event', 'ended')
         ->pluck('video_id')
-        ->toArray();
+        ->map(fn ($id) => (int) $id)
+        ->all();
+
+    $completedSet = array_flip($completedVideoIds);
 
     $unlocked = true;
-    $videos = $assignedVideos->map(function ($v) use (&$unlocked, $completedVideoIds) {
-        $v->is_ended = in_array($v->id, $completedVideoIds);
-        $v->is_accessible = $unlocked;
+    $videos = [];
+    foreach ($assignedVideos as $v) {
+        $vid = (int) $v->id;
+        $isEnded = isset($completedSet[$vid]);
+        $isAccessible = $unlocked;
 
-        if (! $v->is_ended) {
-            $unlocked = false;
+        if (! $isEnded) {
+            $unlocked = false; // desde el primero no terminado, los demás quedan bloqueados
         }
-        return $v;
-    });
 
-    // 10) Evaluaciones (mantengo las de VIDEO y CURSO como en tu código; si tienes tipo LECCIÓN, lo puedes agregar)
-    $userId = $user->id;
+        $videos[] = [
+            'id'            => $vid,
+            'title'         => $v->title,
+            'image_cover'   => $v->image_cover,
+            'duration'      => $v->duration,
+            'size'          => $v->size,
+            'is_ended'      => $isEnded,
+            'is_accessible' => $isAccessible,
+        ];
+    }
+
+    // 10) Evaluaciones (VIDEO y CURSO)
+    $userId = (int) $user->id;
 
     $videoEvaluations = Evaluation::query()
-        ->where('course_id', $courseId)
+        ->where('course_id', (int) $courseId)
         ->where('type', EvaluationsTypes::VIDEO)
         ->where('video_id', $videoId)
         ->withCount([
@@ -468,7 +496,7 @@ $assignedVideos = $lesson->assignedVideos()
         });
 
     $courseEvaluations = Evaluation::query()
-        ->where('course_id', $courseId)
+        ->where('course_id', (int) $courseId)
         ->where('type', EvaluationsTypes::COURSE)
         ->withCount([
             'submissions as submitted_by_me_count' => fn ($q) => $q->where('user_id', $userId),
@@ -492,11 +520,12 @@ $assignedVideos = $lesson->assignedVideos()
         ->select('id','title','description','type','uploaded','file_src','video_src','img_src')
         ->get();
 
+    // 12) Navegación global (si ya las tienes implementadas)
+    $allVideos          = $this->videosByCourseOrderedByLesson((int) $courseId);
+    $lastVideoIdLesson  = $this->lastVideoIdByCourseOrderedByLesson((int) $courseId);
+    $firstVideoIdLesson = $this->firstVideoIdByCourseOrderedByLesson((int) $courseId);
 
- $allVideos = $this->videosByCourseOrderedByLesson((int)$courseId);
- $lastVideoIdLesson = $this->lastVideoIdByCourseOrderedByLesson($courseId);
- $firstVideoIdLesson = $this->firstVideoIdByCourseOrderedByLesson($courseId);
-    // 12) Respuesta
+    // 13) Respuesta
     return Inertia::render('Frontend/Lessons/Videos/ShowVideo', [
         'course'              => $course->only(['id','title','image_cover']),
         'lesson'              => $lesson->only(['id','title','order']),
@@ -507,23 +536,16 @@ $assignedVideos = $lesson->assignedVideos()
         'previousVideo'       => $previousVideo?->only(['id','title','image_cover']),
         'nextVideo'           => $nextVideo?->only(['id','title','image_cover']),
         'nextVideoAccessible' => $nextVideoAccessible,
-        'videos'              => $videos->map(fn ($v) => [
-            'id'            => $v->id,
-            'title'         => $v->title,
-            'image_cover'   => $v->image_cover,
-            'duration'      => $v->duration,
-            'size'          => $v->size,
-            'is_ended'      => (bool) $v->is_ended,
-            'is_accessible' => (bool) $v->is_accessible,
-        ]),
+        'videos'              => collect($videos)->values(),
         'videoEvaluations'    => $videoEvaluations,
         'courseEvaluations'   => $courseEvaluations,
         'videoResources'      => $videoResources,
-        'allVideos' => $allVideos,
-        'firstVideoIdLesson' => $firstVideoIdLesson,
-        'lastVideoIdLesson' => $lastVideoIdLesson
+        'allVideos'           => $allVideos,
+        'firstVideoIdLesson'  => $firstVideoIdLesson,
+        'lastVideoIdLesson'   => $lastVideoIdLesson,
     ]);
 }
+
 
   protected function videosByCourseOrderedByLesson(int $courseId)
     {

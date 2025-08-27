@@ -94,6 +94,10 @@
                     :key="video.id"
                     class="col-12 col-md-6 col-lg-4 mb-4" >
                     <div class="card video-card h-100 shadow-sm">
+
+                      <pre>
+                        {{video}}
+                      </pre>
                   <!-- Thumbnail -->
                       <div class="video-thumb-wrapper">
                         <img
@@ -142,7 +146,7 @@
                    
 
                            <Link
-                              v-if="video.is_accessible  == '1'"
+                              v-if="video.is_accessible  ==  true "
                               :href="route('dashboard.courses.lessons.videos.show', {
                                 course: course.id,
                                 lesson: lesson.id,

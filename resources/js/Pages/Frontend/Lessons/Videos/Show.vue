@@ -14,8 +14,7 @@
           ]"
         />
  
- 
- 
+
  
     <!-- Reproductor y Lista -->
     <section class="section-panel py-3">
