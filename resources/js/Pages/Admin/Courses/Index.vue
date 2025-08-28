@@ -73,9 +73,16 @@
                     <td class="text-end pe-4">
                       <div class="d-flex justify-content-end flex-wrap gap-1">
                         <div class="btn-group btn-group-sm" role="group" aria-label="Acciones del curso">
-                          <button class="btn btn-outline-info" @click="openViewModal(course)" title="Ver curso">
+                   
+
+                          <Link
+                            class="btn btn-outline-secondary"
+                            :href="route('admin.courses.show', course.id)"
+                            title="Ver"
+                          >
                             <i class="bi bi-eye-fill"></i>
-                          </button>
+                          </Link>
+
                           <Link :href="route('admin.courses.edit', course.id)" class="btn btn-outline-warning" title="Editar curso">
                             <i class="bi bi-pencil-fill"></i>
                           </Link>

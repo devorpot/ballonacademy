@@ -102,6 +102,7 @@
       <span v-if="hasEvaluations">Puedes realizar las evaluaciones de esta lección.</span>
       <span v-else>Esta lección no tiene evaluaciones asignadas.</span>
     </p>
+
   </template>
 
   <!-- Caso: solo terminó el video -->
@@ -115,10 +116,14 @@
 </div>
 
 
-          <div class="modal-footer">
-  <button class="btn btn-outline-secondary" @click="closeEvalModal">Cerrar</button>
+  <div class="modal-footer">
+      <button class="btn btn-outline-secondary" @click="closeEvalModal">Cerrar</button>
+     
 
- 
+
+  <Link  
+    v-if="isLastOfCourse || isLastOfLesson"
+    :href="route('dashboard.courses.evaluations.index', { course: courseId })" class="btn btn-primary mx-2">Ver Evaluaciones</Link>
 
   <!-- Si no es último de lección/curso, ofrece ir al siguiente video -->
   <button
@@ -128,6 +133,7 @@
   >
     Siguiente video
   </button>
+   
 </div>
 
         </div>

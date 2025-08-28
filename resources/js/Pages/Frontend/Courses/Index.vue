@@ -16,7 +16,16 @@
 
     <section class="section-panel py-3">
       <div class="container-fluid">
-        <!-- Empty -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="card-title">
+                   Cursos en la Academia 
+                </h5>
+              </div>
+              <div class="card-body">
+                <!-- Empty -->
         <div v-if="!courses || courses.length === 0" class="alert alert-info">
           No estás inscrito en ningún curso por el momento.
         </div>
@@ -24,7 +33,7 @@
         <!-- Grid -->
         <div v-else class="row g-4">
           <div v-for="course in courses" :key="course.id" class="col-12 col-lg-6">
-            <article class="course-hero h-100 rounded-4 overflow-hidden bg-light border d-flex flex-column flex-lg-row">
+            <article class="course-hero h-100 rounded-4 overflow-hidden  d-flex flex-column flex-lg-row shadow-0 border-0">
               <!-- Media -->
               <div class="course-hero__media position-relative">
                 <img
@@ -81,6 +90,10 @@
                 </div>
               </div>
             </article>
+          </div>
+        </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

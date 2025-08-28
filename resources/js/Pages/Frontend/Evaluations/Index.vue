@@ -1,254 +1,384 @@
 <script setup>
-import { Head, usePage, Link, router } from '@inertiajs/vue3';
-import { ref, computed, onMounted } from 'vue';
-import { route } from 'ziggy-js';
+import { Head, Link, router } from '@inertiajs/vue3'
+import { ref, computed } from 'vue'
+import { route } from 'ziggy-js'
 
-import StudentLayout from '@/Layouts/StudentLayout.vue';
-import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue';
-import CrudFilters from '@/Components/Admin/Ui/CrudFilters.vue';
-import CrudPagination from '@/Components/Admin/Ui/CrudPagination.vue';
-import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue';
-import CourseCard from '@/Components/Dashboard/Courses/CourseCard.vue'
-
+import StudentLayout from '@/Layouts/StudentLayout.vue'
+import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue'
+ 
 const props = defineProps({
-  evaluations: Array,
-  filters: Object,
-  course: Object,
-  videos: Array,
-});
+  course: { type: Object, required: true }, // { id, title }
+  groups: {
+    type: Object,
+    required: true,
+    // {
+    //   course: [Evaluation...],         // type=1
+    //   video:  [Evaluation...],         // type=2
+    //   lesson: [{ lesson_title, evaluations: [Evaluation...] }], // type=3
+    // }
+  },
+  canSubmitEvaluation: { type: Boolean, default: true },
+  videos: { type: Array, default: () => [] },
+})
 
-const searchQuery = ref('');
-const currentPage = ref(1);
-const itemsPerPage = ref(10);
-const sortKey = ref('id');
-const sortOrder = ref('asc');
-const toast = ref(null);
-const page = usePage();
-const retryingId = ref(null);
+const retryingId = ref(null)
 
-onMounted(() => {
-  if (page.props.flash.success) {
-    toast.value = { message: page.props.flash.success, type: 'success' };
-  }
-  if (page.props.flash.error) {
-    toast.value = { message: page.props.flash.error, type: 'danger' };
-  }
-});
-
-const sortBy = (key) => {
-  if (sortKey.value === key) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortKey.value = key;
-    sortOrder.value = 'asc';
-  }
-};
-
-const filteredEvaluations = computed(() => {
-  if (!searchQuery.value) return props.evaluations;
-  const query = searchQuery.value.toLowerCase();
-  return props.evaluations.filter(e =>
-    (e.eva_comments || '').toLowerCase().includes(query)
-  );
-});
-
-const sortedEvaluations = computed(() => {
-  let data = [...filteredEvaluations.value];
-  data.sort((a, b) => {
-    let aVal = a[sortKey.value], bVal = b[sortKey.value];
-    return sortOrder.value === 'asc'
-      ? String(aVal).localeCompare(String(bVal))
-      : String(bVal).localeCompare(String(aVal));
-  });
-  return data;
-});
-
-const paginatedEvaluations = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  return sortedEvaluations.value.slice(start, start + itemsPerPage.value);
-});
-
-const totalPages = computed(() => Math.ceil(sortedEvaluations.value.length / itemsPerPage.value));
-
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-};
-
-// Eliminar intento anterior y redirigir
-function retryEvaluation(eva) {
-  if (!confirm('¿Estás seguro que deseas volver a realizar el test? Tu envío anterior será eliminado de forma permanente.')) {
-    return;
-  }
-  retryingId.value = eva.id;
-  router.delete(route('dashboard.evaluation-users.destroy-by-evaluation'), {  // <--- corrige aquí
-    data: {
-      evaluation_id: eva.id,
-      course_id: eva.course_id
-    },
-    onSuccess: () => {
-      retryingId.value = null;
-    },
-    onError: () => {
-      alert('Ocurrió un error al intentar eliminar tu evaluación anterior.');
-      retryingId.value = null;
-    }
-  });
+function statusBadgeClass(status) {
+  if (status === 999) return 'bg-success'
+  if (status === 333) return 'bg-danger'
+  if (status === 222) return 'bg-warning text-dark'
+  if (status === 111) return 'bg-info text-dark'
+  return 'bg-secondary'
 }
 
+function statusLabel(status, hasLast) {
+  if (!hasLast) return 'No realizada'
+  if (status === 999) return 'Aprobada'
+  if (status === 333) return 'No aprobada'
+  if (status === 222) return 'En revisión'
+  if (status === 111) return 'Enviada'
+  return 'Sin estado'
+}
+
+function previewHref(eva) {
+  return route('dashboard.courses.evaluations.evaluation.preview', {
+    course: eva.course_id,
+    evaluation: eva.id,
+  })
+}
+
+async function retryEvaluation(eva) {
+  if (!confirm('Esto eliminará tu envío anterior. ¿Deseas continuar?')) return
+  try {
+    retryingId.value = eva.id
+    await router.post(
+      route('dashboard.courses.evaluations.retry', {
+        course: eva.course_id,
+        evaluation: eva.id,
+      }),
+      {},
+      { preserveScroll: true }
+    )
+  } finally {
+    retryingId.value = null
+  }
+}
+
+const hasCourseEvals = computed(() => props.groups?.course?.length > 0)
+const hasVideoEvals  = computed(() => props.groups?.video?.length > 0)
+const hasLessonEvals = computed(() => props.groups?.lesson?.length > 0)
 </script>
 
 <template>
   <Head title="Evaluaciones" />
   <StudentLayout>
-     <SectionHeader title="Cursos Inscritos" />
-     <Breadcrumbs username="estudiante" :breadcrumbs="[
+    <SectionHeader title="Cursos Inscritos" />
+    <Breadcrumbs
+      username="estudiante"
+      :breadcrumbs="[
         { label: 'Dashboard', route: 'dashboard.index' },
         { label: 'Cursos', route: 'dashboard.index' },
         { label: course.title, route: '' },
         { label: 'Evaluaciones', route: '' },
-      ]" />
-    <CourseCard :course="course" :videos="videos" />
+      ]"
+    />
 
-    <CrudFilters v-model:searchQuery="searchQuery" :count="sortedEvaluations.length" placeholder="Buscar por comentario..." item-label="evaluación(es)" />
+    <section class="section-panel my-3">
+      <div class="accordion" id="evaluationsAccordion">
 
-
-
- 
-    <section class="section-data my-2">
-      <div class="container-fluid">
-        <div class="row g-3">
+        <!-- ITEM 1: Curso -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingCourse">
+            <button
+              class="accordion-button"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseCourse"
+              aria-expanded="true"
+              aria-controls="collapseCourse"
+            >
+              <i class="bi bi-mortarboard text-primary me-2"></i>
+              <span class="me-2">Evaluaciones del curso</span>
+              <span v-if="hasCourseEvals" class="badge bg-secondary">{{ groups.course.length }}</span>
+            </button>
+          </h2>
           <div
-            v-for="eva in paginatedEvaluations"
-            :key="eva.id"
-            class="col-12 col-md-6 col-lg-4"
+            id="collapseCourse"
+            class="accordion-collapse collapse show"
+            aria-labelledby="headingCourse"
+            data-bs-parent="#evaluationsAccordion"
           >
-            <div class="card shadow-sm h-100">
-              <div class="card-body d-flex flex-column justify-content-between">
-                <div>
-                  <div class="d-flex align-items-center mb-2">
-                    <i class="bi bi-file-earmark-text me-2 fs-3 text-primary"></i>
-                    <h5 class="card-title mb-0 flex-fill">
-                      {{ eva.title }}
-                    </h5>
-                    <span
-                      class="badge rounded-pill"
-                      :class="eva.last_evaluation_user && eva.last_evaluation_user.status === 999
-                        ? 'bg-success'
-                        : eva.last_evaluation_user && eva.last_evaluation_user.status === 333
-                          ? 'bg-danger'
-                          : eva.last_evaluation_user && eva.last_evaluation_user.status === 222
-                            ? 'bg-warning text-dark'
-                            : eva.last_evaluation_user && eva.last_evaluation_user.status === 111
-                              ? 'bg-info text-dark'
-                              : 'bg-secondary'"
-                    >
-                      {{
-                        eva.last_evaluation_user && eva.last_evaluation_user.status === 999
-                          ? 'Aprobada'
-                          : eva.last_evaluation_user && eva.last_evaluation_user.status === 333
-                            ? 'No aprobada'
-                            : eva.last_evaluation_user && eva.last_evaluation_user.status === 222
-                              ? 'En revisión'
-                              : eva.last_evaluation_user && eva.last_evaluation_user.status === 111
-                                ? 'Enviada'
-                                : 'No realizada'
-                      }}
-                    </span>
-                  </div>
-                  <div class="mb-2 small text-muted">
-                    <i class="bi bi-calendar-event me-1"></i>
-                    Publicada: {{ eva.eva_send_date }}
-                  </div>
-                  <div class="mb-3">
-                    <strong>Comentarios:</strong>
-                    <div class="text-body-secondary">
-                      {{ eva.eva_comments || 'Sin comentarios' }}
-                    </div>
-                  </div>
-                </div>
-                <div class="mt-auto">
-                  <!-- Ya realizada y aprobada -->
-                  <template v-if="eva.user_has_evaluated && eva.last_evaluation_user && eva.last_evaluation_user.status === 999">
-                    <div class="alert alert-success d-flex align-items-center gap-2 mb-2 py-2 px-3">
-                      <i class="bi bi-award-fill fs-4"></i>
-                      <span>¡Felicidades! Has aprobado esta evaluación.</span>
-                    </div>
-                    <Link
-                      class="btn btn-primary btn-sm px-4 d-inline-flex align-items-center gap-2"
-                      :href="route('dashboard.courses.evaluations.evaluation.preview', { course: eva.course_id, evaluation: eva.id })"
-                    >
-                      <i class="bi bi-eye"></i> Ver resultados
-                    </Link>
-                  </template>
-                  <!-- Ya realizada pero no aprobada, en revisión o enviada -->
-                  <template v-else-if="eva.user_has_evaluated && eva.last_evaluation_user">
-                    <div
-                      class="alert alert-warning d-flex align-items-center gap-2 mb-2 py-2 px-3"
-                      v-if="eva.last_evaluation_user.status === 222"
-                    >
-                      <i class="bi bi-hourglass-split fs-4"></i>
-                      <span>
-                        Tu evaluación está en revisión. Puedes volver a hacer el test si lo deseas, pero tu envío anterior será eliminado.
-                      </span>
-                    </div>
-                    <div
-                      class="alert alert-info d-flex align-items-center gap-2 mb-2 py-2 px-3"
-                      v-else-if="eva.last_evaluation_user.status === 111"
-                    >
-                      <i class="bi bi-send-check-fill fs-4"></i>
-                      <span>
-                        Tu evaluación fue enviada. Puedes volver a hacer el test, pero tu envío anterior será eliminado.
-                      </span>
-                    </div>
-                    <div
-                      class="alert alert-danger d-flex align-items-center gap-2 mb-2 py-2 px-3"
-                      v-else-if="eva.last_evaluation_user.status === 333"
-                    >
-                      <i class="bi bi-x-circle-fill fs-4"></i>
-                      <span>
-                        No aprobaste esta evaluación. Puedes volver a hacer el test, pero tu envío anterior será eliminado.
-                      </span>
-                    </div>
-                    <button
-                      class="btn btn-warning btn-sm fw-bold text-white px-4 d-inline-flex align-items-center gap-2"
-                      @click="retryEvaluation(eva)"
-                      :disabled="retryingId === eva.id"
-                    >
-                      <span v-if="retryingId === eva.id" class="spinner-border spinner-border-sm me-2"></span>
-                      <i class="bi bi-arrow-repeat"></i>
-                      Volver a Realizar Evaluación
-                    </button>
-                  </template>
-                  <!-- Nunca la ha realizado -->
-                  <template v-else>
-                    <Link
-                      class="btn btn-success btn-sm fw-bold px-4 d-inline-flex align-items-center gap-2"
-                      :href="route('dashboard.courses.evaluations.evaluation.preview', { course: eva.course_id, evaluation: eva.id })"
-                    >
-                      <i class="bi bi-pencil-square"></i> Realizar Evaluación
-                    </Link>
-                  </template>
-                </div>
+            <div class="accordion-body">
+              <div v-if="!hasCourseEvals" class="alert alert-secondary mb-0">
+                No hay evaluaciones de curso.
               </div>
-            </div>
-          </div>
 
-          <!-- Si no hay evaluaciones -->
-          <div v-if="sortedEvaluations.length === 0" class="col-12">
-            <div class="alert alert-secondary text-center py-4">
-              <i class="bi bi-exclamation-circle me-2"></i>
-              No se encontraron evaluaciones
-            </div>
-          </div>
-        </div>
-      </div>
+              <div v-else class="container-fluid">
+                <div class="row g-3">
+                  <div
+                    v-for="eva in groups.course"
+                    :key="`course-${eva.id}`"
+                    class="col-12 col-md-6 col-lg-4"
+                  >
+                    <div class="card shadow-sm h-100">
+                      <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-start justify-content-between mb-2">
+                          <h5 class="card-title mb-0 me-2 text-truncate">{{ eva.title }}</h5>
+                          <span class="badge rounded-pill" :class="statusBadgeClass(eva?.last_evaluation_user?.status)">
+                            {{ statusLabel(eva?.last_evaluation_user?.status, !!eva?.last_evaluation_user) }}
+                          </span>
+                        </div>
+
+                        <div class="small text-muted mb-2">
+                          <i class="bi bi-calendar-event me-1"></i> Publicada: {{ eva.eva_send_date || '—' }}
+                        </div>
+
+                        <div class="mb-3">
+                          <strong>Comentarios:</strong>
+                          <div class="text-body-secondary">
+                            {{ eva.eva_comments || 'Sin comentarios' }}
+                          </div>
+                        </div>
+
+                        <div class="mt-auto d-flex gap-2">
+                          <template v-if="eva.user_has_evaluated && eva.last_evaluation_user && eva.last_evaluation_user.status === 999">
+                            <Link class="btn btn-primary btn-sm w-100" :href="previewHref(eva)">
+                              <i class="bi bi-eye"></i> Ver resultados
+                            </Link>
+                          </template>
+                          <template v-else-if="eva.user_has_evaluated && eva.last_evaluation_user">
+                            <button
+                              class="btn btn-warning btn-sm text-white fw-bold w-100"
+                              @click="retryEvaluation(eva)"
+                              :disabled="retryingId === eva.id"
+                            >
+                              <span v-if="retryingId === eva.id" class="spinner-border spinner-border-sm me-2"></span>
+                              <i class="bi bi-arrow-repeat"></i> Reintentar
+                            </button>
+                          </template>
+                          <template v-else>
+                            <Link class="btn btn-success btn-sm fw-bold w-100" :href="previewHref(eva)">
+                              <i class="bi bi-pencil-square"></i> Realizar
+                            </Link>
+                          </template>
+                        </div>
+                      </div>
+                    </div>
+                  </div> <!-- col -->
+                </div> <!-- row -->
+              </div> <!-- container-fluid -->
+            </div> <!-- accordion-body -->
+          </div> <!-- collapse -->
+        </div> <!-- accordion-item -->
+
+        <!-- ITEM 2: Video -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingVideo">
+            <button
+              class="accordion-button collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseVideo"
+              aria-expanded="false"
+              aria-controls="collapseVideo"
+            >
+              <i class="bi bi-camera-reels text-primary me-2"></i>
+              <span class="me-2">Evaluaciones por video</span>
+              <span v-if="hasVideoEvals" class="badge bg-secondary">{{ groups.video.length }}</span>
+            </button>
+          </h2>
+          <div
+            id="collapseVideo"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingVideo"
+            data-bs-parent="#evaluationsAccordion"
+          >
+            <div class="accordion-body">
+              <div v-if="!hasVideoEvals" class="alert alert-secondary mb-0">
+                No hay evaluaciones por video.
+              </div>
+
+              <div v-else class="container-fluid">
+                <div class="row g-3">
+                  <div
+                    v-for="eva in groups.video"
+                    :key="`video-${eva.id}`"
+                    class="col-12 col-md-6 col-lg-4"
+                  >
+                    <div class="card shadow-sm h-100">
+                      <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-start justify-content-between mb-2">
+                          <h5 class="card-title mb-0 me-2 text-truncate">{{ eva.title }}</h5>
+                          <span class="badge rounded-pill" :class="statusBadgeClass(eva?.last_evaluation_user?.status)">
+                            {{ statusLabel(eva?.last_evaluation_user?.status, !!eva?.last_evaluation_user) }}
+                          </span>
+                        </div>
+
+                        <div class="small text-muted mb-1">
+                          <i class="bi bi-film me-1"></i> Video: {{ eva.video?.title || `#${eva.video_id}` }}
+                        </div>
+                        <div class="small text-muted mb-2">
+                          <i class="bi bi-calendar-event me-1"></i> Publicada: {{ eva.eva_send_date || '—' }}
+                        </div>
+
+                        <div class="mb-3">
+                          <strong>Comentarios:</strong>
+                          <div class="text-body-secondary">
+                            {{ eva.eva_comments || 'Sin comentarios' }}
+                          </div>
+                        </div>
+
+                        <div class="mt-auto d-flex gap-2">
+                          <template v-if="eva.user_has_evaluated && eva.last_evaluation_user && eva.last_evaluation_user.status === 999">
+                            <Link class="btn btn-primary btn-sm w-100" :href="previewHref(eva)">
+                              <i class="bi bi-eye"></i> Ver resultados
+                            </Link>
+                          </template>
+                          <template v-else-if="eva.user_has_evaluated && eva.last_evaluation_user">
+                            <button
+                              class="btn btn-warning btn-sm text-white fw-bold w-100"
+                              @click="retryEvaluation(eva)"
+                              :disabled="retryingId === eva.id"
+                            >
+                              <span v-if="retryingId === eva.id" class="spinner-border spinner-border-sm me-2"></span>
+                              <i class="bi bi-arrow-repeat"></i> Reintentar
+                            </button>
+                          </template>
+                          <template v-else>
+                            <Link class="btn btn-success btn-sm fw-bold w-100" :href="previewHref(eva)">
+                              <i class="bi bi-pencil-square"></i> Realizar
+                            </Link>
+                          </template>
+                        </div>
+                      </div>
+                    </div>
+                  </div> <!-- col -->
+                </div> <!-- row -->
+              </div> <!-- container-fluid -->
+            </div> <!-- accordion-body -->
+          </div> <!-- collapse -->
+        </div> <!-- accordion-item -->
+
+        <!-- ITEM 3: Lección -->
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingLesson">
+            <button
+              class="accordion-button collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseLesson"
+              aria-expanded="false"
+              aria-controls="collapseLesson"
+            >
+              <i class="bi bi-journal-text text-primary me-2"></i>
+              <span class="me-2">Evaluaciones por lección</span>
+              <span v-if="hasLessonEvals" class="badge bg-secondary">{{ groups.lesson.length }}</span>
+            </button>
+          </h2>
+          <div
+            id="collapseLesson"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingLesson"
+            data-bs-parent="#evaluationsAccordion"
+          >
+            <div class="accordion-body">
+
+              <div v-if="!hasLessonEvals" class="alert alert-secondary mb-0">
+                No hay evaluaciones por lección.
+              </div>
+
+              <div v-else class="accordion" id="lessonInnerAccordion">
+                <div
+                  class="accordion-item"
+                  v-for="(group, idx) in groups.lesson"
+                  :key="`lesson-${idx}`"
+                >
+                  <h2 class="accordion-header" :id="`heading-lesson-${idx}`">
+                    <button
+                      class="accordion-button"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      :data-bs-target="`#collapse-lesson-${idx}`"
+                      :aria-controls="`collapse-lesson-${idx}`"
+                      :aria-expanded="idx === 0 ? 'true' : 'false'"
+                    >
+                      {{ group.lesson_title || 'Sin lección' }}
+                      <span class="badge bg-secondary ms-2">{{ group.evaluations?.length || 0 }}</span>
+                    </button>
+                  </h2>
+
+                  <div
+                    :id="`collapse-lesson-${idx}`"
+                    class="accordion-collapse collapse"
+                    :class="{ show: idx === 0 }"
+                    :aria-labelledby="`heading-lesson-${idx}`"
+                    data-bs-parent="#lessonInnerAccordion"
+                  >
+                    <div class="accordion-body">
+                      <div class="container-fluid">
+                        <div class="row g-3">
+                          <div
+                            v-for="eva in group.evaluations"
+                            :key="`lesson-eva-${eva.id}`"
+                            class="col-12 col-md-6 col-lg-4"
+                          >
+                            <div class="card shadow-sm h-100">
+                              <div class="card-body d-flex flex-column">
+                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                  <h5 class="card-title mb-0 me-2 text-truncate">{{ eva.title }}</h5>
+                                  <span class="badge rounded-pill" :class="statusBadgeClass(eva?.last_evaluation_user?.status)">
+                                    {{ statusLabel(eva?.last_evaluation_user?.status, !!eva?.last_evaluation_user) }}
+                                  </span>
+                                </div>
+
+                                <div class="small text-muted mb-2">
+                                  <i class="bi bi-calendar-event me-1"></i> Publicada: {{ eva.eva_send_date || '—' }}
+                                </div>
+
+                                <div class="mb-3">
+                                  <strong>Comentarios:</strong>
+                                  <div class="text-body-secondary">
+                                    {{ eva.eva_comments || 'Sin comentarios' }}
+                                  </div>
+                                </div>
+
+                                <div class="mt-auto d-flex gap-2">
+                                  <template v-if="eva.user_has_evaluated && eva.last_evaluation_user && eva.last_evaluation_user.status === 999">
+                                    <Link class="btn btn-primary btn-sm w-100" :href="previewHref(eva)">
+                                      <i class="bi bi-eye"></i> Ver resultados
+                                    </Link>
+                                  </template>
+                                  <template v-else-if="eva.user_has_evaluated && eva.last_evaluation_user">
+                                    <button
+                                      class="btn btn-warning btn-sm text-white fw-bold w-100"
+                                      @click="retryEvaluation(eva)"
+                                      :disabled="retryingId === eva.id"
+                                    >
+                                      <span v-if="retryingId === eva.id" class="spinner-border spinner-border-sm me-2"></span>
+                                      <i class="bi bi-arrow-repeat"></i> Reintentar
+                                    </button>
+                                  </template>
+                                  <template v-else>
+                                    <Link class="btn btn-success btn-sm fw-bold w-100" :href="previewHref(eva)">
+                                      <i class="bi bi-pencil-square"></i> Realizar
+                                    </Link>
+                                  </template>
+                                </div>
+                              </div>
+                            </div>
+                          </div> <!-- col -->
+                        </div> <!-- row -->
+                      </div> <!-- container-fluid -->
+                    </div> <!-- accordion-body -->
+                  </div> <!-- collapse -->
+                </div> <!-- accordion-item (inner) -->
+              </div> <!-- accordion inner -->
+
+            </div> <!-- accordion-body -->
+          </div> <!-- collapse -->
+        </div> <!-- accordion-item -->
+
+      </div> <!-- accordion root -->
     </section>
-
-    <CrudPagination :current-page="currentPage" :total-pages="totalPages" @change-page="changePage" />
-
-    <ToastNotification v-if="toast" :message="toast.message" :type="toast.type" @hidden="toast = null" />
   </StudentLayout>
 </template>

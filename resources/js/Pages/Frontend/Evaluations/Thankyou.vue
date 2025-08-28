@@ -13,6 +13,7 @@ const props = defineProps({
 <template>
   <Head title="¡Evaluación Enviada!" />
   <StudentLayout>
+
     <div class="container py-5">
       <div class="row justify-content-center">
         <div class="col-md-8">
@@ -21,10 +22,13 @@ const props = defineProps({
               <h1 class="fw-bold mb-4" style="color: #1B8FD5;">
                 ¡Gracias por enviar tu evaluación!
               </h1>
+
+              <p>
+    {{evaluation}}</p>
               <p class="fs-5 mb-4">
                 Hemos recibido tus respuestas. <br>
                 Pronto recibirás noticias de tu instructor sobre tu resultado.<br>
-                Puedes continuar explorando tus cursos.
+                Puedes continuar explorando tus lecciones.
               </p>
               <Link 
                 :href="route('dashboard.courses.index')"

@@ -14,6 +14,9 @@
       <div class="container-fluid">
         <!-- Filters -->
         <div class="card shadow-sm mb-3">
+          <div class="card-header">
+            <h5 class="card-title">Busqueda</h5>
+          </div>
           <div class="card-body">
             <div class="row g-3 align-items-end">
               <div class="col-12 col-md-4">
@@ -59,77 +62,103 @@
 
         <!-- Grid -->
         <div v-else class="row">
-          <div
-            v-for="d in distributors.data"
-            :key="d.id"
-            class="col-12 col-md-6 col-lg-4 mb-4"
-          >
-            <div class="card h-100 shadow-sm">
-              <img
-                v-if="d.logo_url"
-                :src="d.logo_url"
-                :alt="d.name"
-                class="card-img-top"
-                style="object-fit: contain; height: 180px; background: #f8f9fa;"
-              />
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title mb-1">
-                  <i class="bi bi-building me-1"></i>{{ d.name }}
-                </h5>
+         <!-- Lista en filas modernas -->
+          <div class="card">
+             <div class="card-header">
+                <h5 class="card-title">Resultados</h5>
+              </div>
+            <div class="card-body">
+                          <div
+              v-for="d in distributors.data"
+              :key="d.id"
+              class="col-12 mb-3"
+            >
+              <div class="card list-row shadow-sm hover-lift">
+                <div class="row g-0 align-items-center">
+                  <!-- Logo / Placeholder -->
+                  <div class="col-auto">
+                    <img
+                      v-if="d.logo_url"
+                      :src="d.logo_url"
+                      :alt="d.name"
+                      class="logo-thumb rounded-start"
+                    />
+                    <div v-else class="logo-thumb rounded-start d-flex align-items-center justify-content-center bg-light text-muted">
+                      <i class="bi bi-building fs-3"></i>
+                    </div>
+                  </div>
 
-                <p class="text-muted mb-2 d-flex flex-wrap align-items-center gap-2">
-                  <span>
-                    <i class="bi bi-geo-alt me-1"></i>
-                    {{ d.country }}<span v-if="d.state">, {{ d.state }}</span>
-                  </span>
-                  <span v-if="d.region" class="badge text-bg-light border">
-                    <i class="bi bi-diagram-3 me-1"></i>{{ d.region }}
-                  </span>
-                  <span v-if="d.zone" class="badge text-bg-light border">
-                    <i class="bi bi-grid-3x3-gap me-1"></i>{{ d.zone }}
-                  </span>
-                </p>
+                  <!-- Contenido -->
+                  <div class="col">
+                    <div class="card-body py-3">
+                      <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <h5 class="card-title mb-0 me-2">
+                          <i class="bi bi-building me-1"></i>{{ d.name }}
+                        </h5>
 
-                <p v-if="d.description" class="card-text small flex-grow-1">
-                  {{ truncate(d.description, 160) }}
-                </p>
+                        <span v-if="d.region" class="badge text-bg-light border">
+                          <i class="bi bi-diagram-3 me-1"></i>{{ d.region }}
+                        </span>
+                        <span v-if="d.zone" class="badge text-bg-light border">
+                          <i class="bi bi-grid-3x3-gap me-1"></i>{{ d.zone }}
+                        </span>
+                      </div>
 
-                <div class="d-flex flex-wrap gap-2 mt-2">
-                  <a
-                    v-if="d.map_url"
-                    :href="d.map_url"
-                    class="btn btn-outline-success btn-sm"
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
-                  >
-                    <i class="bi bi-map me-1"></i> Ver mapa
-                  </a>
+                      <p class="text-muted mb-2 d-flex flex-wrap align-items-center gap-2">
+                        <span>
+                          <i class="bi bi-geo-alt me-1"></i>
+                          {{ d.country }}<span v-if="d.state">, {{ d.state }}</span>
+                        </span>
+                      </p>
 
-                  <a
-                    v-if="d.phone"
-                    :href="`tel:${d.phone}`"
-                    class="btn btn-outline-secondary btn-sm"
-                  >
-                    <i class="bi bi-telephone me-1"></i> Llamar
-                  </a>
+                      <p v-if="d.description" class="mb-0 text-truncate-2">
+                        {{ truncate(d.description, 200) }}
+                      </p>
+                    </div>
+                  </div>
 
-                  <a
-                    v-if="d.whatsapp"
-                    :href="whatsUrl(d.whatsapp, `Hola ${d.name}, me interesa su distribución.`)"
-                    class="btn btn-outline-success btn-sm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <i class="bi bi-whatsapp me-1"></i> WhatsApp
-                  </a>
+                  <!-- Acciones -->
+                  <div class="col-12 col-md-auto">
+                    <div class="card-body py-3 pt-md-3 d-flex flex-wrap gap-2 justify-content-start justify-content-md-end">
+                      <a
+                        v-if="d.map_url"
+                        :href="d.map_url"
+                        class="btn btn-outline-success btn-sm"
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                      >
+                        <i class="bi bi-map me-1"></i> Ver mapa
+                      </a>
 
-                  <button class="btn btn-primary btn-sm" @click="openModal(d)">
-                    <i class="bi bi-card-text me-1"></i> Ver ficha
-                  </button>
+                      <a
+                        v-if="d.phone"
+                        :href="`tel:${d.phone}`"
+                        class="btn btn-outline-secondary btn-sm"
+                      >
+                        <i class="bi bi-telephone me-1"></i> Llamar
+                      </a>
+
+                      <a
+                        v-if="d.whatsapp"
+                        :href="whatsUrl(d.whatsapp, `Hola ${d.name}, me interesa su distribución.`)"
+                        class="btn btn-outline-success btn-sm"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                      </a>
+
+                      <button class="btn btn-primary btn-sm" @click="openModal(d)">
+                        <i class="bi bi-card-text me-1"></i> Ver ficha
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+            </div>
           </div>
+
         </div>
 
         <!-- Pagination -->
@@ -172,85 +201,101 @@
           </div>
 
           <div class="modal-body" v-if="selected">
-            <div class="row g-3">
-              <div class="col-12 col-md-4">
-                <img
-                  v-if="selected.logo_url"
-                  :src="selected.logo_url"
-                  :alt="selected.name"
-                  class="img-fluid rounded border"
-                />
-              </div>
-              <div class="col-12 col-md-8">
-                <h4 class="mb-1">{{ selected.name }}</h4>
-                <p class="text-muted mb-2 d-flex flex-wrap align-items-center gap-2">
-                  <span>
-                    <i class="bi bi-geo-alt me-1"></i>
-                    {{ selected.country }}<span v-if="selected.state">, {{ selected.state }}</span>
-                  </span>
-                  <span v-if="selected.region" class="badge text-bg-light border">
-                    <i class="bi bi-diagram-3 me-1"></i>{{ selected.region }}
-                  </span>
-                  <span v-if="selected.zone" class="badge text-bg-light border">
-                    <i class="bi bi-grid-3x3-gap me-1"></i>{{ selected.zone }}
-                  </span>
-                </p>
-
-                <div class="list-group small">
-                  <div v-if="selected.address" class="list-group-item">
-                    <i class="bi bi-signpost me-1"></i>{{ selected.address }}
-                  </div>
-                  <div v-if="selected.email" class="list-group-item">
-                    <i class="bi bi-envelope me-1"></i>
-                    <a :href="`mailto:${selected.email}`">{{ selected.email }}</a>
-                  </div>
-                  <div v-if="selected.phone" class="list-group-item">
-                    <i class="bi bi-telephone me-1"></i>
-                    <a :href="`tel:${selected.phone}`">{{ selected.phone }}</a>
-                  </div>
-                  <div v-if="selected.whatsapp" class="list-group-item">
-                    <i class="bi bi-whatsapp me-1"></i>
-                    <a
-                      :href="whatsUrl(selected.whatsapp, `Hola ${selected.name}, me interesa su distribución.`)"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {{ prettyPhone(selected.whatsapp) }}
-                    </a>
-                  </div>
-                  <div v-if="selected.website" class="list-group-item">
-                    <i class="bi bi-globe me-1"></i>
-                    <a :href="ensureProtocol(selected.website)" target="_blank" rel="noopener noreferrer">
-                      {{ selected.website }}
-                    </a>
-                  </div>
-                  <div v-if="selected.facebook" class="list-group-item">
-                    <i class="bi bi-facebook me-1"></i>
-                    <a :href="ensureProtocol(selected.facebook)" target="_blank" rel="noopener noreferrer">
-                      Facebook
-                    </a>
-                  </div>
-                  <div v-if="selected.instagram" class="list-group-item">
-                    <i class="bi bi-instagram me-1"></i>
-                    <a :href="ensureProtocol(selected.instagram)" target="_blank" rel="noopener noreferrer">
-                      Instagram
-                    </a>
-                  </div>
-                  <div v-if="selected.tiktok" class="list-group-item">
-                    <i class="bi bi-tiktok me-1"></i>
-                    <a :href="ensureProtocol(selected.tiktok)" target="_blank" rel="noopener noreferrer">
-                      TikTok
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-12">
-                <p v-if="selected.description" class="mb-0">
-                  {{ selected.description }}
-                </p>
-              </div>
+           <div class="row g-4 align-items-start">
+  <!-- Logo -->
+        <div class="col-12 col-md-4 text-center">
+          <div class="p-3 bg-light rounded shadow-sm">
+            <img
+              v-if="selected.logo_url"
+              :src="selected.logo_url"
+              :alt="selected.name"
+              class="img-fluid rounded"
+              style="max-height: 160px; object-fit: contain;"
+            />
+            <div v-else class="d-flex align-items-center justify-content-center h-100 text-muted fs-1">
+              <i class="bi bi-building"></i>
             </div>
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="col-12 col-md-8">
+          <h3 class="fw-semibold mb-2">{{ selected.name }}</h3>
+
+          <!-- Ubicación + tags -->
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-3 text-muted small">
+            <span>
+              <i class="bi bi-geo-alt me-1"></i>
+              {{ selected.country }}<span v-if="selected.state">, {{ selected.state }}</span>
+            </span>
+            <span v-if="selected.region" class="badge rounded-pill text-bg-light border">
+              <i class="bi bi-diagram-3 me-1"></i>{{ selected.region }}
+            </span>
+            <span v-if="selected.zone" class="badge rounded-pill text-bg-light border">
+              <i class="bi bi-grid-3x3-gap me-1"></i>{{ selected.zone }}
+            </span>
+          </div>
+
+          <!-- Contacto -->
+          <ul class="list-unstyled mb-0">
+            <li v-if="selected.address" class="mb-2">
+              <i class="bi bi-signpost text-primary me-2"></i>
+              {{ selected.address }}
+            </li>
+            <li v-if="selected.email" class="mb-2">
+              <i class="bi bi-envelope text-primary me-2"></i>
+              <a :href="`mailto:${selected.email}`" class="text-decoration-none">{{ selected.email }}</a>
+            </li>
+            <li v-if="selected.phone" class="mb-2">
+              <i class="bi bi-telephone text-primary me-2"></i>
+              <a :href="`tel:${selected.phone}`" class="text-decoration-none">{{ selected.phone }}</a>
+            </li>
+            <li v-if="selected.whatsapp" class="mb-2">
+              <i class="bi bi-whatsapp text-success me-2"></i>
+              <a
+                :href="whatsUrl(selected.whatsapp, `Hola ${selected.name}, me interesa su distribución.`)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-decoration-none"
+              >
+                {{ prettyPhone(selected.whatsapp) }}
+              </a>
+            </li>
+            <li v-if="selected.website" class="mb-2">
+              <i class="bi bi-globe text-primary me-2"></i>
+              <a :href="ensureProtocol(selected.website)" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                {{ selected.website }}
+              </a>
+            </li>
+            <li v-if="selected.facebook" class="mb-2">
+              <i class="bi bi-facebook text-primary me-2"></i>
+              <a :href="ensureProtocol(selected.facebook)" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                Facebook
+              </a>
+            </li>
+            <li v-if="selected.instagram" class="mb-2">
+              <i class="bi bi-instagram text-danger me-2"></i>
+              <a :href="ensureProtocol(selected.instagram)" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                Instagram
+              </a>
+            </li>
+            <li v-if="selected.tiktok" class="mb-2">
+              <i class="bi bi-tiktok text-dark me-2"></i>
+              <a :href="ensureProtocol(selected.tiktok)" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                TikTok
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Descripción -->
+        <div class="col-12">
+          <div v-if="selected.description" class="p-3 bg-light rounded shadow-sm">
+            <p class="mb-0">{{ selected.description }}</p>
+          </div>
+        </div>
+      </div>
+
           </div>
 
           <div class="modal-footer d-flex flex-wrap gap-2">
@@ -379,4 +424,31 @@ function prettyPhone(p) {
 .modal {
   z-index: 2000;
 }
+
+.list-row {
+  border: 1px solid var(--bs-border-color);
+  border-radius: .75rem;
+  transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.08);
+  border-color: rgba(0,0,0,.06);
+}
+
+.logo-thumb {
+  width: 112px;
+  height: 112px;
+  object-fit: contain;
+  background: #f8f9fa;
+}
+
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;      /* número de líneas */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 </style>

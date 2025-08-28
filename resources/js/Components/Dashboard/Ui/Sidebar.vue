@@ -1,5 +1,5 @@
 <template>
-  <aside class="sidebar shadow-lg bg-white d-flex flex-column align-items-center px-0 py-4">
+  <aside class="sidebar-menu shadow-lg bg-white d-flex flex-column align-items-center px-0 py-4">
     <!-- Avatar -->
     <div class="avatar mb-3 position-relative">
       <span class="avatar-halo"></span>
@@ -126,17 +126,20 @@ const L = computed(() => page.props?.L ?? {})
 </script>
 
 <style scoped>
-.sidebar {
+.sidebar-menu {
   height: 100vh;
   width: 100%;
   min-width: 300px;
   border-radius: 2rem 0 0 2rem;
   box-shadow: 0 8px 32px #00205716;
-  background: #fff;
+  background: #0063AF!important;
   position: relative;
   margin-top: 1rem;
+
 }
 
+
+ 
 .avatar {
   width: 110px;
   height: 110px;
@@ -170,12 +173,12 @@ const L = computed(() => page.props?.L ?? {})
 
 .user-name {
   font-size: 1.25rem;
-  color: #2563eb;
+  color: #FFFFFF!important;
   letter-spacing: 0.01em;
 }
 .user-nickname {
   font-size: 0.98rem;
-  color: #6b7280;
+  color: #FFFFFF!important;
   font-weight: 500;
 }
 
@@ -185,8 +188,8 @@ const L = computed(() => page.props?.L ?? {})
   align-items: center;
   gap: 0.3rem;
   width: 100%;
-  background: #f8fafc;
-  color: #26364a;
+  background: #3584E4;
+  color: #FFFFFF;
   padding: 0.68rem 1rem;
   border: none;
   border-radius: 0.85rem;
@@ -200,7 +203,7 @@ const L = computed(() => page.props?.L ?? {})
 .btn-nav.active,
 .btn-nav:focus,
 .btn-nav:hover {
-  background: #2563eb;
+  background: #D4A744;
   color: #fff !important;
   box-shadow: 0 2px 10px #2563eb22;
   outline: none;

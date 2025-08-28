@@ -327,16 +327,23 @@ Route::middleware(['auth', 'role:student'])
             ->name('courses.evaluations.update');
         Route::get('courses/{course}/evaluations/{evaluation}/show', [FrontendEvaluationController::class, 'show'])
             ->name('courses.evaluations.show');
+
+       Route::post('courses/{course}/evaluations/{evaluation}/retry', [FrontendEvaluationController::class, 'retry'])
+            ->name('courses.evaluations.retry');
+        
         Route::get('courses/{course}/evaluations/{evaluation}/preview', [FrontendEvaluationUsersController::class, 'preview'])
             ->name('courses.evaluations.evaluation.preview');
+        
         Route::get('/courses/{course}/evaluations/{evaluation}/download', [FrontendEvaluationUsersController::class, 'download'])
             ->name('courses.evaluations.download');
 
         // Evaluaciones → Flujos adicionales
         Route::get('/evaluations/{evaluation}/thank-you', [FrontendEvaluationUsersController::class, 'thankyou'])
             ->name('evaluations.thankyou');
+
         Route::delete('/evaluation-users/by-evaluation', [FrontendEvaluationUsersController::class, 'destroyByEvaluation'])
             ->name('evaluation-users.destroy-by-evaluation');
+
         Route::resource('evaluation-users', FrontendEvaluationUsersController::class)
             ->only(['index', 'store', 'show']);
 

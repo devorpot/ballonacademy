@@ -198,15 +198,22 @@ public function update(Request $request, Course $course)
         }
     }
 
-    public function show(Course $course)
-{
-    $course->load('students'); // Carga los estudiantes asignados
+   public function show(Course $course)
+    {
+        // Cargar relaciones que necesitas en la vista
+        $course->load([
+            'students:id,name,email', // ajusta si tu relación usa otra tabla/campos
+        ]);
 
-    return response()->json([ 
-        'course' => $course
-    ]);
-}
+        // Normalizar URLs de archivos (si guardas paths en storage/)
+        $data = $course->toArray();
+        $data['image_cover'] = $course->image_cover ? Storage::url($course->image_cover) : null;
+        $data['logo']        = $course->logo ? Storage::url($course->logo) : null;
 
+        return Inertia::render('Admin/Courses/Show', [
+            'course' => $data,
+        ]);
+    }
 
 public function assignStudents(Request $request, Course $course)
 {

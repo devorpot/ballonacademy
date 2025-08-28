@@ -101,6 +101,9 @@ class EvaluationUsersController extends Controller
     // Pantalla de agradecimiento tras enviar evaluación
     public function thankyou($course = null, $evaluation = null)
     {
+
+
+
         return Inertia::render('Frontend/Evaluations/Thankyou', [
             'evaluation' => $evaluation,
             'course' => $course

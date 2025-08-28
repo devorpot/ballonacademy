@@ -143,25 +143,25 @@ onMounted(() => {
        
        { label: 'Mi Perfil', route: '' },
     ]" />
-    <SectionHeader title="Editar Perfil" />
+      
     <ToastNotification v-if="toast" :message="toast.message" :type="toast.type" @hidden="toast = null" />
     <section class="section-panel mb-4">
       <div class="container-fluid">
-
-        
+         
         <form @submit.prevent="submit" novalidate>
           <div class="card">
             <div class="card-header">
-              <ul class="nav nav-tabs card-header-tabs">
-                <li class="nav-item">
-                  <a class="nav-link" :class="{ active: activeTab === 'personal' }" href="#" @click.prevent="activeTab = 'personal'">Perfil Personal</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" :class="{ active: activeTab === 'billing' }" href="#" @click.prevent="activeTab = 'billing'">Datos de Facturación</a>
-                </li>
-              </ul>
+                <h5 class="card-title">Editar Perfil</h5>
             </div>
             <div class="card-body">
+              <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                  <a class="nav-link my-2" :class="{ active: activeTab === 'personal' }" href="#" @click.prevent="activeTab = 'personal'">Perfil Personal</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link my-2" :class="{ active: activeTab === 'billing' }" href="#" @click.prevent="activeTab = 'billing'">Datos de Facturación</a>
+                </li>
+              </ul>
               <div v-if="activeTab === 'personal'">
                 <div class="row">
                   <div class="col-md-6 mb-3">

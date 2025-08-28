@@ -1,5 +1,6 @@
 <script setup>
-import { Head, Link, usePage, router } from '@inertiajs/vue3'
+import { Head, Link, usePage } from '@inertiajs/vue3'
+import { Inertia } from '@inertiajs/inertia'
 import { ref, computed, onMounted } from 'vue'
 import { route } from 'ziggy-js'
 
@@ -7,14 +8,15 @@ import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue'
 import CrudFilters from '@/Components/Admin/Ui/CrudFilters.vue'
 import CrudPagination from '@/Components/Admin/Ui/CrudPagination.vue'
+import ConfirmDeleteModal from '@/Components/Admin/ConfirmDeleteModal.vue'
 import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue'
 
 const props = defineProps({
-  // Resultado de paginate() en el controlador: { data, links, meta... }
-  evaluations: { type: Object, required: true },
-  // Presente cuando navegas por /admin/evaluation-users/course/{course}/index
+  // Puede ser un array simple o el objeto de paginate() { data, links, meta, ... }
+  evaluations: { type: [Array, Object], required: true },
+  // Cuando navegas por /admin/evaluation-users/course/{course}/index
   course: { type: Object, default: null },
-  // Filtros actuales (enviados por el backend con withQueryString)
+  // Filtros actuales
   filters: {
     type: Object,
     default: () => ({
@@ -27,12 +29,40 @@ const props = defineProps({
   }
 })
 
-
 const page = usePage()
+
+// UI state
 const toast = ref(null)
 const searchQuery = ref('')
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
+
+const showDeleteModal = ref(false)
+const deletingId = ref(null)
+const isDeleting = ref(false)
+
+// Ordenamiento
+const sortKey = ref('id')
+const sortOrder = ref('asc')
+
+// Mapas de labels
+const TYPE_MAP = { 1: 'Curso', 2: 'Video' }
+const EVA_TYPE_MAP = { 1: 'Cuestionario', 2: 'Video' }
+
+// Utils
+const fmtDate = (d) => {
+  if (!d) return '—'
+  const date = new Date(d)
+  return isNaN(date) ? '—' : date.toLocaleDateString()
+}
+
+const statusBadge = (statusLabelRaw) => {
+  const txt = String(statusLabelRaw ?? '—')
+  if (/aprob/i.test(txt)) return { class: 'badge bg-success-subtle text-success border', text: txt }
+  if (/revi/i.test(txt))  return { class: 'badge bg-warning-subtle text-warning border', text: txt }
+  if (/no\s?apro/i.test(txt)) return { class: 'badge bg-danger-subtle text-danger border', text: txt }
+  return { class: 'badge bg-secondary-subtle text-secondary border', text: txt }
+}
 
 onMounted(() => {
   if (page.props.flash?.success) {
@@ -43,62 +73,44 @@ onMounted(() => {
   }
 })
 
-// Mapas de fallback si el backend aún no expone *_label
-const TYPE_MAP = { 1: 'Curso', 2: 'Video' }
-const EVA_TYPE_MAP = { 1: 'Cuestionario', 2: 'Video' }
+// Normaliza evaluations: acepta array o paginate()
+const baseList = computed(() => {
+  if (Array.isArray(props.evaluations)) return props.evaluations
+  return props.evaluations?.data ?? []
+})
 
-const fmtDate = (d) => {
-  if (!d) return '—'
-  const date = new Date(d)
-  return isNaN(date) ? '—' : date.toLocaleDateString()
-}
-const fmtDateTime = (d) => {
-  if (!d) return '—'
-  const date = new Date(d)
-  return isNaN(date) ? '—' : date.toLocaleString()
-}
-
-const statusBadge = (statusLabelRaw) => {
-  const txt = String(statusLabelRaw ?? '—')
-  // Puedes ajustar clases según label real si quieres una lógica más fina
-  if (/aprob/i.test(txt)) return { class: 'badge bg-success-subtle text-success border', text: txt }
-  if (/revi/i.test(txt))  return { class: 'badge bg-warning-subtle text-warning border', text: txt }
-  if (/no\s?apro/i.test(txt)) return { class: 'badge bg-danger-subtle text-danger border', text: txt }
-  return { class: 'badge bg-secondary-subtle text-secondary border', text: txt }
-}
-
+// Filas listas para render
 const rows = computed(() => {
-  // Normaliza los datos que muestran la tabla para no repetir lógica en plantilla
-  return (props.evaluations?.data ?? []).map(ev => {
-    const evaluation = ev.evaluation ?? {}
+  return baseList.value.map(ev => {
+    // Cuando viene de evaluation-users suele venir así: { id, user, course, evaluation, ... }
+    // Aseguramos accesos defensivos
+    const evaluation = ev.evaluation ?? ev
     const typeLabel =
       evaluation.type_label ??
       TYPE_MAP[Number(evaluation.type)] ??
-      evaluation.type ??
-      '—'
-
+      evaluation.type ?? '—'
     const evaTypeLabel =
       evaluation.eva_type_label ??
       EVA_TYPE_MAP[Number(evaluation.eva_type)] ??
-      evaluation.eva_type ??
-      '—'
+      evaluation.eva_type ?? '—'
 
     return {
       id: ev.id,
       userName: ev.user?.name ?? '—',
-      courseTitle: ev.course?.title ?? '—',
+      courseTitle: ev.course?.title ?? evaluation.course?.title ?? '—',
       evaluationTitle: evaluation.title ?? '—',
       typeLabel,
       evaTypeLabel,
       pointsMin: evaluation.points_min ?? '—',
-      sendDate: fmtDate(ev.eva_send_date ?? evaluation.eva_send_date), // toma del envío o de la evaluación si aplica
-      statusLabel: ev.status_label ?? '—',
+      sendDate: fmtDate(ev.eva_send_date ?? evaluation.eva_send_date),
+      statusLabel: ev.status_label ?? evaluation.status_label ?? '—',
       approvedBy: ev.approved_user?.name ?? '—'
     }
   })
 })
 
-const filteredEvaluations = computed(() => {
+// Búsqueda
+const filtered = computed(() => {
   if (!searchQuery.value) return rows.value
   const q = searchQuery.value.toLowerCase()
   return rows.value.filter(r =>
@@ -111,13 +123,40 @@ const filteredEvaluations = computed(() => {
   )
 })
 
-const paginatedEvaluations = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  return filteredEvaluations.value.slice(start, start + itemsPerPage.value)
+// Ordenamiento
+const sortBy = (key) => {
+  if (sortKey.value === key) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortKey.value = key
+    sortOrder.value = 'asc'
+  }
+}
+
+const sorted = computed(() => {
+  const data = [...filtered.value]
+  data.sort((a, b) => {
+    let aVal = a[sortKey.value]
+    let bVal = b[sortKey.value]
+    // Normaliza a string para comparación estable cuando son textos
+    aVal = aVal ?? ''
+    bVal = bVal ?? ''
+    if (typeof aVal === 'string') aVal = aVal.toLowerCase()
+    if (typeof bVal === 'string') bVal = bVal.toLowerCase()
+
+    if (aVal < bVal) return sortOrder.value === 'asc' ? -1 : 1
+    if (aVal > bVal) return sortOrder.value === 'asc' ? 1 : -1
+    return 0
+  })
+  return data
 })
 
-const totalPages = computed(() => Math.ceil(filteredEvaluations.value.length / itemsPerPage.value))
-
+// Paginación cliente
+const paginated = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  return sorted.value.slice(start, start + itemsPerPage.value)
+})
+const totalPages = computed(() => Math.ceil(sorted.value.length / itemsPerPage.value))
 const changePage = (pageNum) => {
   if (pageNum >= 1 && pageNum <= totalPages.value) {
     currentPage.value = pageNum
@@ -125,64 +164,54 @@ const changePage = (pageNum) => {
   }
 }
 
-// Estado para eliminar
-const showDeleteModal = ref(false)
-const deletingId = ref(null)
-const deletingLabel = ref('') // opcional: nombre de la evaluación/usuario para mostrar en modal
-
-function askDelete(ev) {
-  deletingId.value = ev.id
-  deletingLabel.value = `#${ev.id} — ${ev.evaluationTitle} · ${ev.userName}`
+// Eliminar
+const askDelete = (row) => {
+  deletingId.value = row.id
   showDeleteModal.value = true
 }
-
-function closeDeleteModal() {
+const cancelDelete = () => {
   showDeleteModal.value = false
   deletingId.value = null
-  deletingLabel.value = ''
+  isDeleting.value = false
 }
-
-function confirmDelete() {
+const confirmDelete = () => {
   if (!deletingId.value) return
-  router.delete(
-    route('admin.evaluation-users.destroy', deletingId.value),
-    {
-      preserveScroll: true,
-      onStart: () => {
-        toast.value = null
-      },
-      onSuccess: () => {
-        toast.value = { message: 'Evaluación eliminada correctamente.', type: 'success' }
-      },
-      onError: () => {
-        toast.value = { message: 'No se pudo eliminar la evaluación.', type: 'danger' }
-      },
-      onFinish: () => {
-        closeDeleteModal()
-      }
+  isDeleting.value = true
+  Inertia.delete(route('admin.evaluation-users.destroy', deletingId.value), {
+    preserveScroll: true,
+    onSuccess: () => {
+      toast.value = { message: 'Evaluación eliminada correctamente.', type: 'success' }
+      cancelDelete()
+    },
+    onError: () => {
+      toast.value = { message: 'No se pudo eliminar la evaluación.', type: 'danger' }
+      isDeleting.value = false
+    },
+    onFinish: () => {
+      isDeleting.value = false
     }
-  )
+  })
 }
 </script>
 
 <template>
   <Head title="Evaluaciones Enviadas por Usuarios" />
   <AdminLayout>
-      <Breadcrumbs
-        username="admin"
-        :breadcrumbs="[
-          { label: 'Dashboard', route: 'admin.dashboard' },
-          { label: 'Evaluaciones', route: 'admin.evaluations.index' },
-          {
-            label: `${(props.course?.title ?? '-')}`,
-            route: 'admin.evaluation-users.course.index',   // nombre de ruta
-            params: { course: props.evaluationUser?.course?.id } // <-- aquí va el ID
-          } 
-        ]"
-      />
+    <Breadcrumbs
+      username="admin"
+      :breadcrumbs="[
+        { label: 'Dashboard', route: 'admin.dashboard' },
+        { label: 'Evaluaciones', route: 'admin.evaluations.index' },
+        props.course
+          ? {
+              label: props.course.title,
+              route: 'admin.evaluation-users.course.index',
+              params: { course: props.course.id }
+            }
+          : { label: 'Envíos', route: '' }
+      ]"
+    />
 
-
- 
     <section class="section-heading">
       <div class="container-fluid">
         <div class="row">
@@ -197,7 +226,7 @@ function confirmDelete() {
 
     <CrudFilters
       v-model:searchQuery="searchQuery"
-      :count="filteredEvaluations.length"
+      :count="sorted.length"
       placeholder="Buscar por usuario, curso, evaluación, tipo o estatus..."
       item-label="envío(s)"
     />
@@ -210,20 +239,46 @@ function confirmDelete() {
               <table class="table table-hover table-striped align-middle mb-0">
                 <thead class="table-light">
                   <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Curso</th>
-                    <th>Evaluación</th>
-                    <th>Ámbito</th>
-                    <th>Tipo</th>
-                    <th>Pts. mín.</th>
-                     
-                    <th>Aprobado por</th>
+                    <th @click="sortBy('id')" style="cursor:pointer;">
+                      ID
+                      <i :class="sortKey === 'id' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
+                    </th>
+                    <th @click="sortBy('userName')" style="cursor:pointer;">
+                      Usuario
+                      <i :class="sortKey === 'userName' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
+                    </th>
+                    <th @click="sortBy('courseTitle')" style="cursor:pointer;">
+                      Curso
+                      <i :class="sortKey === 'courseTitle' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
+                    </th>
+                    <th @click="sortBy('evaluationTitle')" style="cursor:pointer;">
+                      Evaluación
+                      <i :class="sortKey === 'evaluationTitle' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
+                    </th>
+                    <th @click="sortBy('typeLabel')" style="cursor:pointer;">
+                      Ámbito
+                      <i :class="sortKey === 'typeLabel' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
+                    </th>
+                    <th @click="sortBy('evaTypeLabel')" style="cursor:pointer;">
+                      Tipo
+                      <i :class="sortKey === 'evaTypeLabel' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
+                    </th>
+                    <th @click="sortBy('pointsMin')" style="cursor:pointer;">
+                      Pts. mín.
+                      <i :class="sortKey === 'pointsMin' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
+                    </th>
+                    <th @click="sortBy('statusLabel')" style="cursor:pointer;">
+                      Estatus
+                      <i :class="sortKey === 'statusLabel' ? (sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down') : 'bi bi-arrow-down-up'"></i>
+                    </th>
+                    <th>
+                      Aprobado por
+                    </th>
                     <th class="text-end pe-4">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="ev in paginatedEvaluations" :key="ev.id">
+                  <tr v-for="ev in paginated" :key="ev.id">
                     <td>{{ ev.id }}</td>
                     <td>{{ ev.userName }}</td>
                     <td>{{ ev.courseTitle }}</td>
@@ -231,33 +286,34 @@ function confirmDelete() {
                     <td>{{ ev.typeLabel }}</td>
                     <td>{{ ev.evaTypeLabel }}</td>
                     <td>{{ ev.pointsMin }}</td>
-                     
+                    <td>
+                      <span :class="statusBadge(ev.statusLabel).class">{{ statusBadge(ev.statusLabel).text }}</span>
+                    </td>
                     <td>{{ ev.approvedBy }}</td>
                     <td class="text-end pe-4">
-                      <div class="btn-group" role="group">
+                      <div class="btn-group btn-group-sm" role="group">
                         <Link
-                          class="btn btn-outline-primary btn-sm"
+                          class="btn btn-outline-primary"
                           :href="route('admin.evaluation-users.show', ev.id)"
                           title="Ver envío"
                         >
                           <i class="bi bi-eye-fill"></i>
                         </Link>
-
                         <button
                           type="button"
-                          class="btn btn-outline-danger btn-sm"
-                          :disabled="deletingId === ev.id"
+                          class="btn btn-outline-danger"
+                          :disabled="isDeleting && deletingId === ev.id"
                           @click="askDelete(ev)"
                           title="Eliminar envío"
                         >
-                          <span v-if="deletingId === ev.id" class="spinner-border spinner-border-sm me-1"></span>
+                          <span v-if="isDeleting && deletingId === ev.id" class="spinner-border spinner-border-sm me-1"></span>
                           <i v-else class="bi bi-trash-fill"></i>
                         </button>
                       </div>
-                  </td>
-
+                    </td>
                   </tr>
-                  <tr v-if="filteredEvaluations.length === 0">
+
+                  <tr v-if="sorted.length === 0">
                     <td colspan="11" class="text-center py-4 text-muted">
                       <i class="bi bi-exclamation-circle me-2"></i>No hay evaluaciones enviadas
                     </td>
@@ -274,6 +330,18 @@ function confirmDelete() {
       :current-page="currentPage"
       :total-pages="totalPages"
       @change-page="changePage"
+    />
+
+    <ConfirmDeleteModal
+      :show="showDeleteModal"
+      :loading="isDeleting"
+      @close="cancelDelete"
+      @confirm="confirmDelete"
+      title="¿Deseas eliminar este envío de evaluación?"
+      confirm-message="Por favor confirma la eliminación. Esta acción no se puede deshacer."
+      warning-text="Se eliminará el registro seleccionado."
+      cancel-text="No, cancelar"
+      confirm-text="Sí, eliminar"
     />
 
     <ToastNotification

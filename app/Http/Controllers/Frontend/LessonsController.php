@@ -346,6 +346,7 @@ public function show($courseId, $lessonId)
         ],
         'videos'            => collect($videosArr)->values(),
         'evaluations'       => $evaluationsPayload,
+        'isCompleted' =>$isCompleted,
         'completedVideoIds' => $completedVideoIds,
     ]);
 }

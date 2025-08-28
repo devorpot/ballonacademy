@@ -130,3 +130,4 @@ class EvaluationUsersController extends Controller
         return redirect()->back()->with('success', 'Evaluación eliminada correctamente');
     }
 }
+ 

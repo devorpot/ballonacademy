@@ -100,6 +100,9 @@
 
           <!-- Lista de Videos -->
           <div class="col-12 col-lg-4" id="sidebar">
+ 
+            
+
             <div class="card shadow-sm border-0 h-100">
               <div class="card-header bg-white border-bottom">
                 <h6 class="fw-bold mb-0">Lista de Videos</h6>
@@ -136,7 +139,7 @@
 </template>
 
 <script setup>
-import { Head, router } from '@inertiajs/vue3'
+import { Head, router, Link } from '@inertiajs/vue3'
 import { ref, computed, nextTick, watchEffect, onMounted, onBeforeUnmount } from 'vue'
 import { route } from 'ziggy-js'
 

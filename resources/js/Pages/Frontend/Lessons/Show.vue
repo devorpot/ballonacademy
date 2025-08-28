@@ -18,14 +18,20 @@
  <section class="section-panel">
    <div class="container-fluid">
        <!-- Encabezado lección -->
-        <div class="card shadow-sm mb-3">
+        <div class="card shadow-sm mb-1">
           <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-            <div class="mb-2 mb-md-0">
-              
-              <p class="text-muted mb-0">{{ lesson.description_short }}</p>
+             <div class="mb-2 mb-md-0 w-50">
+               
+             
+              <div v-if="isCompleted">
+                
+                  <p><strong> Esta lección se ha completado</strong> <br>puedes realizar las evaluaciones.</p>
+                  <Link :href="route('dashboard.courses.evaluations.index', props.course.id)" class="btn btn-success">Ver Evaluaciones</Link> 
+              </div>
+             
             </div>
 
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
               <div class="text-end">
                 <small class="text-muted d-block">Progreso de la lección</small>
                 <div class="progress" style="height: 8px; width: 220px;">
@@ -58,18 +64,7 @@
 
 
  
-
- <section class="section-panel py-3">
-      <div class="container-fluid">
-          <div v-if="lesson.instructions" class="card shadow-sm mt-3">
-          <div class="card-body">
-            <h5 class="fw-bold mb-2">Instrucciones</h5>
-            <p class="mb-0">{{ lesson.instructions }}</p>
-          </div>
-        </div>
-      </div>
-  </section>
-
+ 
   <section class="section-panel py-3">
       <div class="container-fluid">
 
@@ -95,9 +90,7 @@
                     class="col-12 col-md-6 col-lg-4 mb-4" >
                     <div class="card video-card h-100 shadow-sm">
 
-                      <pre>
-                        {{video}}
-                      </pre>
+                      
                   <!-- Thumbnail -->
                       <div class="video-thumb-wrapper">
                         <img
@@ -174,13 +167,19 @@
       </div>
     </section>
 
-<pre>
-  {{evaluations}}
-</pre>
- <section class="section-panel">
+ 
+ <section class="section-panel" id="panel-evaluations" v-if="isCompleted">
   <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+         
+         <h5 class="mb-3">Realizar las evaluaciones de la lección</h5>
+        
+      </div>
+    </div>
     <!-- Evaluaciones en filas -->
-    <div class="col-12" v-if="evaluations.length">
+   <div class="row" v-if="evaluations.length">
+      <div class="col-12">
       <div class="card shadow-sm">
         <div class="card-header bg-white border-bottom d-flex align-items-center gap-2">
           <i class="bi bi-card-checklist"></i>
@@ -273,6 +272,7 @@
         </div>
       </div>
     </div>
+   </div>
   </div>
 </section>
 
@@ -287,6 +287,7 @@ import StudentLayout from '@/Layouts/StudentLayout.vue'
 import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue'
 
 const props = defineProps({
+  isCompleted:{ type: Boolean, required: true },
   course: { type: Object, required: true },
   lesson: { type: Object, required: true },
   videos: { type: Array, required: true },        // [{ id, title, image_cover, duration, size, is_ended, is_accessible }]

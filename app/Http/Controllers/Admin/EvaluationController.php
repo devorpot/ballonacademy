@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use App\Enums\EvaluationStatus;
+use Illuminate\Support\Facades\DB;
 use App\Enums\EvaluationsTypes; // nuevo: enum para 'type' (1=Course, 2=Video)
 
 class EvaluationController extends Controller
@@ -52,16 +53,32 @@ class EvaluationController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+public function store(Request $request)
 {
     $validated = $this->validateData($request, true);
 
-    $validated['eva_video_file'] = $this->handleUpload($request, 'eva_video_file', 'evaluations/videos');
+    return DB::transaction(function () use ($request, $validated) {
+        $validated['eva_video_file'] = $this->handleUpload($request, 'eva_video_file', 'evaluations/videos');
 
-    Evaluation::create($validated);
+        $evaluation = Evaluation::create($validated);
 
-    return redirect()->route('admin.evaluations.index')->with('success', 'Evaluación creada exitosamente');
+        $incomingType = $this->typeValue($validated['type'] ?? null);
+
+        if ($incomingType === EvaluationsTypes::LESSON->value && !empty($validated['lesson_id'])) {
+            $this->attachLessonEvaluation(
+                $evaluation,
+                (int)$validated['lesson_id'],
+                (int)$validated['course_id']
+            );
+        }
+
+        return redirect()
+            ->route('admin.evaluations.index')
+            ->with('success', 'Evaluación creada exitosamente');
+    });
 }
+
+
 
     public function edit(Evaluation $evaluation)
     {
@@ -71,6 +88,13 @@ class EvaluationController extends Controller
             'APROVEED'    => 'Aprobado',
             'NO APROVEED' => 'No aprobado',
         ];
+
+
+        /*Agregamos la evaluacion si es del tipo  3 =  Evaluacion*/
+
+
+
+
 
         return Inertia::render('Admin/Evaluations/Edit', [
             'evaluation' => $evaluation->load(['course', 'video', 'lesson']),
@@ -88,16 +112,47 @@ class EvaluationController extends Controller
         ]);
     }
 
-    public function update(Request $request, Evaluation $evaluation)
+public function update(Request $request, Evaluation $evaluation)
 {
     $validated = $this->validateData($request, false);
 
-    $evaluation->fill($validated);
-    $evaluation->eva_video_file = $this->updateFile($request, $evaluation->eva_video_file, 'eva_video_file', 'evaluations/videos');
-    $evaluation->save();
+    return DB::transaction(function () use ($request, $evaluation, $validated) {
+        // Antes de guardar: ¿era de lección?
+        $wasLesson = ($this->typeValue($evaluation->type) === EvaluationsTypes::LESSON->value);
 
-    return redirect()->route('admin.evaluations.index')->with('success', 'Evaluación actualizada correctamente');
+        // Actualizar campos y archivo
+        $evaluation->fill($validated);
+        $evaluation->eva_video_file = $this->updateFile(
+            $request,
+            $evaluation->eva_video_file,
+            'eva_video_file',
+            'evaluations/videos'
+        );
+        $evaluation->save();
+
+        // Después de guardar: ¿es de lección?
+        $incomingType = $this->typeValue($validated['type'] ?? null);
+        $isLesson     = ($incomingType === EvaluationsTypes::LESSON->value);
+
+        if ($isLesson && !empty($validated['lesson_id'])) {
+            $this->attachLessonEvaluation(
+                $evaluation,
+                (int)$validated['lesson_id'],
+                (int)$validated['course_id']
+            );
+        }
+
+        if ($wasLesson && !$isLesson) {
+            $this->detachLessonEvaluation($evaluation);
+        }
+
+        return redirect()
+            ->route('admin.evaluations.index')
+            ->with('success', 'Evaluación actualizada correctamente');
+    });
 }
+
+
  
 
     public function destroy(Evaluation $evaluation)
@@ -243,6 +298,7 @@ class EvaluationController extends Controller
         $lessonId = $request->query('lesson_id');
 
         $query = Evaluation::query()
+            ->where('lesson_id', $lessonId)
             ->where('course_id', $course->id);
 
         if ($q !== '') {
@@ -274,6 +330,64 @@ class EvaluationController extends Controller
             'data' => $evaluations,
         ]);
     }
+
+    /**
+ * Crea (o actualiza) la relación en lesson_evaluations dejando el order al final.
+ */
+private function attachLessonEvaluation(Evaluation $evaluation, int $lessonId, int $courseId): void
+{
+    // Si ya existe una fila para esta evaluación, la actualizamos; si no, la creamos al final.
+    $existing = LessonEvaluation::where('evaluation_id', $evaluation->id)->first();
+
+    if ($existing) {
+        // Si cambia de lección, asignar nuevo order al final de la nueva lección
+        if ((int)$existing->lesson_id !== $lessonId) {
+            $nextOrder = (int) LessonEvaluation::where('lesson_id', $lessonId)->max('order');
+            $existing->order = $nextOrder + 1;
+        }
+        $existing->lesson_id  = $lessonId;
+        $existing->course_id  = $courseId;
+        $existing->active     = true;
+        $existing->save();
+        return;
+    }
+
+    // No existía: crear al final de la lección
+    $nextOrder = (int) LessonEvaluation::where('lesson_id', $lessonId)->max('order');
+
+    LessonEvaluation::create([
+        'lesson_id'     => $lessonId,
+        'evaluation_id' => $evaluation->id,
+        'course_id'     => $courseId,
+        'order'         => $nextOrder + 1,
+        'active'        => true,
+    ]);
+}
+
+
+/**
+ * Devuelve el valor (int) del tipo, acepte enum/int/string/null.
+ */
+private function typeValue($type): ?int
+{
+    if ($type instanceof \App\Enums\EvaluationsTypes) {
+        return $type->value;
+    }
+    if ($type === null || $type === '') {
+        return null;
+    }
+    return (int) $type;
+}
+
+
+/**
+ * Elimina cualquier relación en lesson_evaluations para esta evaluación.
+ */
+private function detachLessonEvaluation(Evaluation $evaluation): void
+{
+    LessonEvaluation::where('evaluation_id', $evaluation->id)->delete();
+}
+
 
 
 }

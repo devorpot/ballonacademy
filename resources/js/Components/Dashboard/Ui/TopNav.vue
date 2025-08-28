@@ -3,7 +3,7 @@
     <!-- Logo -->
     <div class="d-flex align-items-center gap-2">
   <Link :href="route('dashboard.index')">
-     <span class="fs-5 fw-semibold app-title d-none d-md-inline ms-2">Academia Internacional de Globos</span>
+     <img src="https://academiainternacionalglobos.com/wp-content/themes/academiaglobos/assets/images/logo-internacional.png" alt="" style="max-width:110px;" />
    </Link>
       
     </div>
@@ -117,11 +117,31 @@ async function changeLocale(locale) {
 }
 </script>
 <style scoped>
+
+  :root {
+  --ba-bg:        #042B60; /* background */
+  --ba-border:    #0E78BE; /* borders */
+  --ba-button:    #D4A744; /* buttons */
+  --ba-text:      #FFFFFF; /* text */
+
+  /* Derivados (misma paleta con opacidad) */
+  --ba-bg-8:      rgba(4, 43, 96, 0.08);
+  --ba-bg-12:     rgba(4, 43, 96, 0.12);
+  --ba-bg-16:     rgba(4, 43, 96, 0.16);
+  --ba-border-20: rgba(14,120,190,0.20);
+  --ba-border-28: rgba(14,120,190,0.28);
+  --ba-text-70:   rgba(255,255,255,0.70);
+  --ba-text-85:   rgba(255,255,255,0.85);
+  --ba-white-08:  rgba(255,255,255,0.08);
+  --ba-white-12:  rgba(255,255,255,0.12);
+  --ba-white-16:  rgba(255,255,255,0.16);
+}
+
 .top-nav.navbar-card {
-  background: #fff;
-  border-radius: 1.3rem;
+  background: #042B60;
+ 
   box-shadow: 0 2px 16px 0 #00205718;
-  margin: 15px 16px 0 16px;
+  
   height: 66px;
   min-height: 60px;
   position: relative;
@@ -130,7 +150,7 @@ async function changeLocale(locale) {
 .logo-circle {
   width: 42px;
   height: 42px;
-  background: #e9ecef;
+ 
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -138,15 +158,11 @@ async function changeLocale(locale) {
   overflow: hidden;
   border: 2px solid #007bff22;
 }
-.app-title {
-  color: #2563eb;
-  font-family: 'Montserrat', 'Roboto', Arial, sans-serif;
-  letter-spacing: 0.02em;
-}
+ 
 .btn-icon {
-  background: transparent;
+  background: #D4A744!important;
   border: none;
-  color: #2261a9;
+  color: #FFF;
   transition: color 0.18s;
   padding: 0.5rem 0.7rem;
   border-radius: 50%;
@@ -157,15 +173,16 @@ async function changeLocale(locale) {
   color: #1c478c;
 }
 .user-menu {
-  background: #f8fafc;
+   color:#FFF;
   border-radius: 2rem;
   padding: 0.35rem 0.95rem 0.35rem 0.6rem;
   gap: 0.45rem;
   box-shadow: 0 1px 3px #dde8f433;
 }
 .user-avatar {
-  color: #98a8c7;
-  background: #fff;
+  color: #FFF;
+
+ 
   border-radius: 50%;
   border: 1.5px solid #e2e8f0;
   width: 34px;
@@ -176,17 +193,17 @@ async function changeLocale(locale) {
   font-size: 1.1rem;
 }
 .btn-profile {
-  background: none;
+  background: #D4A744!important;
   border: none;
-  color: #2261a9;
+  color: #FFF;
   font-size: 1.05rem;
   transition: background 0.16s;
   padding: 0.3rem 0.7rem;
   border-radius: 50%;
 }
 .btn-logout {
-  background: #e9ecef;
-  color: #d92929;
+  background: #A51605;
+  color: #FFF;
   border: none;
   border-radius: 1.4rem;
   padding: 0.46rem 1.2rem;
@@ -201,6 +218,7 @@ async function changeLocale(locale) {
 }
 
 .lang-dropdown {
+   background: #0063AF!important;
   min-width: 150px;
   right: 0;
   top: 100%;
@@ -209,9 +227,16 @@ async function changeLocale(locale) {
 .lang-dropdown .dropdown-item {
   border-radius: 0.375rem;
   padding: 0.3rem 0.75rem;
+  color:#FFF;
+}
+
+.lang-dropdown .dropdown-item  {
+  border-radius: 0.375rem;
+  padding: 0.3rem 0.75rem;
+  color:#FFF!important;
 }
 .lang-dropdown .dropdown-item:hover {
-  background-color: #f1f5f9;
+  background-color: #0D6EFD;
 }
 
 

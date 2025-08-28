@@ -1,9 +1,32 @@
 @primary-color: #CCC;
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=TikTok+Sans:opsz,wght@12..36,300..900&display=swap');
+ 
+
+/* Estilo base (Escritorio) */
 body {
+  font-size: 16px; /* tamaño estándar */
+  line-height: 1.6;
+  font-family: 'Montserrat', 'Roboto', Arial, sans-serif;
+  background:#FFF;
   font-family: 'Inter', sans-serif;
-  
 }
+
+/* Tablet (pantallas medianas: 768px a 1199px) */
+@media (max-width: 1199px) {
+  body {
+    font-size: 15px!important;
+    line-height: 1.55;
+  }
+}
+
+/* Celular (pantallas chicas: hasta 767px) */
+@media (max-width: 767px) {
+  body {
+    font-size: 14px!important;
+    line-height: 1.5;
+  }
+}
+
 
  .admin {
     .main{

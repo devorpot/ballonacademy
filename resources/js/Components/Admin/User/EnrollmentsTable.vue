@@ -63,14 +63,12 @@
               </td>
 
               <td class="fw-medium">
-                <a
-                  v-if="courseHref(item)"
-                  :href="courseHref(item)"
+                <Link
+                  :href="route(courseRouteName, { course: item.id })"
                   class="text-decoration-none"
                 >
                   {{ item.title }}
-                </a>
-                <span v-else>{{ item.title }}</span>
+                </Link>
               </td>
 
               <td class="text-muted">
@@ -86,23 +84,13 @@
 
               <td class="text-end">
                 <div class="btn-group">
-                  <a
-                    v-if="courseHref(item)"
-                    :href="courseHref(item)"
+                  <Link
+                    :href="route(courseRouteName, { course: item.id })"
                     class="btn btn-outline-primary btn-sm"
                     title="Ver curso"
                   >
                     <i class="bi bi-box-arrow-up-right me-1"></i>Ver
-                  </a>
-                  <button
-                    v-else
-                    type="button"
-                    class="btn btn-outline-secondary btn-sm"
-                    disabled
-                    title="Ruta no configurada"
-                  >
-                    <i class="bi bi-slash-circle me-1"></i>Sin ruta
-                  </button>
+                  </Link>
                 </div>
               </td>
             </tr>
@@ -149,25 +137,19 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 
 const props = defineProps({
   enrollments: { type: Array, required: true },
-
-  // Nombre de ruta Ziggy para ver curso. Cambia según tu app:
-  // ejemplos: 'admin.courses.show' o 'dashboard.courses.show'
   courseRouteName: { type: String, default: 'admin.courses.show' },
-
-  // Items por página
   perPage: { type: Number, default: 10 },
-
-  // Locale para formatear fecha
   dateLocale: { type: String, default: 'es-MX' },
 })
 
 const query   = ref('')
-const sortBy  = ref('created_at') // 'created_at' | 'title'
-const sortDir = ref('desc')       // 'asc' | 'desc'
+const sortBy  = ref('created_at')
+const sortDir = ref('desc')
 const page    = ref(1)
 
 const normalized = computed(() =>
@@ -198,7 +180,6 @@ const sorted = computed(() => {
       const bt = (b.title || '').toLowerCase()
       return sortDir.value === 'asc' ? at.localeCompare(bt) : bt.localeCompare(at)
     }
-    // Por fecha (subscription.created_at)
     const ad = a.subscription?.created_at ? new Date(a.subscription.created_at).getTime() : 0
     const bd = b.subscription?.created_at ? new Date(b.subscription.created_at).getTime() : 0
     return sortDir.value === 'asc' ? ad - bd : bd - ad
@@ -233,7 +214,6 @@ function formatDate(value) {
 }
 
 function thumbSrc(item) {
-  // Preferimos logo si existe, si no la portada
   const path = item.logo || item.image_cover
   return path ? `/storage/${path}` : null
 }
@@ -241,14 +221,6 @@ function thumbSrc(item) {
 function initials(text) {
   const s = (text || '').trim()
   return s ? s.split(/\s+/).map(p => p[0]).slice(0,2).join('').toUpperCase() : 'C'
-}
-
-function courseHref(item) {
-  try {
-    return route(props.courseRouteName, { course: item.id })
-  } catch {
-    return null
-  }
 }
 </script>
 

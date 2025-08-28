@@ -50,12 +50,12 @@ onBeforeUnmount(() => {
     <!-- Sidebar móvil -->
     <Transition name="slide">
       <div v-if="showMobileSidebar" class="mobile-sidebar-overlay" @click="toggleSidebar" role="presentation">
-        <aside class="mobile-sidebar" @click.stop aria-label="Menú lateral">
+        <div class="mobile-sidebar" @click.stop aria-label="Menú lateral">
           <button class="close-button" @click="toggleSidebar" aria-label="Cerrar menú">
             <i class="bi bi-x-lg"></i>
           </button>
           <Sidebar />
-        </aside>
+        </div>
       </div>
     </Transition>
 

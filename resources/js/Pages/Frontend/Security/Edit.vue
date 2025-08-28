@@ -42,14 +42,15 @@ function submit() {
         />
  
 
-        <section class="section-panel py-3">
+ <section class="section-panel py-3">
     <div class="container-fluid  ">
       <div class="row justify-content-center">
         <div class="col-lg-12">
           <div class="card shadow-sm">
+            <div class="card-header">
+               <h5 class="card-title">Seguridad de la cuenta</h5>
+            </div>
             <div class="card-body">
-              <h5 class="fw-bold mb-3">Seguridad de la cuenta</h5>
-
               <div class="mb-3">
                 <label class="form-label" for="name">Nombre</label>
                 <input id="name" type="text" v-model="form.name" class="form-control" :class="{ 'is-invalid': form.errors.name }" />
