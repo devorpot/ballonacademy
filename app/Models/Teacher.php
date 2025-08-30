@@ -21,7 +21,13 @@ class Teacher extends Model
         'degree',
         'experience_years',
         'birth_date',
-        'status'
+        'status',
+        'facebook',
+        'instagram',
+        'tiktok',
+        'website',
+        'profile_image',
+        'cover_image'
     ];
 
     /**

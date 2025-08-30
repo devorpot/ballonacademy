@@ -7,13 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-
 use App\Models\Video;
 use App\Models\Course;
 use App\Models\Teacher;
-
-
-use App\Models\Evaluation;
+use App\Models\Evaluation; 
+use App\Models\VideoMaterial;
 use App\Models\EvaluationUser;
 
 use App\Enums\EvaluationsTypes; // COURSE | VIDEO
@@ -238,15 +236,48 @@ public function show($courseId, $videoId)
             return $eva;
         });
 
-    $videoResources = $video->resources()
-        ->select('id','title','description','type','uploaded','file_src','video_src','img_src')
-        ->get();
+      $videoMaterials = VideoMaterial::forVideo((int) $videoId)
+        ->orderBy('name')
+        ->get([
+            'id',
+            'video_id',
+            'name',
+            'quantity',
+            'unit',
+            'notes',
+            'image',
+            'price',
+            'buy_link',
+        ])
+        ->map(function ($m) {
+            return [
+                'id'         => $m->id,
+                'name'       => $m->name,
+                'quantity'   => $m->quantity ?? 0,
+                'unit'       => $m->unit,
+                'notes'      => $m->notes,
+                'image'      => $m->image,
+                'image_url'  => $m->image_url,   // accessor
+                'price'      => $m->price ?? 0,
+                'buy_link'   => $m->buy_link,
+                'total_cost' => $m->total_cost,  // accessor
+            ];
+        });
+
+    // Resumen opcional para la vista
+    $materialsSummary = [
+        'count'          => $videoMaterials->count(),
+        'quantity_sum'   => (float) $videoMaterials->sum('quantity'),
+        'total_cost_sum' => (float) $videoMaterials->sum('total_cost'),
+    ];
+
+ 
 
     return Inertia::render('Frontend/Videos/Show', [
         'course'               => $course,
         'video'                => [
             ...$video->toArray(),
-            'captions' => $captions,
+            'captions'   => $captions,
         ],
         'previousVideo'        => $previousVideo,
         'nextVideo'            => $nextVideo,
@@ -255,6 +286,10 @@ public function show($courseId, $videoId)
         'videoEvaluations'     => $videoEvaluations,
         'courseEvaluations'    => $courseEvaluations,
         'videoResources'       => $videoResources,
+
+        // === NUEVO ===
+        'videoMaterials'       => $videoMaterials,
+        'materialsSummary'     => $materialsSummary,
     ]);
 }
 

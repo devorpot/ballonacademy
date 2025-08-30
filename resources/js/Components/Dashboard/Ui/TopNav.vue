@@ -88,7 +88,7 @@ const page = usePage()
 const user = computed(() => page.props?.auth?.user ?? null)
 const isAuthenticated = computed(() => !!user.value)
 
-const userName = computed(() => user.value?.name ?? 'Invitado')
+const userName = computed(() => user.value?.profile.nickname ?? 'Invitado')
 const userLocale = computed(() => user.value?.locale ?? 'es')
 
 const profileImage = computed(() => {

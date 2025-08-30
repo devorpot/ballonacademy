@@ -50,7 +50,21 @@
                       @show-resource="openResourceModal"
                     />
 
-                  </div>
+                </div>
+
+
+                <div class="d-block my-3" v-if="hasMaterials">
+
+                    <VideoCardMaterials
+                        :video-id="video.id"
+                        :video-materials="videoMaterials"
+                        :materials-summary="materialsSummary"   
+                        currency="MXN"
+                        locale="es-MX"
+                      />
+                     
+
+                </div>
 
            
  
@@ -103,7 +117,7 @@
  
             
 
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card border-0 shadow  ">
               <div class="card-header bg-white border-bottom">
                 <h6 class="fw-bold mb-0">Lista de Videos</h6>
               </div>
@@ -126,6 +140,20 @@
                 />
               </div>
             </div>
+
+             <div class="card border-0 shadow  ">
+              <div class="card-header bg-white border-bottom">
+                <h6 class="fw-bold mb-0">Lista de Videos</h6>
+              </div>
+              <div class="card-body">
+                <VideoComments
+                :video-id="video.id"
+                :course-id="course.id"
+                :can-comment="user != null"
+              />
+
+              </div>    
+            </div>
           </div>
         </div>
       </div>
@@ -139,7 +167,7 @@
 </template>
 
 <script setup>
-import { Head, router, Link } from '@inertiajs/vue3'
+import { Head, router, Link, usePage } from '@inertiajs/vue3'
 import { ref, computed, nextTick, watchEffect, onMounted, onBeforeUnmount } from 'vue'
 import { route } from 'ziggy-js'
 
@@ -149,10 +177,12 @@ import VideoCardMini from '@/Components/Dashboard/Video/VideoCardMini.vue'
 
 import VideoCardEvaluations from '@/Components/Dashboard/Video/VideoCardEvaluations.vue'
 import VideoCardResources from '@/Components/Dashboard/Video/VideoCardResources.vue'
-
+import VideoCardMaterials from '@/Components/Dashboard/Video/VideoCardMaterials.vue'
+import VideoComments from '@/Components/Dashboard/Video/VideoComments.vue'
 import CardsVideoEvaluations from '@/Components/Dashboard/Cards/CardsVideoEvaluations.vue'
  
 import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue'
+const page = usePage()
 
 const {
   course,
@@ -167,7 +197,9 @@ const {
   videoResources,
   allVideos,
   lastVideoIdLesson,
-  firstVideoIdLesson
+  firstVideoIdLesson,
+  materialsSummary,
+  videoMaterials
 } = defineProps({
   course: Object,
   lesson: Object,
@@ -181,11 +213,17 @@ const {
   videoResources: { type: Array, default: () => [] },
   allVideos: Array,
   lastVideoIdLesson:Number,
-  firstVideoIdLesson:Number
+  firstVideoIdLesson:Number,
+  materialsSummary: { type: Object, default: () => null },
+  videoMaterials: { type: Array,  default: () => [] }
 })
 
+
+const user = computed(() => page.props?.auth?.user ?? null)
 // Navegación videos
-const lastVideoId = computed(() => videos.length ? Number(videos[videos.length - 1].id) : null)
+const lastVideoId = computed(() =>
+  Array.isArray(videos) && videos.length ? Number(videos[videos.length - 1].id) : null
+)
 function goToNextVideo() {
   if (nextVideo) {
     router.visit(route('dashboard.courses.lessons.videos.show', {
@@ -243,7 +281,7 @@ const availableTabs = computed(() => {
 const showTabNav = computed(() => availableTabs.value.length > 1)
 
  
-
+const hasMaterials = computed(() => Array.isArray(videoMaterials) && videoMaterials.length > 0)
 const contentCol = ref(null)
 const sidebarCol = ref(null)
 const stickContent = ref(false)

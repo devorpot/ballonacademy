@@ -55,20 +55,27 @@ class EvaluationController extends Controller
 
 public function store(Request $request)
 {
+    // Validación base existente
     $validated = $this->validateData($request, true);
+    // Validación específica del PDF (20 MB)
+    $request->validate([
+        'pdf_file' => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
+    ]);
 
     return DB::transaction(function () use ($request, $validated) {
+        // Subidas
         $validated['eva_video_file'] = $this->handleUpload($request, 'eva_video_file', 'evaluations/videos');
+        $validated['pdf_file']       = $this->handleUpload($request, 'pdf_file',       'evaluations/pdfs');
 
         $evaluation = Evaluation::create($validated);
 
+        // Vinculación a lección si aplica
         $incomingType = $this->typeValue($validated['type'] ?? null);
-
         if ($incomingType === EvaluationsTypes::LESSON->value && !empty($validated['lesson_id'])) {
             $this->attachLessonEvaluation(
                 $evaluation,
-                (int)$validated['lesson_id'],
-                (int)$validated['course_id']
+                (int) $validated['lesson_id'],
+                (int) $validated['course_id']
             );
         }
 
@@ -80,7 +87,8 @@ public function store(Request $request)
 
 
 
-    public function edit(Evaluation $evaluation)
+
+ public function edit(Evaluation $evaluation)
     {
         $statusLabels = [
             'SEND'        => 'Enviado',
@@ -114,31 +122,54 @@ public function store(Request $request)
 
 public function update(Request $request, Evaluation $evaluation)
 {
+    // Validación base existente (sin obligar archivos)
     $validated = $this->validateData($request, false);
+    // Validación específica del PDF y flag de borrado
+    $request->validate([
+        'pdf_file'        => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
+        'remove_pdf_file' => ['sometimes', 'boolean'],
+    ]);
 
     return DB::transaction(function () use ($request, $evaluation, $validated) {
-        // Antes de guardar: ¿era de lección?
+        // ¿Era de lección antes?
         $wasLesson = ($this->typeValue($evaluation->type) === EvaluationsTypes::LESSON->value);
 
-        // Actualizar campos y archivo
+        // Actualizar campos
         $evaluation->fill($validated);
+
+        // Video: reemplazo si viene archivo
         $evaluation->eva_video_file = $this->updateFile(
             $request,
             $evaluation->eva_video_file,
             'eva_video_file',
             'evaluations/videos'
         );
+
+        // PDF: reemplazo si viene archivo
+        $evaluation->pdf_file = $this->updateFile(
+            $request,
+            $evaluation->pdf_file,
+            'pdf_file',
+            'evaluations/pdfs'
+        );
+
+        // PDF: borrado explícito si se marcó el flag y no se subió uno nuevo
+        if ($request->boolean('remove_pdf_file') && !$request->hasFile('pdf_file')) {
+            $this->deleteFile($evaluation->pdf_file);
+            $evaluation->pdf_file = null;
+        }
+
         $evaluation->save();
 
-        // Después de guardar: ¿es de lección?
+        // ¿Ahora es de lección?
         $incomingType = $this->typeValue($validated['type'] ?? null);
         $isLesson     = ($incomingType === EvaluationsTypes::LESSON->value);
 
         if ($isLesson && !empty($validated['lesson_id'])) {
             $this->attachLessonEvaluation(
                 $evaluation,
-                (int)$validated['lesson_id'],
-                (int)$validated['course_id']
+                (int) $validated['lesson_id'],
+                (int) $validated['course_id']
             );
         }
 
@@ -153,18 +184,18 @@ public function update(Request $request, Evaluation $evaluation)
 }
 
 
- 
+public function destroy(Evaluation $evaluation)
+{
+    // Elimina archivos asociados
+    $this->deleteFile($evaluation->eva_video_file);
+    $this->deleteFile($evaluation->pdf_file);
 
-    public function destroy(Evaluation $evaluation)
-    {
-        $this->deleteFile($evaluation->eva_video_file);
+    $evaluation->delete();
 
-        $evaluation->delete();
-
-        return redirect()
-            ->route('admin.evaluations.index')
-            ->with('success', 'Evaluación eliminada exitosamente');
-    }
+    return redirect()
+        ->route('admin.evaluations.index')
+        ->with('success', 'Evaluación eliminada exitosamente');
+}
 
         public function show(Evaluation $evaluation)
     {

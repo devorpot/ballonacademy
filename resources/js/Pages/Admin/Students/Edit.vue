@@ -57,7 +57,7 @@
                         aria-controls="tab-billing"
                         :aria-selected="activeTab === 'billing'"
                         @click.prevent="switchTab('billing')"
-                      >Datos de Facturación</a>
+                      >Datos </a>
                     </li>
                     <li class="nav-item ms-auto" role="presentation">
                       <button
@@ -257,7 +257,7 @@
                       </div>
 
                       <div class="col-md-6 mb-3">
-                        <FieldText id="website" label="Sitio web" v-model="form.website" />
+                        <FieldUrl id="website" label="Sitio web" v-model="form.website" />
                       </div>
                       <div class="col-md-6 mb-3">
                         <FieldText id="facebook" label="Facebook" v-model="form.facebook" />
@@ -279,12 +279,8 @@
 
                   <div v-show="activeTab === 'billing'" id="tab-billing" role="tabpanel">
                     <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <FieldText id="rfc" label="RFC" v-model="form.rfc" />
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <FieldText id="business_name" label="Razón social" v-model="form.business_name" />
-                      </div>
+                      
+                  
                       <div class="col-md-6 mb-3">
                         <FieldText id="street" label="Calle" v-model="form.street" />
                       </div>
@@ -306,15 +302,44 @@
                       <div class="col-md-4 mb-3">
                         <FieldText id="postal_code" label="Código postal" v-model="form.postal_code" />
                       </div>
-                      <div class="col-md-4 mb-3">
-                        <FieldEmail id="billing_email" label="Correo para factura" v-model="form.billing_email" />
+                     
+                       <div class="col-md-4 mb-3">
+                        <FieldText id="bussines_own" label="¿Cuentas con negocio propio?" v-model="form.bussines_own" />
                       </div>
-                      <div class="col-md-4 mb-3">
-                        <FieldText id="tax_regime" label="Régimen fiscal" v-model="form.tax_regime" />
+                       <div class="col-md-4 mb-3">
+                        <FieldText id="activity" label="¿A qué te dedicas actualmente" v-model="form.activity" />
                       </div>
-                      <div class="col-md-4 mb-3">
-                        <FieldText id="cfdi_use" label="Uso de CFDI" v-model="form.cfdi_use" />
+                       <div class="col-md-4 mb-3">
+                        <FieldText id="experiencie" label="¿Cuentas con experiencia en decoración?" v-model="form.experiencie" />
                       </div>
+                          <div class="col-md-6 mb-3">
+                        <FieldText id="business_name" label="Nombre del Negocio" v-model="form.business_name" />
+                      </div>
+                       <div class="col-md-4 mb-3">
+                        <FieldText id="bussines_name" label="Giro del negocio" v-model="form.bussines_category" />
+                      </div>
+                       <div class="col-md-4 mb-3">
+                        <FieldUrl id="bussines_website" label="sitio web del negocio" v-model="form.bussines_website" />
+                      </div>
+                      <FieldImage
+                          id="bussines_logo"
+                          label=""
+                          v-model="form.bussines_logo"
+                          :initialPreview="bussinesLogoPreview"
+                          :disabled="form.processing"
+                        />
+                        <small v-if="removeBussinesLogo" class="text-danger d-block mt-1">
+                          Se eliminará la imagen de perfil al guardar.
+                        </small>
+                        <div v-if="form.errors.bussines_logo" class="invalid-feedback d-block">
+                          {{ form.errors.bussines_logo }}
+                        </div>
+                    
+                      <div class="col-md-4 mb-3">
+                        <FieldEmail id="billing_email" label="Correo del negocio" v-model="form.billing_email" />
+                      </div>
+                
+                      
                     </div>
                   </div>
                 </div>
@@ -352,7 +377,7 @@ import FieldText from '@/Components/Admin/Fields/FieldText.vue'
 import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue'
 import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue'
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue'
-
+import FieldUrl from '@/Components/Admin/Fields/FieldUrl.vue'
 const props = defineProps({
   user: { type: Object, required: true },
   profile: { type: Object, required: true }
@@ -364,6 +389,9 @@ const showAccount = ref(false)
 const touched = ref({})
 
 const profileImagePreview = props.profile?.profile_image ? `/storage/${props.profile.profile_image}` : null
+
+const bussinesLogoPreview = props.profile?.bussines_logo ? `/storage/${props.profile.bussines_logo}` : null
+
 const coverImagePreview   = props.profile?.cover_image   ? `/storage/${props.profile.cover_image}`   : null
 const hasCurrentProfileImage = !!profileImagePreview
 const hasCurrentCoverImage   = !!coverImagePreview
@@ -371,7 +399,7 @@ const hasCurrentCoverImage   = !!coverImagePreview
 // Flags de eliminación de imágenes
 const removeProfileImage = ref(false)
 const removeCoverImage   = ref(false)
-
+const removeBussinesLogo  = ref(false)
 const form = useForm({
   _method: 'PUT',
 
@@ -408,14 +436,19 @@ const form = useForm({
   // Archivos (nuevos)
   profile_image: null,
   cover_image: null,
-
+  bussines_logo: null,
   // Redes
   website: props.profile?.website || '',
   facebook: props.profile?.facebook || '',
   instagram: props.profile?.instagram || '',
   tiktok: props.profile?.tiktok || '',
   youtube: props.profile?.youtube || '',
-  description: props.profile?.description || ''
+  description: props.profile?.description || '',
+  activity: props.profile?.activity || '',
+  experiencie: props.profile?.experiencie || '',
+  bussines_own: props.profile?.bussines_own || '',
+  bussines_website: props.profile?.bussines_website || '',
+  bussines_category: props.profile?.bussines_category || ''
 })
 
 // Persistencia de pestaña

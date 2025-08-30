@@ -44,7 +44,7 @@ function logout() {
        </div>
       <div class="w-100">
            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
+            <div class="container-fluid" style="max-width:1600px;">
    
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
@@ -56,16 +56,66 @@ function logout() {
                                 <i class="bi bi-people me-1"></i> Usuarios
                             </Link>
                         </li>
-                        <li class="nav-item">
-                            <Link class="nav-link" :href="route('admin.students.index')">
+              
+                 
+                           <li class="nav-item dropdown">
+                              <Link
+                                class="nav-link dropdown-toggle"
+                                href="#"
+                                id="navbarStudents"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                              >
                                 <i class="bi bi-people me-1"></i> Estudiantes
-                            </Link>
-                        </li>
-                         <li class="nav-item">
-                            <Link class="nav-link" :href="route('admin.courses.index')">
+                              </Link>
+
+                              <ul class="dropdown-menu" aria-labelledby="navbarStudents">
+                                <li>
+                                  <Link class="dropdown-item" :href="route('admin.students.index')">
+                                    Todos los estudiantes
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link class="dropdown-item" :href="route('admin.students.create')">
+                                    Crear estudiante
+                                  </Link>
+                                  <Link class="dropdown-item" :href="route('admin.activations.index')">
+                                    Activaciones
+                                  </Link>
+                              
+                                </li>
+                              </ul>
+                            </li>
+                        <li class="nav-item dropdown">
+                              <Link
+                                class="nav-link dropdown-toggle"
+                                href="#"
+                                id="navbarCourses"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                              >
                                 <i class="bi bi-people me-1"></i> Cursos
-                            </Link>
-                        </li>
+                              </Link>
+
+                              <ul class="dropdown-menu" aria-labelledby="navbarCourses">
+                                <li>
+                                  <Link class="dropdown-item" :href="route('admin.courses.index')">
+                                    Todos los cursos
+                                  </Link>
+                                </li>
+                                <li>
+                                  <Link class="dropdown-item" :href="route('admin.courses.create')">
+                                    Crear curso
+                                  </Link>
+                                  <Link class="dropdown-item" :href="route('admin.extras.index')">
+                                    Clases Extras
+                                  </Link>
+                                </li>
+                              </ul>
+                            </li>
+
                         <li class="nav-item">
                             <Link class="nav-link" :href="route('admin.teachers.index')">
                                 <i class="bi bi-people me-1"></i> Maestros

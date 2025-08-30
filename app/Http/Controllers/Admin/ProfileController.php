@@ -107,6 +107,13 @@ class ProfileController extends Controller
             'youtube' => 'nullable|url|max:255',
 
             'description' => 'nullable|string',
+            'activity' => 'nullable|string',
+            'experiencie' => 'nullable|string',
+            'bussines_own' => 'nullable|string',
+            'bussines_name' => 'nullable|string',
+            'bussines_logo' => 'nullable|string',
+            'bussines_website' => 'nullable|string',
+            'bussines_category' => 'nullable|string'
         ]);
     }
 }

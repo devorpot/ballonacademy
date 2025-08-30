@@ -56,17 +56,27 @@
                 placeholder="Ejemplo: 15"
                 class="mb-2"
               />
+               <FieldUrl
+                :id="`material-buy-link-${videoId}`"
+                label="Enlace de compra (opcional)"
+                v-model="materialForm.buy_link"
+                :showValidation="touched.buy_link"
+                :formError="formErrors.buy_link"
+                @blur="() => handleBlur('buy_link')"
+                placeholder="https://..."
+                class="mb-2"
+              />
               <FieldImage
-  :id="`material-image-${videoId}`"
-  label="Imagen"
-  v-model="materialForm.image"
-  :showValidation="touched.image"
-  :formError="formErrors.image"
-  :initialPreview="materialForm.image_preview"
-  @image-removed="onImageRemoved"
-  @blur="() => handleBlur('image')"
-  class="mb-2"
-/>
+              :id="`material-image-${videoId}`"
+              label="Imagen"
+              v-model="materialForm.image"
+              :showValidation="touched.image"
+              :formError="formErrors.image"
+              :initialPreview="materialForm.image_preview"
+              @image-removed="onImageRemoved"
+              @blur="() => handleBlur('image')"
+              class="mb-2"
+            />
 
               <FieldTextarea
                 :id="`material-notes-${videoId}`"
@@ -79,17 +89,7 @@
                 placeholder="Información adicional"
                 class="mb-2"
               />
-              <FieldText
-                :id="`material-buy-link-${videoId}`"
-                label="Enlace de compra (opcional)"
-                v-model="materialForm.buy_link"
-                type="url"
-                :showValidation="touched.buy_link"
-                :formError="formErrors.buy_link"
-                @blur="() => handleBlur('buy_link')"
-                placeholder="https://..."
-                class="mb-2"
-              />
+         
               <div class="text-end">
                 <button type="submit" class="btn btn-success btn-sm" :disabled="saving">
                   <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>
@@ -166,6 +166,7 @@ import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
 import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
 import FieldMoney from '@/Components/Admin/Fields/FieldMoney.vue';
+import FieldUrl from '@/Components/Admin/Fields/FieldUrl.vue';
 import ImageThumb from '@/Components/Admin/Ui/ImageThumb.vue';
 
 const props = defineProps({

@@ -30,18 +30,17 @@ function onPageChange(p) { currentPage.value = p }
 /* Confirmación de borrado */
 const confirm = reactive({ visible: false, item: null })
 
-/* Form */
+/* Form (solo archivo, sin caja de texto) */
 const form = reactive({
   lang: 'es',
-  file: null,
-  captions: ''
+  file: null
 })
-const touched = reactive({ lang: false, file: false, captions: false })
-const errors = reactive({ lang: '', file: '', captions: '' })
+const touched = reactive({ lang: false, file: false })
+const errors = reactive({ lang: '', file: '' })
 
 function resetForm() {
   editingId.value = null
-  Object.assign(form, { lang: 'es', file: null, captions: '' })
+  Object.assign(form, { lang: 'es', file: null })
   Object.keys(touched).forEach(k => touched[k] = false)
   Object.keys(errors).forEach(k => errors[k] = '')
 }
@@ -52,16 +51,12 @@ function openModal(item = null) {
     editingId.value = item.id
     Object.assign(form, {
       lang: item.lang || 'es',
-      file: null,
-      captions: item.captions || ''
+      file: null
     })
   } else {
     resetForm()
   }
 }
-
-
-
 
 function closeModal() { showModal.value = false; resetForm() }
 function cancelEdit() { closeModal() }
@@ -76,13 +71,10 @@ function validate() {
   Object.keys(errors).forEach(k => errors[k] = '')
   if (!form.lang) { errors.lang = 'Selecciona un idioma'; ok = false }
 
-  if (!editingId.value) {
-    // En creación, requiere al menos archivo o texto
-    if (!form.file && !form.captions) {
-      errors.file = 'Sube un archivo .vtt/.srt o pega el contenido'
-      errors.captions = 'Sube un archivo .vtt/.srt o pega el contenido'
-      ok = false
-    }
+  // En creación, el archivo es obligatorio
+  if (!editingId.value && !form.file) {
+    errors.file = 'Sube un archivo .vtt/.srt'
+    ok = false
   }
   return ok
 }
@@ -109,30 +101,17 @@ async function submitItem() {
   if (!validate()) return
 
   loading.submit = true
-const fd = new FormData()
-fd.append('lang', form.lang)
-if (form.captions) fd.append('captions', form.captions)
-if (form.file) fd.append('file', form.file)
-
-if (editingId.value) {
-  fd.append('_method', 'PUT')
-  await axios.post(
-    route('admin.videos.captions.update', { video: props.video.id, caption: editingId.value }),
-    fd
-  )
-}
+  const fd = new FormData()
+  fd.append('lang', form.lang)
+  if (form.file) fd.append('file', form.file)
 
   try {
     if (editingId.value) {
-      // El override de método debe ir en el cuerpo
       fd.append('_method', 'PUT')
-
       await axios.post(
         route('admin.videos.captions.update', { video: props.video.id, caption: editingId.value }),
         fd
-        // no fuerces Content-Type; axios lo setea con el boundary correcto
       )
-
       toast.value = { message: 'Subtítulo actualizado', type: 'success' }
     } else {
       await axios.post(
@@ -146,7 +125,6 @@ if (editingId.value) {
     await fetchItems()
     emit('saved')
   } catch (e) {
-    console.log('submitItem fired', { editing: editingId.value, form: {...form} })
     if (e.response?.data?.errors) {
       for (const [k, v] of Object.entries(e.response.data.errors)) {
         errors[k] = Array.isArray(v) ? v[0] : v
@@ -160,7 +138,6 @@ if (editingId.value) {
     loading.submit = false
   }
 }
-
 
 /* Eliminar */
 function askDelete(item) { confirm.item = item; confirm.visible = true }
@@ -216,48 +193,39 @@ watch(() => props.video?.id, fetchItems)
                     <option value="en">English (en)</option>
                     <option value="fr">Français (fr)</option>
                     <option value="pt">Português (pt)</option>
-                    <!-- agrega los que uses -->
                   </select>
                   <div class="invalid-feedback" v-if="touched.lang && errors.lang">{{ errors.lang }}</div>
                 </div>
 
                 <div class="col-12 col-md-8">
                   <label class="form-label">Archivo (.vtt / .srt)</label>
-                  <input type="file" class="form-control"
-                           accept=".vtt,.srt,text/vtt,application/x-subrip"
-                           @change="onFileChange"
-                           :class="{ 'is-invalid': touched.file && errors.file }"
-                    />
-
-                    <!-- Mostrar archivo existente si se está editando -->
-                    <div v-if="editingId && form.captions" class="form-text">
-                      Ya existe un archivo para este subtítulo.
-                      <a :href="storageUrl(items.find(i => i.id === editingId)?.file)" target="_blank" rel="noopener">
-                        Ver archivo actual
-                      </a>
-                    </div>
+                  <input
+                    type="file"
+                    class="form-control"
+                    accept=".vtt,.srt,text/vtt,application/x-subrip"
+                    @change="onFileChange"
+                    @blur="touch('file')"
+                    :class="{ 'is-invalid': touched.file && errors.file }"
+                  />
+                  <!-- Mostrar archivo existente si se está editando -->
+                  <div v-if="editingId && items.find(i => i.id === editingId)?.file" class="form-text">
+                    Ya existe un archivo para este subtítulo.
+                    <a :href="storageUrl(items.find(i => i.id === editingId)?.file)" target="_blank" rel="noopener">
+                      Ver archivo actual
+                    </a>
+                  </div>
                   <div class="invalid-feedback" v-if="touched.file && errors.file">{{ errors.file }}</div>
                 </div>
               </div>
 
-              <div class="mt-3">
-                <label class="form-label">Contenido (opcional)</label>
-                <textarea class="form-control" rows="6" v-model="form.captions"
-                          placeholder="Pega subtítulos en VTT o SRT"
-                          @blur="touch('captions')"
-                          :class="{ 'is-invalid': touched.captions && errors.captions }"></textarea>
-                <div class="form-text">Si subes archivo y también pegas contenido, se tomará el archivo.</div>
-                <div class="invalid-feedback" v-if="touched.captions && errors.captions">{{ errors.captions }}</div>
-              </div>
-
               <div class="text-end mt-3">
                 <button type="submit" class="btn btn-success btn-sm" :disabled="loading.submit">
-                    <span v-if="loading.submit" class="spinner-border spinner-border-sm me-1"></span>
-                    {{ editingId ? 'Guardar cambios' : 'Guardar subtítulo' }}
-                  </button>
-                  <button type="button" class="btn btn-secondary btn-sm ms-2" @click="cancelEdit" :disabled="loading.submit">
-                    Cancelar
-                  </button>
+                  <span v-if="loading.submit" class="spinner-border spinner-border-sm me-1"></span>
+                  {{ editingId ? 'Guardar cambios' : 'Guardar subtítulo' }}
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm ms-2" @click="cancelEdit" :disabled="loading.submit">
+                  Cancelar
+                </button>
               </div>
             </form>
           </div>
@@ -273,7 +241,6 @@ watch(() => props.video?.id, fetchItems)
           <tr>
             <th>Idioma</th>
             <th>Archivo</th>
-            <th>Vista</th>
             <th style="width: 110px;"></th>
           </tr>
         </thead>
@@ -282,12 +249,8 @@ watch(() => props.video?.id, fetchItems)
             <td class="fw-semibold">{{ cap.lang }}</td>
             <td>
               <a v-if="cap.file" :href="storageUrl(cap.file)" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary">
-                Abrir .vtt
+                Abrir archivo
               </a>
-              <span v-else class="text-muted">—</span>
-            </td>
-            <td>
-              <button class="btn btn-sm btn-outline-primary" v-if="cap.captions" @click="openModal(cap)">Ver/Editar</button>
               <span v-else class="text-muted">—</span>
             </td>
             <td class="text-end">

@@ -117,6 +117,32 @@
                         @image-removed="onRemoveLogo"
                       />
                     </div>
+
+                    <!-- PDF: archivo nuevo y estado actual -->
+                    <div class="col-md-6 mb-3">
+
+
+                     <FieldFile
+                      id="pdf"
+                      label="Archivo PDF (máx. 20 MB)"
+                      v-model="form.pdf"                   
+                      v-model:remove="form.remove_pdf"   
+                      :initial-url="currentPdfUrl"        
+                      :showValidation="touched.pdf"
+                      :formError="form.errors.pdf"
+                      @blur="() => handleBlur('pdf')"
+                      accept="application/pdf"
+                      :onlyPdf="true"
+                      :maxSizeMB="20"
+                      :showPreviewToggle="true"
+                    />
+
+
+                      <small class="text-muted d-block mt-1">Formatos permitidos: PDF. Tamaño máximo: 20 MB.</small>
+                    </div>
+
+                    
+                    <!-- /PDF -->
                   </div>
                 </div>
 
@@ -152,6 +178,7 @@ import FieldText from '@/Components/Admin/Fields/FieldText.vue'
 import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue'
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue'
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue'
+import FieldFile from '@/Components/Admin/Fields/FieldFile.vue'
 
 const props = defineProps({
   certificate: { type: Object, required: true },
@@ -160,9 +187,9 @@ const props = defineProps({
 })
 
 /**
- * Form: aplica mismo patrón de manejo de imágenes que Courses/Edit.vue
- * - photo y logo inician en null (solo si se sube archivo se envía)
- * - flags remove_photo y remove_logo para indicar borrado en backend
+ * Form:
+ * - photo, logo, pdf inician en null (solo se envían si el usuario selecciona un archivo)
+ * - flags remove_* para indicar borrado en backend
  */
 const form = useForm({
   _method: 'PUT',
@@ -174,17 +201,27 @@ const form = useForm({
   date_expedition: props.certificate.date_expedition ?? '',
   comments: props.certificate.comments ?? '',
 
-  // Manejo de imágenes (nuevo archivo)
   photo: null,
   logo: null,
+  pdf: null,          // nuevo archivo PDF
 
-  // Flags de borrado para backend
   remove_photo: false,
-  remove_logo: false
+  remove_logo: false,
+  remove_pdf: false    // flag para eliminar PDF actual
 })
 
-const logoPreview = props.certificate.logo ? '/storage/' + props.certificate.logo : null
+const logoPreview  = props.certificate.logo ? '/storage/' + props.certificate.logo : null
 const photoPreview = props.certificate.photo ? '/storage/' + props.certificate.photo : null
+
+// URL del PDF actual: usa accessor pdf_url si lo tienes; si no, arma desde pdf_path
+ 
+
+const currentPdfUrl = computed(() => {
+  if (props.certificate?.pdf_url) return props.certificate.pdf_url
+  if (props.certificate?.pdf_path) return '/storage/' + props.certificate.pdf_path
+  return null
+})
+
 
 const touched = ref({})
 
@@ -221,7 +258,7 @@ const isFormValid = computed(() => {
          !validateField('authorized_by')
 })
 
-/** Handlers de imágenes: marcan flags y limpian v-model */
+/** Handlers para imágenes */
 const onRemovePhoto = () => {
   form.remove_photo = true
   form.photo = null
@@ -234,27 +271,35 @@ const onRemoveLogo = () => {
   touched.value.logo = true
 }
 
+/** Handler PDF: alterna eliminar/restaurar */
+const toggleRemovePdf = () => {
+  form.remove_pdf = !form.remove_pdf
+  if (form.remove_pdf) {
+    form.pdf = null
+  }
+  touched.value.pdf = true
+}
+
 const touchCoreFields = () => {
   touched.value.user_id = true
   touched.value.master_id = true
   touched.value.authorized_by = true
   touched.value.photo = true
   touched.value.logo = true
+  touched.value.pdf = true
 }
 
 const submit = () => {
   touchCoreFields()
 
   if (isFormValid.value) {
-    form
-      .post(route('admin.certificates.update', props.certificate.id), {
-        forceFormData: true,
-        preserveScroll: true,
-        onError: (errors) => {
-          // Puedes integrar aquí tu Toast/Alert si lo deseas
-          console.error('Errores al guardar:', errors)
-        }
-      })
+    form.post(route('admin.certificates.update', props.certificate.id), {
+      forceFormData: true,
+      preserveScroll: true,
+      onError: (errors) => {
+        console.error('Errores al guardar:', errors)
+      }
+    })
   }
 }
 </script>

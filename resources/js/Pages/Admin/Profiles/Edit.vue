@@ -40,7 +40,7 @@
                       <a class="nav-link" :class="{ active: activeTab === 'personal' }" href="#" @click.prevent="activeTab = 'personal'">Perfil Personal</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" :class="{ active: activeTab === 'billing' }" href="#" @click.prevent="activeTab = 'billing'">Datos de Facturación</a>
+                      <a class="nav-link" :class="{ active: activeTab === 'billing' }" href="#" @click.prevent="activeTab = 'billing'">Direccion</a>
                     </li>
                   </ul>
                 </div>

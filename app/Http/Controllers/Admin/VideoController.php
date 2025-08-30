@@ -252,14 +252,17 @@ public function update(Request $request, Video $video)
     }
 
     public function videosPanel(Course $course)
-            {
-                $course->load('videos');
+{
+    $videos = Video::query()
+        ->where('course_id', $course->id)
+        ->orderBy('order') // opcional si tienes columna de orden
+        ->get();
 
-                return Inertia::render('Admin/Videos/VideosPanel', [
-                    'course' => $course,
-                    'videos' => $course->videos,
-                ]);
-    }
+    return Inertia::render('Admin/Videos/VideosPanel', [
+        'course' => $course,
+        'videos' => $videos,
+    ]);
+}
 
     public function stream(Video $video): StreamedResponse
     {
@@ -334,10 +337,10 @@ private function validateData(Request $request, $includeFiles = true)
 
     if ($includeFiles) {
         if (!$request->boolean('keep_image') || $request->hasFile('image_cover')) {
-            $rules['image_cover'] = 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048';
+            $rules['image_cover'] = 'nullable|file|mimes:jpeg,png,jpg,gif|max:10222';
         }
         if (!$request->boolean('keep_video') || $request->hasFile('video_path')) {
-            $rules['video_path'] = 'nullable|file|mimetypes:video/mp4,video/quicktime,video/x-m4v|max:511200';
+            $rules['video_path'] = 'nullable|file|mimetypes:video/mp4,video/quicktime,video/x-m4v|max:1211200';
         }
     }
 
@@ -440,3 +443,4 @@ private function validateData(Request $request, $includeFiles = true)
 
 
 }
+ 

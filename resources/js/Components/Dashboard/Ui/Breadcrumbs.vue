@@ -3,9 +3,6 @@ import { Link, usePage } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import { computed } from 'vue'
 
-
-
-
 const props = defineProps({
   username: { type: String, default: 'Usuario' },
   breadcrumbs: {
@@ -14,20 +11,23 @@ const props = defineProps({
   }
 })
 
-
 const page = usePage()
 const User = computed(() => page.props.auth.user ?? {})
 
-// nombre de ruta vs URL
 function isRouteName(value) {
   return typeof value === 'string' && !value.startsWith('http') && !value.startsWith('/')
 }
 
-// último título como encabezado
 const lastLabel = computed(() => props.breadcrumbs.at(-1)?.label || 'Dashboard')
-
-// inicial del avatar
 const userInitial = computed(() => (props.username?.trim?.()[0] || 'U').toUpperCase())
+
+// Para el dropdown mobile: items clicables salvo el último
+const mobileItems = computed(() =>
+  props.breadcrumbs.map((b, i) => ({
+    ...b,
+    isActive: i === props.breadcrumbs.length - 1
+  }))
+)
 </script>
 
 <template>
@@ -35,19 +35,51 @@ const userInitial = computed(() => (props.username?.trim?.()[0] || 'U').toUpperC
     <div class="container-fluid">
       <div class="breadcrumbs-card bg-white border rounded-4 shadow-sm">
         <div class="row g-0 align-items-center">
-          <!-- Col: Avatar + título + breadcrumb -->
           <div class="col-12 col-lg">
-            <div class="d-flex align-items-center gap-3 p-3 p-md-4">
-              <!-- Avatar circular (opcional, se muestra si hay username) -->
-               
+            <div class="d-flex align-items-center gap-2 p-2 p-md-4">
+              <!-- (opcional) avatar
+              <div class="avatar-circle d-none d-sm-inline-flex">
+                <span class="avatar-initial">{{ userInitial }}</span>
+              </div> -->
 
               <div class="flex-grow-1 min-w-0">
-                <h1 class="h4 fw-medium mb-1 text-truncate" :title="lastLabel">
+                <h1 class="h5 fw-medium mb-1 text-truncate" :title="lastLabel">
                   {{ lastLabel }}
                 </h1>
 
-                <!-- Breadcrumb navegable -->
-                <nav aria-label="breadcrumb" class="breadcrumb-wrapper">
+                <!-- ====== Mobile: Dropdown de ruta ====== -->
+                <div class="d-sm-none">
+                  <div class="dropdown">
+                    <button
+                      class="btn btn-outline-secondary btn-sm dropdown-toggle w-100 text-truncate"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      :title="lastLabel"
+                    >
+                      {{ lastLabel }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end w-100 shadow-sm">
+                      <li v-for="(item, idx) in mobileItems" :key="idx">
+                        <span v-if="item.isActive || !item.route" class="dropdown-item disabled small">
+                          <i class="bi bi-dot me-1"></i>{{ item.label }}
+                        </span>
+                        <Link
+                          v-else
+                          class="dropdown-item small"
+                          :href="isRouteName(item.route)
+                            ? (item.params ? route(item.route, item.params) : route(item.route))
+                            : item.route"
+                        >
+                          <i class="bi bi-chevron-right me-1"></i>{{ item.label }}
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- ====== Desktop/Tablet: Breadcrumb tradicional ====== -->
+                <nav aria-label="breadcrumb" class="breadcrumb-wrapper d-none d-sm-block">
                   <ol class="breadcrumb mb-0 small">
                     <li
                       v-for="(item, index) in breadcrumbs"
@@ -82,7 +114,7 @@ const userInitial = computed(() => (props.username?.trim?.()[0] || 'U').toUpperC
             </div>
           </div>
 
-          <!-- Col: Acciones (opcional) -->
+          <!-- Col: Acciones -->
           <div class="col-12 col-lg-auto">
             <div class="px-3 px-md-4 pb-3 pb-md-4 pt-0 pt-lg-4 d-flex gap-2 justify-content-start justify-content-lg-end">
               <slot name="actions" />
@@ -95,38 +127,28 @@ const userInitial = computed(() => (props.username?.trim?.()[0] || 'U').toUpperC
 </template>
 
 <style lang="less" scoped>
-.section-breadcrumbs {
-  /* separador visual respecto a la cabecera */
-}
+.section-breadcrumbs {}
 
-/* Tarjeta del encabezado */
 .breadcrumbs-card {
-  /* línea sutil arriba para integrarse con el resto de paneles */
   border-color: rgba(0, 0, 0, .06) !important;
 }
 
-/* Avatar redondo (coherente con la UI del resto de paneles) */
+/* Avatar opcional */
 .avatar-circle {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  width: 56px; height: 56px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
   background: linear-gradient(180deg, #f3f6ff 0%, #eef2ff 100%);
-  border: 1px solid rgba(13, 110, 253, .15);
-  box-shadow: 0 2px 6px rgba(13, 110, 253, .08);
+  border: 1px solid rgba(13,110,253,.15);
+  box-shadow: 0 2px 6px rgba(13,110,253,.08);
   flex: 0 0 auto;
 }
-.avatar-initial {
-  font-weight: 700;
-  color: #0d6efd;
-}
+.avatar-initial { font-weight: 700; color: #0d6efd; }
 
-/* Breadcrumb */
+/* Breadcrumb (desktop/tablet) */
 .breadcrumb-wrapper {
-  /* permite scroll horizontal suave cuando hay muchas migas en pantallas pequeñas */
-  overflow: hidden;
+  overflow: auto; /* permite scroll horizontal si hace falta */
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%);
 }
 .breadcrumb {
   --bs-breadcrumb-divider: '›';
@@ -134,35 +156,29 @@ const userInitial = computed(() => (props.username?.trim?.()[0] || 'U').toUpperC
   margin-top: 2px;
   gap: .25rem;
 }
-.breadcrumb-item {
-  max-width: 22ch; /* cada miga no se come todo el ancho */
-}
+.breadcrumb-item { max-width: 22ch; }
 .breadcrumb-item + .breadcrumb-item::before {
-  color: #adb5bd;
-  padding-right: .5rem;
-  padding-left: .25rem;
+  color: #adb5bd; padding-right: .5rem; padding-left: .25rem;
 }
-.breadcrumb-link {
-  color: #0d6efd;
-}
-.breadcrumb-link:hover {
-  text-decoration: underline;
-}
+.breadcrumb-link { color: #0d6efd; }
+.breadcrumb-link:hover { text-decoration: underline; }
+.breadcrumb-item-text { max-width: 22ch; vertical-align: bottom; }
 
-/* El texto de cada miga se trunca correctamente */
-.breadcrumb-item-text {
-  max-width: 22ch;
-  vertical-align: bottom;
+/* Dropdown mobile */
+.dropdown-menu {
+  max-height: 60vh;
+  overflow: auto;
+}
+.dropdown-item.disabled {
+  opacity: .7;
 }
 
 /* Responsivo */
 @media (max-width: 575.98px) {
   .avatar-circle { width: 48px; height: 48px; }
-  .breadcrumb-item,
-  .breadcrumb-item-text { max-width: 18ch; }
+  .breadcrumb-item, .breadcrumb-item-text { max-width: 18ch; }
 }
 @media (min-width: 1200px) {
-  .breadcrumb-item,
-  .breadcrumb-item-text { max-width: 28ch; }
+  .breadcrumb-item, .breadcrumb-item-text { max-width: 28ch; }
 }
 </style>

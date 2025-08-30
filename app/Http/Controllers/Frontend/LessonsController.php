@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Video;
+use App\Models\VideoMaterial;
 use App\Models\LessonVideo;
   
 use App\Models\Teacher;
@@ -439,7 +440,7 @@ public function showVideo($courseId, $lessonId, $videoId)
         ->where('event', 'ended')
         ->exists();
 
-    // 9) Set de videos completados (enteros) para flags de acceso secuencial
+    // 9) Set de videos completados para flags de acceso secuencial
     $completedVideoIds = DB::table('video_activities')
         ->where('user_id', (int) $user->id)
         ->where('course_id', (int) $courseId)
@@ -447,7 +448,6 @@ public function showVideo($courseId, $lessonId, $videoId)
         ->pluck('video_id')
         ->map(fn ($id) => (int) $id)
         ->all();
-
     $completedSet = array_flip($completedVideoIds);
 
     $unlocked = true;
@@ -458,7 +458,7 @@ public function showVideo($courseId, $lessonId, $videoId)
         $isAccessible = $unlocked;
 
         if (! $isEnded) {
-            $unlocked = false; // desde el primero no terminado, los demás quedan bloqueados
+            $unlocked = false;
         }
 
         $videos[] = [
@@ -521,7 +521,37 @@ public function showVideo($courseId, $lessonId, $videoId)
         ->select('id','title','description','type','uploaded','file_src','video_src','img_src')
         ->get();
 
-    // 12) Navegación global (si ya las tienes implementadas)
+    // 11-BIS) MATERIALES del video
+    $videoMaterials = VideoMaterial::query()
+        ->where('video_id', $videoId)
+        ->orderBy('name')
+        ->get(['id','name','quantity','unit','notes','image','price','buy_link'])
+        ->map(function ($m) {
+            $qty   = is_numeric($m->quantity) ? (float) $m->quantity : 0.0;
+            $price = is_numeric($m->price)    ? (float) $m->price    : 0.0;
+            $total = round($qty * $price, 2);
+
+            return [
+                'id'         => $m->id,
+                'name'       => $m->name,
+                'quantity'   => $qty,
+                'unit'       => $m->unit,
+                'notes'      => $m->notes,
+                'image'      => $m->image,
+                'image_url'  => $m->image ? Storage::url($m->image) : null,
+                'price'      => $price,
+                'buy_link'   => $m->buy_link,
+                'total_cost' => $total,
+            ];
+        });
+
+    $materialsSummary = [
+        'count'          => $videoMaterials->count(),
+        'quantity_sum'   => (float) $videoMaterials->sum('quantity'),
+        'total_cost_sum' => (float) $videoMaterials->sum('total_cost'),
+    ];
+
+    // 12) Navegación global
     $allVideos          = $this->videosByCourseOrderedByLesson((int) $courseId);
     $lastVideoIdLesson  = $this->lastVideoIdByCourseOrderedByLesson((int) $courseId);
     $firstVideoIdLesson = $this->firstVideoIdByCourseOrderedByLesson((int) $courseId);
@@ -544,9 +574,12 @@ public function showVideo($courseId, $lessonId, $videoId)
         'allVideos'           => $allVideos,
         'firstVideoIdLesson'  => $firstVideoIdLesson,
         'lastVideoIdLesson'   => $lastVideoIdLesson,
+
+        // >>> NUEVO <<<
+        'videoMaterials'      => $videoMaterials,
+        'materialsSummary'    => $materialsSummary,
     ]);
 }
-
 
   protected function videosByCourseOrderedByLesson(int $courseId)
     {

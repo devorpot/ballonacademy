@@ -49,124 +49,146 @@
   </section>
 
   <!-- Tabla -->
-  <section class="section-data my-2">
-    <div class="container-fluid">
-      <div class="card">
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th class="col-id" role="button" @click="emitSort('users.id')">
-                    ID <i :class="sortIcon('users.id')"></i>
-                  </th>
-                  <th class="col-name" role="button" @click="emitSort('users.name')">
-                    Nombre <i :class="sortIcon('users.name')"></i>
-                  </th>
-                  <th class="col-email" role="button" @click="emitSort('users.email')">
-                    Email <i :class="sortIcon('users.email')"></i>
-                  </th>
-                  <th class="col-phone" role="button" @click="emitSort('profiles.whatsapp')">
-                    Teléfono <i :class="sortIcon('profiles.whatsapp')"></i>
-                  </th>
-                  <th class="col-country" role="button" @click="emitSort('profiles.country')">
-                    País <i :class="sortIcon('profiles.country')"></i>
-                  </th>
-                  <th class="col-status" role="button" @click="emitSort('users.active')">
-                    Estado <i :class="sortIcon('users.active')"></i>
-                  </th>
-                  <th class="text-end pe-4 col-actions">Acciones</th>
-                </tr>
-              </thead>
+<section class="section-data my-2">
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="col-id" role="button" @click="emitSort('users.id')">
+                  ID <i :class="sortIcon('users.id')"></i>
+                </th>
+                <th class="col-image">Imagen</th>
+                <th class="col-name" role="button" @click="emitSort('users.name')">
+                  Nombre <i :class="sortIcon('users.name')"></i>
+                </th>
+                <th class="col-email" role="button" @click="emitSort('users.email')">
+                  Email <i :class="sortIcon('users.email')"></i>
+                </th>
+                <th class="col-phone" role="button" @click="emitSort('profiles.whatsapp')">
+                  Teléfono <i :class="sortIcon('profiles.whatsapp')"></i>
+                </th>
+                <th class="col-country" role="button" @click="emitSort('profiles.country')">
+                  País <i :class="sortIcon('profiles.country')"></i>
+                </th>
+                <th class="col-status" role="button" @click="emitSort('users.active')">
+                  Estado <i :class="sortIcon('users.active')"></i>
+                </th>
+                <th class="text-end pe-4 col-actions">Acciones</th>
+              </tr>
+            </thead>
 
-              <tbody>
-                <tr v-for="student in rows" :key="student.id">
-                  <td class="text-muted">{{ student.id }}</td>
+            <tbody>
+              <tr v-for="student in rows" :key="student.id">
+                <td class="text-muted">{{ student.id }}</td>
 
-                  <td>
-                    <div
-                      class="text-truncate"
-                      :title="displayFullName(student)"
+                <!-- Nueva columna con la imagen -->
+                <td>
+                  <img
+                    v-if="student.profile?.profile_image"
+                    :src="`/storage/${student.profile.profile_image}`"
+                    alt="Foto"
+                    class="rounded-circle"
+                    style="width:40px; height:40px; object-fit:cover;"
+                  />
+                  <span v-else class="text-muted small">Sin foto</span>
+                </td>
+
+                <td>
+                  <div
+                    class="text-truncate"
+                    :title="displayFullName(student)"
+                  >
+                    <strong>{{ displayFullName(student) || student.name }}</strong>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="text-truncate" :title="student.email">
+                    {{ student.email }}
+                  </div>
+                </td>
+
+                <td>
+                  <div class="text-truncate" :title="student.profile?.whatsapp || ''">
+                    {{ student.profile?.whatsapp }}
+                  </div>
+                </td>
+
+                <td>
+                  <div class="text-truncate" :title="student.profile?.country || ''">
+                    {{ student.profile?.country }}
+                  </div>
+                </td>
+
+                <td>
+                  <span class="badge rounded-pill" :class="student.active ? 'bg-success' : 'bg-danger'">
+                    {{ student.active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+
+                <td class="text-end pe-4">
+                  <div class="btn-group btn-group-sm">
+                    <Link
+                      :href="route('admin.students.show', { user: student.id })"
+                      class="btn btn-outline-success"
+                      title="Mostrar"
                     >
-                      <strong>{{ displayFullName(student) || student.name }}</strong>
-                    </div>
-                  </td>
+                      <i class="bi bi-eye-fill"></i>
+                    </Link>
 
-                  <td>
-                    <div class="text-truncate" :title="student.email">
-                      {{ student.email }}
-                    </div>
-                  </td>
+                    <Link
+                      :href="route('admin.students.edit', { user: student.id })"
+                      class="btn btn-outline-primary"
+                      title="Editar"
+                    >
+                      <i class="bi bi-pencil-fill"></i>
+                    </Link>
 
-                  <td>
-                    <div class="text-truncate" :title="student.profile?.whatsapp || ''">
-                      {{ student.profile?.whatsapp }}
-                    </div>
-                  </td>
+                    <button
+                      class="btn btn-outline-danger"
+                      @click="emit('delete', student.id)"
+                      :disabled="isDeleting"
+                      title="Eliminar"
+                    >
+                      <i class="bi bi-trash-fill"></i>
+                    </button>
 
-                  <td>
-                    <div class="text-truncate" :title="student.profile?.country || ''">
-                      {{ student.profile?.country }}
-                    </div>
-                  </td>
+                    <button
+                      v-if="!student.active"
+                      class="btn btn-outline-success"
+                      @click="emit('activate', student)"
+                      title="Activar usuario"
+                    >
+                      <i class="bi bi-lightning-charge"></i>
+                    </button>
 
-                  <td>
-                    <span class="badge rounded-pill" :class="student.active ? 'bg-success' : 'bg-danger'">
-                      {{ student.active ? 'Activo' : 'Inactivo' }}
-                    </span>
-                  </td>
+                    <Link
+                      :href="route('admin.evaluation-users.byUser', { user: student.id })"
+                      class="btn btn-outline-info btn-sm"
+                    >
+                      <i class="bi bi-journal-text me-1"></i> Evaluaciones
+                    </Link>
 
-                  <td class="text-end pe-4">
-                    <div class="btn-group btn-group-sm">
-                       <Link
-                        :href="route('admin.students.show', { user: student.id })"
-                        class="btn btn-outline-success"
-                        title="Mostrar"
-                      >
-                        <i class="bi bi-eye-fill"></i>
-                      </Link>
+                  </div>
+                </td>
+              </tr>
 
-                      <Link
-                        :href="route('admin.students.edit', { user: student.id })"
-                        class="btn btn-outline-primary"
-                        title="Editar"
-                      >
-                        <i class="bi bi-pencil-fill"></i>
-                      </Link>
-
-                      <button
-                        class="btn btn-outline-danger"
-                        @click="emit('delete', student.id)"
-                        :disabled="isDeleting"
-                        title="Eliminar"
-                      >
-                        <i class="bi bi-trash-fill"></i>
-                      </button>
-
-                      <button
-                        v-if="!student.active"
-                        class="btn btn-outline-success"
-                        @click="emit('activate', student)"
-                        title="Activar usuario"
-                      >
-                        <i class="bi bi-lightning-charge"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr v-if="rows.length === 0">
-                  <td colspan="7" class="text-center py-4 text-muted">
-                    <i class="bi bi-exclamation-circle me-2"></i>No se encontraron estudiantes
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div><!-- /.table-responsive -->
-        </div>
+              <tr v-if="rows.length === 0">
+                <td colspan="8" class="text-center py-4 text-muted">
+                  <i class="bi bi-exclamation-circle me-2"></i>No se encontraron estudiantes
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div><!-- /.table-responsive -->
       </div>
     </div>
-  </section>
+  </div>
+</section>
+
 
   <!-- Paginación (servidor) -->
   <CrudPagination

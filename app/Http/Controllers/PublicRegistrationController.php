@@ -6,7 +6,6 @@ use App\Models\Activation;
 use App\Models\User;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -34,16 +33,18 @@ class PublicRegistrationController extends Controller
     public function store(Request $request, string $hash)
     {
         $payload = $request->validate([
-            'shirt_size' => ['required', Rule::in(['c','m','l','xl'])],
-            'address'    => ['required', 'string', 'min:6', 'max:500'],
-            'country'    => ['required', 'string', 'max:3'],
-            'code'       => ['required', 'string', 'size:6'],
-            'password'   => ['required','string','regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/'],
+            'nickname' => ['required', 'string'],
+            'code'     => ['required', 'string', 'size:6'],
+            'password' => [
+                'required',
+                'string',
+                // Mínimo 8 caracteres, con letra, número y un símbolo
+                'regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/'
+            ],
             'password_confirmation' => ['required', 'same:password'],
         ]);
 
         $result = DB::transaction(function () use ($hash, $payload) {
-            // Bloquear activación para evitar condiciones de carrera
             $activation = Activation::where('hash', $hash)->lockForUpdate()->first();
 
             if (!$activation) {
@@ -51,20 +52,20 @@ class PublicRegistrationController extends Controller
                     'code' => 'Activación no encontrada.',
                 ]);
             }
+
             if ($activation->active) {
                 throw ValidationException::withMessages([
                     'code' => 'Esta activación ya fue utilizada.',
                 ]);
             }
 
-            // Código debe coincidir (case-insensitive)
             if (strcasecmp($payload['code'], $activation->code) !== 0) {
                 throw ValidationException::withMessages([
                     'code' => 'El código de activación no coincide.',
                 ]);
             }
 
-            // Email único en users (case-insensitive)
+            // Evita duplicar usuarios por email
             if (User::whereRaw('LOWER(email) = ?', [mb_strtolower($activation->email)])->exists()) {
                 throw ValidationException::withMessages([
                     'email' => 'Este correo ya está registrado.',
@@ -81,24 +82,21 @@ class PublicRegistrationController extends Controller
             ]);
             $user->assignRole('student');
 
-            // Perfil
+            // Crear perfil con nickname (obligatorio desde el formulario)
             $user->profile()->create([
                 'firstname' => $activation->name,
                 'lastname'  => '',
-                'nickname'  => null,
+                'nickname'  => $payload['nickname'],
                 'phone'     => $activation->phone ?? '',
-                'country'   => $payload['country'] ?? '',
-                'address'   => $payload['address'] ?? '',
-                'shirt_size'=> $payload['shirt_size'] ?? null,
             ]);
 
-            // Relación con curso (idempotente)
+            // Asignar curso si viene desde la activación
             $courseId = $activation->course_id;
-            if ($courseId && ! $user->courses()->where('courses.id', $courseId)->exists()) {
+            if ($courseId && !$user->courses()->where('courses.id', $courseId)->exists()) {
                 $user->courses()->attach($courseId);
             }
 
-            // Suscripción idempotente por (user, course)
+            // Crear/confirmar suscripción gratuita por activación
             Subscription::firstOrCreate(
                 ['user_id' => $user->id, 'course_id' => $courseId],
                 [
@@ -114,19 +112,17 @@ class PublicRegistrationController extends Controller
                 ]
             );
 
-            // Marcar activación como usada
+            // Marcar activación como utilizada
             $activation->update([
-                'active'   => true,
-                'used_at'  => now(),  // si tienes la columna
+                'active'  => true,
+                'used_at' => now(),
             ]);
 
             return $user;
         });
 
-        // Autologin (opcional; mejora UX)
         Auth::login($result);
 
-        // Redirigir a pantalla de bienvenida
         return redirect()->route('public.register.welcome')
             ->with('welcome', [
                 'name'      => $result->name,
@@ -138,7 +134,6 @@ class PublicRegistrationController extends Controller
 
     public function welcome(Request $request)
     {
-        // Recupera datos desde flash o, si el user ya está logueado, arma props por defecto
         $payload = $request->session()->get('welcome');
 
         if (!$payload && Auth::check()) {
@@ -150,7 +145,6 @@ class PublicRegistrationController extends Controller
             ];
         }
 
-        // Si no hay nada que mostrar y no hay sesión, manda al login
         if (!$payload) {
             return redirect()->route('login');
         }

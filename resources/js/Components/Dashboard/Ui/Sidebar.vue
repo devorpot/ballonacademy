@@ -1,5 +1,5 @@
 <template>
-  <aside class="sidebar-menu shadow-lg bg-white d-flex flex-column align-items-center px-0 py-4">
+  <aside class="sidebar-menu shadow-lg bg-white d-flex flex-column align-items-center px-0 py-5">
     <!-- Avatar -->
     <div class="avatar mb-3 position-relative">
       <span class="avatar-halo"></span>
@@ -34,14 +34,14 @@
     <!-- Menú de navegación -->
     <nav class="w-100 px-3">
       <ul class="nav flex-column gap-2">
-          <li class="nav-item">
+           <li class="nav-item">
           <Link
-            :href="route('dashboard.security.edit')"
+            :href="route('dashboard.courses.index')"
             class="btn btn-nav"
-            :class="{ active: $page.url.startsWith('/dashboard/security') }"
+            :class="{ active: $page.url.startsWith('/dashboard/courses') }"
           >
-            <i class="bi bi-person-circle me-2"></i>
-            {{ L.profile?.security || 'Seguridad' }}
+            <i class="bi bi-journal-bookmark-fill me-2"></i>
+            {{ L.nav?.courses || 'Cursos' }}
           </Link>
         </li>
         <li class="nav-item">
@@ -64,31 +64,27 @@
             {{ L.profile?.btnDistributors || 'Distribuidores' }}
           </Link>
         </li>
-        <li class="nav-item">
-          <Link
-            :href="route('dashboard.courses.index')"
-            class="btn btn-nav"
-            :class="{ active: $page.url.startsWith('/dashboard/courses') }"
-          >
-            <i class="bi bi-journal-bookmark-fill me-2"></i>
-            {{ L.nav?.courses || 'Cursos' }}
-          </Link>
-        </li>
+      
         <li class="nav-item">
           <Link :href="route('dashboard.profile.edit')" class="btn btn-nav">
             <i class="bi bi-pencil-square me-2"></i> Blog
+          </Link>
+        </li>
+         <li class="nav-item">
+          <Link
+            :href="route('dashboard.security.edit')"
+            class="btn btn-nav"
+            :class="{ active: $page.url.startsWith('/dashboard/security') }"
+          >
+            <i class="bi bi-person-circle me-2"></i>
+            {{ L.profile?.security || 'Seguridad' }}
           </Link>
         </li>
       </ul>
     </nav>
 
     <!-- Curso actual -->
-    <div class="current-course w-100 mt-auto pt-4 border-top text-center px-3">
-      <div class="fw-semibold text-secondary mb-1" style="font-size: 0.95rem;">Curso actual</div>
-      <div class="text-primary fw-bold" style="font-size: 1.07rem;">
-        No seleccionado
-      </div>
-    </div>
+    
   </aside>
 </template>
 
@@ -134,7 +130,7 @@ const L = computed(() => page.props?.L ?? {})
   box-shadow: 0 8px 32px #00205716;
   background: #0063AF!important;
   position: relative;
-  margin-top: 1rem;
+  margin-top: -0.9rem;
 
 }
 

@@ -131,6 +131,21 @@
                       @blur="() => handleBlur('logo')"
                     />
                   </div>
+                  <div class="col-md-6 mb-3">
+                    <FieldFile
+                      id="pdf"
+                      label="Archivo PDF (máx. 20 MB)"
+                      v-model="form.pdf"
+                      :showValidation="touched.pdf"
+                      :formError="form.errors.pdf"
+                      @blur="() => handleBlur('pdf')"
+                      accept="application/pdf"
+                      :onlyPdf="true"
+                      :maxSizeMB="20"
+                      :showPreviewToggle="true"
+                    />
+
+                  </div>
                 </div>
               </div>
 
@@ -167,6 +182,7 @@ import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
 import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
+import FieldFile from '@/Components/Admin/Fields/FieldFile.vue';
 
 const props = defineProps({
   users: Array,
@@ -191,6 +207,7 @@ const form = useForm({
   date_end: '',
   date_expedition: '',
   comments: '',
+  pdf_path:null,
   photo: null,
   logo: null
 });

@@ -231,14 +231,18 @@ public function edit(Lesson $lesson)
 
     // ===== Panel y utilidades =====
 
-    public function lessonsPanel(Course $course)
+public function lessonsPanel(Course $course)
 {
     $course->load([
         'lessons' => fn ($q) => $q->orderBy('order')
             ->with([
-                'lessonVideos' => fn ($q2) => $q2->select('id','lesson_id','video_id','course_id','order','active')->orderBy('order'),
+                'lessonVideos' => fn ($q2) => $q2
+                    ->select('id','lesson_id','video_id','course_id','order','active')
+                    ->orderBy('order'),
                 'lessonVideos.video:id,title,image_cover,duration,size',
-                'lessonEvaluations' => fn ($q3) => $q3->select('id','lesson_id','evaluation_id','course_id','order','active')->orderBy('order'),
+                'lessonEvaluations' => fn ($q3) => $q3
+                    ->select('id','lesson_id','evaluation_id','course_id','order','active')
+                    ->orderBy('order'),
                 'lessonEvaluations.evaluation:id,title,status',
             ]),
     ]);
@@ -248,6 +252,7 @@ public function edit(Lesson $lesson)
         'lessons' => $course->lessons,
     ]);
 }
+
 
 
     public function list(Course $course)

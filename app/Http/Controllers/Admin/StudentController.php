@@ -113,7 +113,7 @@ public function show(User $user): Response
             'id'          => $course->id,
             'title'       => $course->title,
             'image_cover' => $course->image_cover,
-             'logo' => $course->logo,
+            'logo' => $course->logo,
             'description' => $course->description,
             'subscription' => [
                 'id'         => $pivot->id        ?? null,
@@ -165,9 +165,17 @@ public function show(User $user): Response
                 'phone'         => $data['phone'] ?? null,
                 'country'       => $data['country'] ?? null,
                 'address'       => $data['address'] ?? null,
+                'shirt_size'       => $data['shirt_size'] ?? null,
                 'profile_image' => null,
                 'cover_image'   => null,
                 'bio'           => null,
+                'activity' => $data['address'] ?? null,
+                'experiencie' =>$data['address'] ?? null,
+                'bussines_own' => $data['address'] ?? null,
+                'bussines_name' => $data['address'] ?? null,
+                'bussines_logo' => $data['address'] ?? null,
+                'bussines_website' => $data['address'] ?? null,
+                'bussines_category' => $data['address'] ?? null
             ]);
 
             return redirect()
@@ -218,10 +226,39 @@ public function show(User $user): Response
             $profilePayload = collect($data)
                 ->only([
                     // Fiscales / personales / redes / description
-                    'firstname','lastname','rfc','business_name','street','external_number','internal_number','state',
-                    'municipality','neighborhood','postal_code','billing_email','tax_regime','cfdi_use','personal_email',
-                    'country','whatsapp','nickname','website','facebook','instagram','tiktok','youtube','description',
-                ])
+                    'firstname',
+                    'lastname',
+                    'rfc',
+                    'business_name',
+                    'street',
+                    'external_number',
+                    'internal_number',
+                    'state',
+                    'municipality',
+                    'neighborhood',
+                    'postal_code',
+                    'billing_email',
+                    'tax_regime',
+                    'cfdi_use',
+                    'personal_email',
+                    'shirt_size',
+                    'country',
+                    'whatsapp',
+                    'nickname',
+                    'website',
+                    'facebook',
+                    'instagram',
+                    'tiktok',
+                    'youtube',
+                    'description',
+                     'activity',
+                    'experiencie',
+                    'bussines_own',
+                    'bussines_name',
+                    
+                    'bussines_website',
+                    'bussines_category'
+                    ])
                 ->toArray();
 
             // Remover imágenes existentes si se pide
@@ -249,6 +286,14 @@ public function show(User $user): Response
                 }
                 $profilePayload['cover_image'] = $request->file('cover_image')
                     ->store('profiles/cover_images', 'public');
+            }
+
+             if ($request->hasFile('bussines_logo')) {
+                if ($user->profile?->bussines_logo) {
+                    Storage::disk('public')->delete($user->profile->bussines_logo);
+                }
+                $profilePayload['bussines_logo'] = $request->file('bussines_logo')
+                    ->store('profiles/bussines_logos', 'public');
             }
 
             // Crear/actualizar perfil
@@ -424,6 +469,13 @@ public function show(User $user): Response
             'youtube'   => ['nullable', 'url', 'max:255'],
 
             'description' => ['nullable', 'string'],
+            'activity' => ['nullable', 'string'],
+            'experiencie' => ['nullable', 'string'],
+            'bussines_own' => ['nullable', 'string'],
+            'bussines_name' => ['nullable', 'string'],
+            'bussines_logo' => ['nullable', 'image', 'max:5120'],
+            'bussines_website' => ['nullable', 'string'],
+            'bussines_category' => ['nullable', 'string']
         ], $messages);
     }
 

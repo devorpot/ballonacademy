@@ -10,6 +10,8 @@
       ]"
     />
 
+ 
+
     <section class="section-heading">
       <div class="container-fluid d-flex justify-content-between align-items-center mb-3">
         <h4 class="admin-title">
@@ -218,14 +220,15 @@ import ConfirmDeleteModal from '@/Components/Admin/ConfirmDeleteModal.vue';
 import ToastNotification from '@/Components/Admin/Ui/ToastNotification.vue';
 
 const props = defineProps({
-  course: Object
+  course: Object,
+  videos:Object
 });
 
 // Buscador
 const searchQuery = ref('');
 
 // Lista reactiva base (SIEMPRE ordenada por 'order' al inicio)
-const videoList = ref([...props.course.videos].sort((a, b) => a.order - b.order));
+const videoList = ref([...props.videos].sort((a, b) => a.order - b.order));
 
 // Filtro reactivo
 const filteredVideos = computed(() => {

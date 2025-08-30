@@ -2,8 +2,8 @@
 import { Link } from '@inertiajs/vue3';
  
 import { route } from 'ziggy-js'
-import Navbar from '@/Components/Admin/Navbar.vue'
-import Footer from '@/Components/Admin/Footer.vue'
+import Navbar from '@/Components/Admin/Ui/Navbar.vue'
+import Footer from '@/Components/Admin/Ui/Footer.vue'
  
 </script>
 

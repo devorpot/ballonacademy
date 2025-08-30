@@ -1,0 +1,65 @@
+# Dashboard
+
+## Usuarios
+- Falta agregar la imagen del usuario a la tabla (students y teachers)  
+- Falta la opción de generar password    (X)
+- Falta el rol de evaluador para quien aprobara las evaluaciones de los alumnos
+
+## Estudiantes
+
+- Falta agregar la imagen del usuario a la tabla de inicio (X)
+- Falta la opción de generar password  en automatico  (X)
+- Agregar el boton de evaluaciones para mostrar sus envios  (X)
+
+Faltan los siguientes campos:  (X)
+
+- Talla de camiseta  
+- Calle  
+- No. Int  
+- Colonia  
+- CP  
+- Estado (Select por estados de cada país)  
+- Ciudad / Municipio (texto)  
+- ¿A qué te dedicas actualmente? *  
+- ¿Cuentas con experiencia en decoración? * (Sí / No)  
+- ¿Cuentas con negocio propio? * (Sí / No)  
+- Nombre del negocio  
+- Giro del negocio *  
+- Logo del negocio *  
+
+## Maestros
+- Falta la imagen de perfil  (X)
+- Falta la imagen de portada   (X)
+- Faltan sus campos de redes sociales    (X)
+- Falta un apartado para que suban sus imagenes 
+
+## Cursos
+- Falta arreglar todo el desmadre con las evaluaciones  
+
+## Evaluaciones
+- Falta arreglar todo el desmadre con las evaluaciones  
+- Mover los envíos a una vista general  
+- Mejorar la parte de preguntas  y el UX del cuestionario
+- Agregar el campo de Instrucciones
+- Agregar el campo de archivos adjuntos
+
+
+## Certificados
+- Falta agregar el campo para el PDF del usuario  (X)
+
+
+## Suscriptiones
+- Falta agregar todas las opciones como ENUMS a los campos
+
+
+## activaciones
+- Falta agregar la funcion de reenviar activacion
+- Falta agregar la funcioo de desactivar 
+-Falta agregar todos los campos del registro y que compaginen con los campos de la de Academia
+
+Le falta al Admin:
+
+-La tabla blog
+-La tabla clases extra en vivo 
+-La tabla videos de youtube
+-Conexion de Wordpress para el blog

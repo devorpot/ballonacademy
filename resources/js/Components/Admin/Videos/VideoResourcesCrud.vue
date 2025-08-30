@@ -3,8 +3,6 @@
     <!-- Toast -->
     <ToastNotification v-if="toast" :message="toast.message" :type="toast.type" @close="toast=null" />
 
-    <!-- Overlay global de carga -->
- 
     <!-- Botón para abrir el modal de agregar -->
     <button class="btn btn-outline-primary mb-3" @click="openModal()">
       <i class="bi bi-plus-circle"></i> Agregar recurso
@@ -54,7 +52,7 @@
                 <div class="invalid-feedback" v-if="touched.description && errors.description">{{ errors.description }}</div>
               </div>
 
-              <!-- Tipo + Fecha -->
+              <!-- Tipo (fecha oculta mediante input hidden) -->
               <div class="row g-2">
                 <div class="col-12 col-md-4">
                   <label :for="`vr-type-${video.id}`" class="form-label">Tipo</label>
@@ -74,18 +72,12 @@
                   <div class="invalid-feedback" v-if="touched.type && errors.type">{{ errors.type }}</div>
                 </div>
 
-                <div class="col-12 col-md-4">
-                  <label :for="`vr-uploaded-${video.id}`" class="form-label">Fecha</label>
-                  <input
-                    :id="`vr-uploaded-${video.id}`"
-                    type="date"
-                    class="form-control"
-                    v-model="form.uploaded"
-                    @blur="touch('uploaded')"
-                    :class="{ 'is-invalid': touched.uploaded && errors.uploaded }"
-                  />
-                  <div class="invalid-feedback" v-if="touched.uploaded && errors.uploaded">{{ errors.uploaded }}</div>
-                </div>
+                <!-- Campo de fecha oculto -->
+                <input
+                  type="hidden"
+                  :id="`vr-uploaded-${video.id}`"
+                  v-model="form.uploaded"
+                />
               </div>
 
               <!-- Inputs de archivo según tipo -->
@@ -297,12 +289,21 @@ const confirm = reactive({
   item: null
 })
 
+/* Util para fecha local YYYY-MM-DD */
+function todayLocalISO() {
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 /* Form */
 const form = reactive({
   title: '',
   description: '',
   type: 1,
-  uploaded: '',
+  uploaded: todayLocalISO(), // valor por defecto: hoy
   file: null,
   video: null,
   image: null
@@ -338,7 +339,7 @@ function touch(field) { touched[field] = true }
 /* Modal */
 function resetForm() {
   editingId.value = null
-  Object.assign(form, { title: '', description: '', type: 1, uploaded: '', file: null, video: null, image: null })
+  Object.assign(form, { title: '', description: '', type: 1, uploaded: todayLocalISO(), file: null, video: null, image: null })
   Object.assign(existing, { file_src: null, video_src: null, img_src: null })
   Object.keys(touched).forEach(k => touched[k] = false)
   Object.keys(errors).forEach(k => errors[k] = '')
@@ -352,7 +353,7 @@ function openModal(resource = null) {
       title: resource.title || '',
       description: resource.description || '',
       type: resource.type || 1,
-      uploaded: resource.uploaded || ''
+      uploaded: resource.uploaded || todayLocalISO()
     })
     Object.assign(existing, {
       file_src: resource.file_src || null,
@@ -416,7 +417,7 @@ async function submitResource() {
   fd.append('title', form.title)
   fd.append('description', form.description || '')
   fd.append('type', String(form.type))
-  if (form.uploaded) fd.append('uploaded', form.uploaded)
+  fd.append('uploaded', form.uploaded) // siempre se envía
   if (form.type === 1 && form.file)  fd.append('file', form.file)
   if (form.type === 2 && form.video) fd.append('video', form.video)
   if (form.type === 3 && form.image) fd.append('image', form.image)
@@ -464,7 +465,7 @@ async function confirmDelete() {
   confirm.visible = false
   if (!item) return
 
-  // Optimistic UI: quita de la tabla y recuerda índice para posible rollback
+  // Optimistic UI
   const idx = resources.value.findIndex(r => r.id === item.id)
   if (idx === -1) return
   const snapshot = resources.value[idx]
@@ -477,13 +478,10 @@ async function confirmDelete() {
     )
     toast.value = { message: 'Recurso eliminado', type: 'success' }
 
-    // Si después de eliminar quedaste en página vacía, regresa una página y repinta
     const maxPage = Math.max(1, Math.ceil(resources.value.length / perPage.value))
     if (currentPage.value > maxPage) currentPage.value = maxPage
-    // Opcional: volver a sincronizar con backend
     await fetchResources()
   } catch (e) {
-    // Rollback
     resources.value.splice(idx, 0, snapshot)
     toast.value = { message: 'No se pudo eliminar el recurso', type: 'danger' }
   } finally {

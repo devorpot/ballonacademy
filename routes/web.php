@@ -28,7 +28,9 @@ use App\Http\Controllers\Admin\EvaluationQuestionController;
 use App\Http\Controllers\Admin\EvaluationFileController;
 use App\Http\Controllers\Admin\EvaluationUsersController;
 use App\Http\Controllers\Admin\ActivationsController;
+use App\Http\Controllers\Admin\ExtraClassController;
 use App\Http\Controllers\PublicRegistrationController;
+
 
 
 use App\Http\Controllers\Frontend\DashboardController as FrontendDashboardController;
@@ -44,6 +46,7 @@ use App\Http\Controllers\Frontend\SecurityController  as FrontendSecurityControl
 use App\Http\Controllers\Frontend\DistributorController  as FrontendDistributorController;
 
 use App\Http\Controllers\Frontend\LessonsController  as FrontendLessonsController;
+use App\Http\Controllers\Frontend\VideoCommentsController  as FrontendVideoCommentsController;
 use App\Http\Controllers\Api\VideoActivityController;
 use App\Http\Controllers\Api\ActivityController;
  
@@ -53,16 +56,72 @@ use App\Http\Controllers\Api\ActivityController;
 
 Route::get('/', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/', [AuthController::class, 'login']);
-Route::get('/login', [AuthController::class, 'loginForm']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 
-// Recuperar contraseña
-Route::get('/forgot-password', [AuthController::class, 'forgotPasswordForm'])->name('password.request');
-Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
-Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
-Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+/*
+|--------------------------------------------------------------------------
+| Rutas públicas para invitados (guest)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('guest')->group(function () {
+    // Login (formulario y envío)
+    Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
+
+    // Olvidé mi contraseña: formulario para pedir el email
+    Route::get('/forgot-password', [AuthController::class, 'forgotPasswordForm'])
+        ->name('password.request');
+
+    // Envío del email con el enlace de reseteo
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])
+        ->name('password.email');
+
+    // Formulario de nueva contraseña (la notificación usa  
+        
+        Route::get('/reset-password/{token}', function (Request $request, string $token) {
+        // Retorna tu vista/Inertia para el form de cambio de password
+        // Debes pasar token y email (si lo usas en la vista)
+        return inertia('Auth/ResetPassword', [
+            'token' => $token,
+            'email' => $request->query('email'),
+        ]);
+    })->name('password.reset');
+
+
+    // Guardar nueva contraseña (la notificación envía a este POST)
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+        ->name('password.update');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Rutas protegidas (auth)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Cambiar contraseña (usuario autenticado)
+    Route::get('/change-password', [AuthController::class, 'changePasswordForm'])
+        ->name('password.change.form');
+
+    Route::post('/change-password', [AuthController::class, 'changePassword'])
+        ->name('password.change');
+
+    // Generar token de activación (si solo personal interno debe usarlo, mantenlo protegido)
+    Route::get('/activation-token', [AuthController::class, 'activationTokenForm'])
+        ->name('activation.token.form');
+
+    Route::post('/activation-token', [AuthController::class, 'createActivationToken'])
+        ->name('activation.token.create');
+});
+
+
+
+
+ 
 
 Route::get('/activate/{user}', [UserController::class, 'activate'])
     ->name('users.activate')
@@ -97,7 +156,7 @@ Route::middleware(['auth', 'role:admin'])
     Route::post('courses/{course}/assign-students', [CourseController::class, 'assignStudents'])->name('courses.assign-students');
 
     // Cursos → Videos por curso
-    Route::get('courses/{course}/videos-panel', [VideoController::class, 'videosPanel'])->name('courses.videos.panel');
+    Route::get('courses/{course}/videos-panel', [VideoController::class,  'videosPanel'])->name('courses.videos.panel');
     Route::get('courses/{course}/videos/videos-list', [VideoController::class, 'list'])->name('courses.videos.list');
     Route::post('courses/{course}/videos/reorder', [VideoController::class, 'reorderVideos'])->name('courses.videos.reorder');
     Route::delete('courses/{course}/videos/{video}', [VideoController::class, 'deleteVideo'])->name('courses.videos.delete');
@@ -206,6 +265,17 @@ Route::middleware(['auth', 'role:admin'])
     Route::resource('evaluation-users', EvaluationUsersController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
     Route::put('evaluation-users/{evaluation_user}/status', [EvaluationUsersController::class, 'updateStatus'])->name('evaluation-users.update-status');
 
+    Route::get(
+    '/evaluation-users/course/{course}/user/{user}',
+    [EvaluationUsersController::class, 'byUserAndCourse']
+)->name('evaluation-users.byUserAndCourse');
+
+    Route::get(
+    '/evaluation-users/user/{user}',
+    [EvaluationUsersController::class, 'byUser']
+)->name('evaluation-users.byUser');
+
+
     // =====================================================================
     // Usuarios y Roles
     // =====================================================================
@@ -248,7 +318,16 @@ Route::middleware(['auth', 'role:admin'])
     // Activaciones
     // =====================================================================
     Route::post('/activations', [ActivationsController::class, 'store'])->name('activations.store');
+
+    Route::post('/activations/{activation}/resend', [ActivationsController::class, 'resend'])
+    ->name('activations.resend');
+
+ Route::patch('/activations/{activation}/toggle', [ActivationsController::class, 'toggle'])
+    ->name('activations.toggle');
+
     Route::resource('activations', ActivationsController::class);
+    //Extraclases
+     Route::resource('extras', ExtraClassController::class);
 
 });
 
@@ -365,4 +444,22 @@ Route::middleware(['auth', 'role:student'])
         // Ruta para servir videos protegidos
         Route::get('/videos/secure/{filename}', [FrontendCoursesController::class, 'streamProtectedVideo'])
             ->name('videos.secure');
+
+
+        Route::prefix('/video-comments')->group(function () {
+            // Listar comentarios por video
+            Route::get('/video/{videoId}', [FrontendVideoCommentsController::class, 'index'])
+                ->name('video-comments.index');
+
+            // Crear comentario (requiere login)
+            Route::post('/', [FrontendVideoCommentsController::class, 'store'])
+                ->name('video-comments.store');
+
+            // Like / Dislike (requieren login)
+            Route::post('/{id}/like', [FrontendVideoCommentsController::class, 'like'])
+                ->name('video-comments.like');
+
+            Route::post('/{id}/dislike', [FrontendVideoCommentsController::class, 'dislike'])
+                ->name('video-comments.dislike');
+        });
     });

@@ -13,9 +13,9 @@
             <h4 class="admin-title">
               <i class="bi bi-journal-text me-2"></i> &nbsp; Gestionar Cursos
             </h4>
-            <button class="btn btn-primary" @click="showCreateModal = true">
+            <Link class="btn btn-primary" :href="route('admin.courses.create')">
               <i class="bi bi-plus-lg me-1"></i> Nuevo Curso
-            </button>
+            </Link>
           </div>
         </div>
       </div>

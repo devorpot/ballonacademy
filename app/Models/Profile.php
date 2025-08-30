@@ -19,6 +19,7 @@ class Profile extends Model
     'external_number',
     'internal_number',
     'state',
+    'shirt_size',
     'municipality',
     'neighborhood',
     'postal_code',
@@ -37,6 +38,13 @@ class Profile extends Model
     'tiktok',
     'youtube',
     'description',
+    'activity',
+    'experiencie',
+    'bussines_own',
+    'bussines_name',
+    'bussines_logo',
+    'bussines_website',
+    'bussines_category'
 ];
 
 

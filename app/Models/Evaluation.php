@@ -16,6 +16,7 @@ class Evaluation extends Model
     protected $fillable = [
         'user_id',        // incluye si haces asignación masiva con user_id
         'course_id',
+        'pdf_file',
         'teacher_id',
         'video_id',
         'lesson_id',
@@ -80,6 +81,11 @@ class Evaluation extends Model
     public function getStatusNameAttribute(): ?string
     {
         return $this->status?->name;
+    }
+
+     public function getPdfFileUrlAttribute(): ?string
+    {
+        return $this->pdf_file ? Storage::disk('public')->url($this->pdf_file) : null;
     }
 
     public function user()

@@ -17,32 +17,29 @@ const loginHref = computed(() => props.loginUrl || route('login'))
 
 // Texto de bienvenida
 const title = computed(() => `¡Bienvenido ${props.name || 'a la Academia'}!`)
-
-// Assets (podrías moverlos a tu config si lo prefieres)
-const LOGO_URL = 'https://academiainternacionalglobos.com/wp-content/themes/academiaglobos/assets/images/logo-internacional.png'
-const HERO_IMG = 'https://academiainternacionalglobos.com/wp-content/themes/academiaglobos/assets/images/card-pba_hover.png'
-const LOGO_FABRICAS = 'https://academiainternacionalglobos.com/wp-content/themes/academiaglobos/assets/images/logo-fabricas.png'
-const LOGO_PAYASO = 'https://academiainternacionalglobos.com/wp-content/themes/academiaglobos/assets/images/logo-globos-payaso.png'
-const LOGO_ANAFAG = 'https://academiainternacionalglobos.com/wp-content/themes/academiaglobos/assets/images/logo-anafag.png'
 </script>
 
 <template>
   <GuestLayout>
     <Head title="Completar registro" />
 
-    <section class="container py-5">
+    <section class="container ">
       <div class="row justify-content-center">
         <div class="col-lg-8">
+          <div class="hero py-3 text-center">
+            <img src="https://academiainternacionalglobos.com/wp-content/themes/academiaglobos/assets/images/logo-internacional.png" alt="">
+          </div>
 
           <!-- Card principal -->
           <div class="card shadow-sm welcome-card overflow-hidden">
-            <!-- Header con logo -->
+            <!-- Header con texto plano (antes era un logo) -->
             <div class="card-header text-center py-4 header-brand">
-              <img :src="LOGO_URL" alt="Academia Internacional de Globos" class="brand-logo img-fluid" />
+              <h2 class="mb-0 brand-title">International Balloons Academy</h2>
+              <p class="mb-0 brand-subtitle">Plataforma de aprendizaje</p>
             </div>
 
             <!-- Contenido -->
-            <div class="card-body p-4 p-md-5">
+            <div class="card-body p-4 p-md-5 text-center">
               <h1 class="h3 mb-3 text-brand-900">{{ title }}</h1>
 
               <p class="lead mb-2">
@@ -59,17 +56,19 @@ const LOGO_ANAFAG = 'https://academiainternacionalglobos.com/wp-content/themes/a
                 </a>
               </div>
 
-              <div class="small text-muted">
+              <div class="small text-muted text-center">
                 <p class="mb-1">Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
                 <p class="mb-0 text-wrap link-line">
-                  <a :href="loginHref" class="link-brand">{{ loginHref }}</a>
+                  <a href="https://academiainternacionalglobos.com/login" class="link-brand">https://academiainternacionalglobos.com/login</a>
                 </p>
               </div>
             </div>
 
-            <!-- Imagen decorativa -->
+            <!-- Sección decorativa en texto (antes imagen) -->
             <div class="hero-img-wrapper">
-              <img :src="HERO_IMG" alt="Academia Internacional de Globos" class="w-100 d-block hero-img" />
+              <p class="hero-text m-0 py-3 text-center text-white">
+                Aprende, practica y certifica tus habilidades en globoflexia profesional.
+              </p>
             </div>
 
             <!-- Footer -->
@@ -96,11 +95,11 @@ const LOGO_ANAFAG = 'https://academiainternacionalglobos.com/wp-content/themes/a
                 </a>
               </div>
 
-              <!-- Logos -->
-              <div class="d-flex justify-content-center align-items-center gap-3 logos-row">
-                <img :src="LOGO_FABRICAS" alt="Fábricas" class="logo-mini" />
-                <img :src="LOGO_PAYASO" alt="Globos Payaso" class="logo-mini" />
-                <img :src="LOGO_ANAFAG" alt="ANAFAG" class="logo-mini" />
+              <!-- Logos reemplazados por texto plano -->
+              <div class="d-flex justify-content-center align-items-center gap-3 logos-row flex-wrap">
+                <span class="logo-text badge bg-light text-dark px-3 py-2">Fábricas</span>
+                <span class="logo-text badge bg-light text-dark px-3 py-2">Globos Payaso</span>
+                <span class="logo-text badge bg-light text-dark px-3 py-2">ANAFAG</span>
               </div>
 
               <p class="mt-3 mb-0 small">International Balloons Academy</p>
@@ -124,19 +123,32 @@ const LOGO_ANAFAG = 'https://academiainternacionalglobos.com/wp-content/themes/a
 @brand-accent:#e4ae4e; // botón/footer
 @text-muted:  #8a8a8a;
 
+
+.hero{
+  background:@brand-dark;
+  border-radius:1rem;
+  margin-bottom:1rem;
+}
+
 .welcome-card {
   border: 0;
   border-radius: 12px;
   overflow: hidden;
 }
 
-/* Header con logo */
+/* Header con texto */
 .header-brand {
   background: @brand-deep;
   border: 0;
+  color: #fff;
 
-  .brand-logo {
-    max-width: 220px;
+  .brand-title {
+    font-weight: 700;
+    letter-spacing: .3px;
+  }
+  .brand-subtitle {
+    opacity: .9;
+    font-size: .95rem;
   }
 }
 
@@ -175,14 +187,13 @@ const LOGO_ANAFAG = 'https://academiainternacionalglobos.com/wp-content/themes/a
   &:hover { text-decoration: underline; }
 }
 
-/* Imagen hero */
+/* Sección hero en texto plano */
 .hero-img-wrapper {
   background: @brand-dark;
 }
-.hero-img {
-  display: block;
-  width: 100%;
-  height: auto;
+.hero-text {
+  font-size: 1rem;
+  letter-spacing: .2px;
 }
 
 /* Footer */
@@ -192,9 +203,9 @@ const LOGO_ANAFAG = 'https://academiainternacionalglobos.com/wp-content/themes/a
   border: 0;
   padding: 28px;
 
-  .logos-row .logo-mini {
-    height: 36px;
-    display: block;
+  .logos-row .logo-text {
+    border-radius: 999px;
+    font-weight: 600;
   }
 }
 

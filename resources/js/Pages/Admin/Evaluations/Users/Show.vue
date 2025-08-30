@@ -30,6 +30,10 @@ const passed = computed(() =>
   passMin != null && userScore != null ? userScore >= passMin : null
 );
 
+const goBack = () => {
+  window.history.back()
+}
+
 // Helpers UI
 function formatDate(value) {
   if (!value) return '-';
@@ -148,9 +152,9 @@ function closeVideo() {
                 <i class="bi bi-clipboard2-data me-2"></i>
                 Detalles de la Evaluación de Usuario <strong> #{{ evaluationUser.evaluation.title }}</strong>
               </h1>
-              <Link :href="route('admin.evaluation-users.index')" class="btn btn-secondary">
-                <i class="bi bi-arrow-left me-2"></i>Volver
-              </Link>
+              <button type="button" class="btn btn-secondary" @click="goBack">
+  <i class="bi bi-arrow-left me-2"></i>Volver
+</button>
             </div>
           </div>
         </div>

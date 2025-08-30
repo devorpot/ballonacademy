@@ -182,12 +182,12 @@ const onCreated = () => {
           <div class="card-body p-0">
             <div class="table-responsive">
               <table class="table table-striped table-hover align-middle mb-0">
-                <thead class="table-light">
+               <thead class="table-light">
                   <tr>
                     <th @click="sortBy('id')" style="cursor: pointer;">ID <i :class="sortIcon('id')"></i></th>
+                    <th>Imagen</th>
                     <th @click="sortBy('name')" style="cursor: pointer;">Nombre <i :class="sortIcon('name')"></i></th>
                     <th @click="sortBy('email')" style="cursor: pointer;">Email <i :class="sortIcon('email')"></i></th>
-                   
                     <th @click="sortBy('phone')" style="cursor: pointer;">Teléfono <i :class="sortIcon('phone')"></i></th>
                     <th @click="sortBy('country')" style="cursor: pointer;">País <i :class="sortIcon('country')"></i></th>
                     <th class="text-end pe-4">Acciones</th>
@@ -196,9 +196,18 @@ const onCreated = () => {
                 <tbody>
                   <tr v-for="teacher in paginatedTeachers" :key="teacher.id">
                     <td>{{ teacher.id }}</td>
+                    <td>
+                      <img 
+                        v-if="teacher.profile_image" 
+                        :src="`/storage/${teacher.profile_image}`" 
+                        alt="Foto del maestro" 
+                        class="rounded-circle" 
+                        style="width:40px; height:40px; object-fit:cover;"
+                      />
+                      <span v-else class="text-muted small">Sin foto</span>
+                    </td>
                     <td>{{ teacher.firstname }} {{ teacher.lastname }}</td>
                     <td>{{ teacher.user.email }}</td>
-                    
                     <td>{{ teacher.phone }}</td>
                     <td>{{ teacher.country }}</td>
                     <td class="text-end pe-4">
@@ -221,6 +230,7 @@ const onCreated = () => {
                     </td>
                   </tr>
                 </tbody>
+
               </table>
             </div>
           </div>

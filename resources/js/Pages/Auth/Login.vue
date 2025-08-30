@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Head, useForm } from '@inertiajs/vue3'
+import { Head, useForm, Link } from '@inertiajs/vue3'
 import GuestLayout from '@/Layouts/GuestLayout.vue'
 import { route } from 'ziggy-js'
 
@@ -113,7 +113,7 @@ const submit = () => {
 
         <!-- Recuperar contraseña -->
         <div class="text-center mt-4">
-          <a href="#" class="text-muted small">¿Olvide mi contraseña?</a>
+          <Link :href="route('password.email')" class="text-muted small">¿Olvide mi contraseña?</Link>
         </div>
       </div>
     </div>

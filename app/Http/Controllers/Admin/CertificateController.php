@@ -26,10 +26,10 @@ class CertificateController extends Controller
             'certificates' => $certificates,
             'filters' => [
                 'sortBy' => $sortBy,
-                'sortDir' => $sortDir
+                'sortDir' => $sortDir,
             ],
             'users' => User::role('student')->get(),
-            'teachers' => Teacher::all()
+            'teachers' => Teacher::all(),
         ]);
     }
 
@@ -37,17 +37,18 @@ class CertificateController extends Controller
     {
         return Inertia::render('Admin/Certificates/Create', [
             'users' => User::role('student')->get(),
-            'teachers' => Teacher::all()
+            'teachers' => Teacher::all(),
         ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $this->validateData($request);
+        $validated = $this->validateData($request, true);
 
-        // Carga inicial de archivos (cuando se suben en creación)
-        $validated['photo'] = $this->handleUpload($request, 'photo', 'certificates/photos');
-        $validated['logo']  = $this->handleUpload($request, 'logo', 'certificates/logos');
+        // Subidas iniciales
+        $validated['photo']    = $this->handleUpload($request, 'photo', 'certificates/photos');
+        $validated['logo']     = $this->handleUpload($request, 'logo',  'certificates/logos');
+        $validated['pdf_path'] = $this->handleUpload($request, 'pdf',   'certificates/pdfs'); // nuevo campo
 
         Certificate::create($validated);
 
@@ -61,18 +62,18 @@ class CertificateController extends Controller
         return Inertia::render('Admin/Certificates/Edit', [
             'certificate' => $certificate->load(['user', 'master']),
             'users' => User::role('student')->get(),
-            'teachers' => Teacher::all()
+            'teachers' => Teacher::all(),
         ]);
     }
 
     public function update(Request $request, Certificate $certificate)
     {
-        // Al editar, no exigimos reglas de archivo si no vienen; igual que en CourseController
+        // En edición no obligamos archivos
         $validated = $this->validateData($request, false);
 
         $certificate->fill($validated);
 
-        // Photo: soporta reemplazo o borrado con flag remove_photo
+        // Photo: reemplazo o borrado
         if ($request->hasFile('photo')) {
             $this->deleteFile($certificate->photo);
             $certificate->photo = $request->file('photo')->store('certificates/photos', 'public');
@@ -81,13 +82,22 @@ class CertificateController extends Controller
             $certificate->photo = null;
         }
 
-        // Logo: soporta reemplazo o borrado con flag remove_logo
+        // Logo: reemplazo o borrado
         if ($request->hasFile('logo')) {
             $this->deleteFile($certificate->logo);
             $certificate->logo = $request->file('logo')->store('certificates/logos', 'public');
         } elseif ($request->boolean('remove_logo')) {
             $this->deleteFile($certificate->logo);
             $certificate->logo = null;
+        }
+
+        // PDF: reemplazo o borrado
+        if ($request->hasFile('pdf')) {
+            $this->deleteFile($certificate->pdf_path);
+            $certificate->pdf_path = $request->file('pdf')->store('certificates/pdfs', 'public');
+        } elseif ($request->boolean('remove_pdf')) {
+            $this->deleteFile($certificate->pdf_path);
+            $certificate->pdf_path = null;
         }
 
         $certificate->save();
@@ -101,6 +111,7 @@ class CertificateController extends Controller
     {
         $this->deleteFile($certificate->photo);
         $this->deleteFile($certificate->logo);
+        $this->deleteFile($certificate->pdf_path); // elimina PDF si existe
 
         $certificate->delete();
 
@@ -112,7 +123,7 @@ class CertificateController extends Controller
     public function show(Certificate $certificate)
     {
         return Inertia::render('Admin/Certificates/Show', [
-            'certificate' => $certificate->load(['user', 'master'])
+            'certificate' => $certificate->load(['user', 'master']),
         ]);
     }
 
@@ -120,31 +131,39 @@ class CertificateController extends Controller
      * $includeFiles=true: exige validación de archivos (crear).
      * $includeFiles=false: no exige reglas de archivo (editar) para permitir flags remove_* sin adjuntar archivo.
      */
-    private function validateData(Request $request, $includeFiles = true)
+    private function validateData(Request $request, bool $includeFiles = true): array
     {
         $rules = [
-            'user_id' => 'required|exists:users,id',
-            'master_id' => 'required|exists:teachers,id',
-            'authorized_by' => 'required|string|max:255',
-            'date_start' => 'nullable|date',
-            'date_end' => 'nullable|date',
+            'user_id'         => 'required|exists:users,id',
+            'master_id'       => 'required|exists:teachers,id',
+            'authorized_by'   => 'required|string|max:255',
+            'date_start'      => 'nullable|date',
+            'date_end'        => 'nullable|date',
             'date_expedition' => 'nullable|date',
-            'comments' => 'nullable|string|max:1000',
+            'comments'        => 'nullable|string|max:1000',
 
-            // Flags de borrado desde el formulario de edición (no obligatorios)
-            'remove_photo' => 'sometimes|boolean',
-            'remove_logo'  => 'sometimes|boolean',
+            // Flags de borrado (no obligatorios)
+            'remove_photo'    => 'sometimes|boolean',
+            'remove_logo'     => 'sometimes|boolean',
+            'remove_pdf'      => 'sometimes|boolean', // nuevo flag
         ];
 
         if ($includeFiles) {
             $rules['photo'] = 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048';
             $rules['logo']  = 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048';
+            // 20 MB = 20480 KB
+            $rules['pdf']   = 'nullable|file|mimes:pdf|max:20480';
+        } else {
+            // En edición permitimos subir archivos pero no son obligatorios
+            $rules['photo'] = 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048';
+            $rules['logo']  = 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048';
+            $rules['pdf']   = 'nullable|file|mimes:pdf|max:20480';
         }
 
         return $request->validate($rules);
     }
 
-    private function handleUpload(Request $request, $field, $path)
+    private function handleUpload(Request $request, string $field, string $path): ?string
     {
         if ($request->hasFile($field)) {
             return $request->file($field)->store($path, 'public');
@@ -152,7 +171,7 @@ class CertificateController extends Controller
         return null;
     }
 
-    private function deleteFile($filePath)
+    private function deleteFile(?string $filePath): void
     {
         if ($filePath) {
             Storage::disk('public')->delete($filePath);
@@ -160,15 +179,20 @@ class CertificateController extends Controller
     }
 
     /**
-     * Aún disponible por si quieres usarla en otros contextos.
-     * En update() ya seguimos el patrón de flags como en cursos.
+     * Opcional: descarga protegida del PDF si prefieres no exponer URL pública.
+     * Asegúrate de registrar la ruta si la usas.
+     *
+     * Route::get('/admin/certificates/{certificate}/download', [CertificateController::class, 'download'])
+     *     ->middleware(['auth', 'verified'])
+     *     ->name('admin.certificates.download');
      */
-    private function updateFile(Request $request, $currentPath, $field, $path)
+    public function download(Certificate $certificate)
     {
-        if ($request->hasFile($field)) {
-            $this->deleteFile($currentPath);
-            return $this->handleUpload($request, $field, $path);
-        }
-        return $currentPath;
+        abort_unless($certificate->pdf_path && Storage::disk('public')->exists($certificate->pdf_path), 404);
+
+        // Nombre sugerido; puedes personalizarlo
+        $suggested = 'certificado-'.$certificate->id.'.pdf';
+
+        return Storage::disk('public')->download($certificate->pdf_path, $suggested);
     }
 }

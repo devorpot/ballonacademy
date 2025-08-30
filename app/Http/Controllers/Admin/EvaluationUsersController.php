@@ -129,5 +129,160 @@ class EvaluationUsersController extends Controller
 
         return redirect()->back()->with('success', 'Evaluación eliminada correctamente');
     }
+
+    // app/Http/Controllers/Admin/EvaluationUsersController.php
+
+public function byUserAndCourse(Request $request, int $courseId, int $userId)
+{
+    // Datos mínimos para encabezados/breadcrumbs
+    $course = Course::select('id', 'title', 'image_cover')->findOrFail($courseId);
+    $student = User::select('id', 'name', 'email')->findOrFail($userId);
+
+    // Base: envíos del usuario en ese curso
+    $query = EvaluationUser::query()
+        ->with([
+            'user:id,name,email',
+            'course:id,title',
+            'evaluation:id,title,points_min,status,eva_type,type',
+            'lesson:id,title',
+            'video:id,title',
+            'approvedUser:id,name',
+        ])
+        ->where('course_id', $courseId)
+        ->where('user_id', $userId);
+
+    // Filtros opcionales
+    if ($request->filled('status')) {
+        $query->where('status', $request->input('status'));
+    }
+
+    if ($request->filled('q')) {
+        $q = trim((string) $request->input('q'));
+        $query->where(function ($sub) use ($q) {
+            $sub->where('comments', 'like', "%{$q}%")
+                ->orWhereHas('evaluation', fn($e) => $e->where('title', 'like', "%{$q}%"))
+                ->orWhereHas('lesson', fn($l) => $l->where('title', 'like', "%{$q}%"))
+                ->orWhereHas('video', fn($v) => $v->where('title', 'like', "%{$q}%"));
+        });
+    }
+
+    // Ordenamiento opcional
+    $sort = $request->input('sort', 'created_at');
+    $dir  = $request->input('dir', 'desc');
+    $allowedSorts = ['created_at', 'status', 'id'];
+    if (!in_array($sort, $allowedSorts, true)) {
+        $sort = 'created_at';
+    }
+    $dir = $dir === 'asc' ? 'asc' : 'desc';
+
+    $perPage = max(1, (int) $request->input('per_page', 20));
+
+    $submissions = $query
+        ->orderBy($sort, $dir)
+        ->paginate($perPage)
+        ->withQueryString();
+
+    return Inertia::render('Admin/Evaluations/Users/ByStudent', [
+        'submissions' => $submissions,
+        'course'      => $course,
+        'student'     => $student,
+        'filters'     => [
+            'q'        => $request->input('q'),
+            'status'   => $request->input('status'),
+            'per_page' => $perPage,
+            'sort'     => $sort,
+            'dir'      => $dir,
+        ],
+        'statusOptions' => collect(\App\Enums\EvaluationUserStatus::cases())->map(fn($case) => [
+            'label' => $case->label(),
+            'value' => $case->value,
+        ]),
+    ]);
+}
+
+// app/Http/Controllers/Admin/EvaluationUsersController.php
+
+public function byUser(Request $request, int $userId)
+{
+    // Alumno para encabezado/breadcrumbs
+    $student = User::select('id','name','email')->findOrFail($userId);
+
+    // Base: todos los envíos de ese usuario (en cualquier curso)
+    $query = EvaluationUser::query()
+        ->with([
+            'evaluation:id,title,course_id,lesson_id,video_id',
+            'evaluation.lesson:id,title',   // ← lesson a través de evaluation
+            'evaluation.video:id,title',    // ← video a través de evaluation
+            'course:id,title',
+            'user:id,name,email',
+        ])
+        ->where('user_id', $userId);
+
+    // Filtros opcionales
+    if ($request->filled('course')) {
+        $query->where('course_id', (int) $request->input('course'));
+    }
+    if ($request->filled('status')) {
+        $query->where('status', $request->input('status'));
+    }
+    if ($request->filled('q')) {
+        $q = trim((string) $request->input('q'));
+        $query->where(function ($sub) use ($q) {
+            $sub->where('comments', 'like', "%{$q}%")
+                ->orWhereHas('evaluation', fn($e) => $e->where('title', 'like', "%{$q}%"))
+                ->orWhereHas('evaluation.lesson', fn($l) => $l->where('title', 'like', "%{$q}%")) // ← corregido
+                ->orWhereHas('evaluation.video', fn($v) => $v->where('title', 'like', "%{$q}%"))   // ← corregido
+                ->orWhereHas('course', fn($c) => $c->where('title', 'like', "%{$q}%"));
+        });
+    }
+
+    // Ordenamiento
+    $sort = $request->input('sort', 'created_at');
+    $dir  = $request->input('dir', 'desc');
+    $allowedSorts = ['created_at', 'status', 'id'];
+    if (!in_array($sort, $allowedSorts, true)) {
+        $sort = 'created_at';
+    }
+    $dir = $dir === 'asc' ? 'asc' : 'desc';
+
+    $perPage = max(1, (int) $request->input('per_page', 20));
+
+    $submissions = $query
+        ->orderBy($sort, $dir)
+        ->paginate($perPage)
+        ->withQueryString();
+
+    // Opciones de cursos para el filtro (solo los que tengan envíos)
+    $courseOptions = Course::query()
+        ->whereIn('id', EvaluationUser::where('user_id', $userId)->select('course_id'))
+        ->orderBy('title')
+        ->get(['id', 'title'])
+        ->map(fn($c) => ['value' => $c->id, 'label' => $c->title])
+        ->values();
+
+    return Inertia::render('Admin/Evaluations/Users/ByStudentAll', [
+        'submissions' => $submissions,
+        'student'     => $student,
+        'filters'     => [
+            'course'   => $request->input('course'),
+            'status'   => $request->input('status'),
+            'q'        => $request->input('q'),
+            'per_page' => $perPage,
+            'sort'     => $sort,
+            'dir'      => $dir,
+        ],
+        'courseOptions' => $courseOptions,
+        'statusOptions' => collect(\App\Enums\EvaluationUserStatus::cases())->map(fn($case) => [
+            'label' => $case->label(),
+            'value' => $case->value,
+        ]),
+    ]);
+}
+
+
+
+
+
+
 }
  

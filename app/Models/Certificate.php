@@ -18,7 +18,8 @@ class Certificate extends Model
         'date_expedition',
         'comments',
         'photo',
-        'logo'
+        'logo',
+        'pdf_path'
     ];
 
     public function user()
@@ -26,8 +27,15 @@ class Certificate extends Model
         return $this->belongsTo(User::class);
     }
 
+
+
     public function master()
     {
         return $this->belongsTo(Teacher::class, 'master_id');
+    }
+
+     public function getPdfUrlAttribute(): ?string
+    {
+        return $this->pdf_path ? \Storage::disk('public')->url($this->pdf_path) : null;
     }
 }

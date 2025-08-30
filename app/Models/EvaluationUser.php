@@ -19,6 +19,7 @@ class EvaluationUser extends Model
         'course_id',
         'video_id',
         'comments',
+        
         'status',
         'files',
         'data',

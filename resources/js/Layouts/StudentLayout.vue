@@ -76,8 +76,7 @@ onBeforeUnmount(() => {
       </div>
     </Transition>
 
-    <!-- Mueve el Footer aquí si lo quieres fuera del scroll -->
-    <Footer />
+ 
   </div>
 </template>
 

@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 
+// Para generación de activaciones
+use Illuminate\Support\Str;
+use App\Models\Activation;
+use App\Models\Course;
+
 class AuthController extends Controller
 {
     // Mostrar formulario de login o redirigir si ya está autenticado
@@ -17,7 +22,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
 
-            if ($user->hasRole('admin')) {
+             if ($user->hasRole('admin')) {
                 return redirect()->route('admin.dashboard');
             }
 
@@ -25,7 +30,7 @@ class AuthController extends Controller
                 return redirect()->route('dashboard.index');
             }
 
-            // Si no tiene rol válido, cierra sesión por seguridad
+            // Si no tiene rol válido, cerrar sesión por seguridad
             Auth::logout();
             return redirect()->route('login');
         }
@@ -76,7 +81,7 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
-    // Mostrar formulario de recuperación
+    // Mostrar formulario de recuperación (solicitar correo)
     public function forgotPasswordForm()
     {
         return Inertia::render('Auth/ForgotPassword');
@@ -126,5 +131,75 @@ class AuthController extends Controller
         return $status === Password::PASSWORD_RESET
             ? redirect()->route('login')->with('status', __($status))
             : back()->withErrors(['email' => [__($status)]]);
+    }
+
+    // Cambiar contraseña (usuario autenticado)
+    public function changePasswordForm()
+    {
+        return Inertia::render('Auth/ChangePassword');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password'      => ['required'],
+            'password'              => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'La contraseña actual no es correcta.']);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        $request->session()->regenerate();
+
+        return back()->with('status', 'Contraseña actualizada correctamente.');
+    }
+
+    // Generar token de activación (para crear un registro en activations)
+    public function activationTokenForm()
+    {
+        return Inertia::render('Auth/ActivationToken', [
+            // opcionalmente puedes pasar lista de cursos
+            // 'courses' => Course::select('id','title')->orderBy('title')->get(),
+        ]);
+    }
+
+    public function createActivationToken(Request $request)
+    {
+        $data = $request->validate([
+            'name'      => ['required','string','max:255'],
+            'email'     => ['required','email'],
+            'phone'     => ['nullable','string','max:50'],
+            'course_id' => ['nullable','integer','exists:courses,id'],
+        ]);
+
+        // Generar código de 6 caracteres y hash único
+        $code = strtoupper(Str::random(6));
+        $hash = Str::uuid()->toString();
+
+        $activation = Activation::create([
+            'name'      => $data['name'],
+            'email'     => mb_strtolower($data['email']),
+            'phone'     => $data['phone'] ?? null,
+            'course_id' => $data['course_id'] ?? null,
+            'code'      => $code,
+            'hash'      => $hash,
+            'active'    => false,
+        ]);
+
+        // Aquí podrías disparar un mail si ya lo tienes configurado
+        // Mail::to($activation->email)->send(new ActivationInvitationMail($activation));
+
+        return back()->with('activation', [
+            'code' => $activation->code,
+            'hash' => $activation->hash,
+            // Ajusta esta ruta a la de tu formulario de activación pública
+            // 'url'  => route('public.activation.show', ['hash' => $activation->hash]),
+        ]);
     }
 }

@@ -64,6 +64,28 @@
               placeholder="Instrucciones"
             />
           </div>
+          <!-- Archivo PDF -->
+          <div class="mb-3">
+<FieldFile
+  id="pdf_file"
+  label="Archivo PDF (máx. 20 MB)"
+  v-model="form.pdf_file"
+  v-model:remove="form.remove_pdf_file"
+  :initial-url="currentPdfUrl"
+  :showValidation="touched.pdf_file"
+  :formError="form.errors.pdf_file"
+  @blur="() => handleBlur('pdf_file')"
+  accept="application/pdf"
+  :onlyPdf="true"
+  :maxSizeMB="20"
+  :showPreviewToggle="true"
+/>
+
+ 
+
+          </div>
+
+         
 
           <!-- Archivo de Video -->
           <div class="mb-3">
@@ -125,6 +147,7 @@
               @blur="() => handleBlur('type')"
             />
           </div>
+
 
           <!-- Video dependiente del curso -->
           <div class="mb-3" v-if="Number(form.type) === 2">
@@ -193,6 +216,7 @@
             />
           </div>
 
+
           <!-- Puntaje mínimo -->
           <div class="mb-3">
             <FieldNumber
@@ -255,7 +279,7 @@ import FieldText from '@/Components/Admin/Fields/FieldText.vue';
 import FieldDate from '@/Components/Admin/Fields/FieldDate.vue';
 import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue';
 import FieldNumber from '@/Components/Admin/Fields/FieldNumber.vue';
-
+import FieldFile from '@/Components/Admin/Fields/FieldFile.vue'
 const props = defineProps({
   evaluation: Object,
   courses: Array,
@@ -265,6 +289,7 @@ const props = defineProps({
 
 // Form inicial
 const form = useForm({
+  _method: 'PUT',
   course_id: props.evaluation.course_id ?? '',
   video_id: props.evaluation.video_id ?? '',
   lesson_id: props.evaluation.lesson_id ?? '',    // <-- nuevo
@@ -276,8 +301,16 @@ const form = useForm({
   eva_video_file: null,
   points_min: props.evaluation.points_min ?? '',
   status: props.evaluation.status ?? 'SEND',
-  _method: 'PUT'
+  
+  pdf_file: null,          // archivo PDF nuevo (opcional)
+  remove_pdf_file: false,  // flag para eliminar el PDF actual
 });
+
+const currentPdfUrl = computed(() => {
+  if (props.evaluation?.pdf_file_url) return props.evaluation.pdf_file_url
+  if (props.evaluation?.pdf_file) return '/storage/' + props.evaluation.pdf_file
+  return null
+})
 
 const keepVideo = ref(true);
 const touched = ref({});
@@ -302,6 +335,17 @@ const evaTypeOptions = [
   { value: 1, label: 'Cuestionario' },
   { value: 2, label: 'Video' }
 ];
+
+ 
+
+// Alterna la eliminación del PDF
+const toggleRemovePdfFile = () => {
+  form.remove_pdf_file = !form.remove_pdf_file
+  if (form.remove_pdf_file) {
+    form.pdf_file = null
+  }
+  touched.value.pdf_file = true
+}
 
 // Estado dependientes
 const loadingVideos = ref(false);

@@ -96,19 +96,59 @@ onMounted(() => {
 })
 
 // ===== Acciones fila =====
-function copyLink(activation) {
-  const link = activation?.public_link || buildPublicLink(activation?.hash)
-  if (!link) return
-  navigator.clipboard.writeText(link).then(() => {
+async function copyLink(activation) {
+  const link = getPublicLink(activation)
+  if (!link) {
+    toast.value = { message: 'No hay enlace para copiar', type: 'danger' }
+    return
+  }
+
+  try {
+    // Clipboard API (requiere contexto seguro: https/localhost)
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(link)
+    } else {
+      // Fallback con textarea temporal
+      legacyCopy(link)
+    }
     toast.value = { message: 'Enlace copiado al portapapeles', type: 'success' }
-  }).catch(() => {
-    toast.value = { message: 'No se pudo copiar el enlace', type: 'danger' }
-  })
+  } catch (err) {
+    console.error('Clipboard error:', err)
+    try {
+      legacyCopy(link)
+      toast.value = { message: 'Enlace copiado al portapapeles', type: 'success' }
+    } catch (err2) {
+      console.error('Legacy copy error:', err2)
+      toast.value = { message: 'No se pudo copiar el enlace', type: 'danger' }
+    }
+  }
+}
+
+// Crea un textarea oculto, selecciona y copia (compatibilidad amplia)
+function legacyCopy(text) {
+  const ta = document.createElement('textarea')
+  ta.value = text
+  ta.setAttribute('readonly', '')
+  ta.style.position = 'fixed'
+  ta.style.top = '-9999px'
+  document.body.appendChild(ta)
+  ta.select()
+  const ok = document.execCommand('copy')
+  document.body.removeChild(ta)
+  if (!ok) throw new Error('execCommand copy failed')
+}
+
+// Obtiene el enlace público de forma segura
+function getPublicLink(activation) {
+  const fromProp = activation?.public_link && String(activation.public_link).trim()
+  if (fromProp) return fromProp
+  return buildPublicLink(activation?.hash)
 }
 
 function buildPublicLink(hash) {
   if (!hash) return null
-  const base = window.location.origin
+  const base = window.location?.origin || ''
+  if (!base) return null
   return `${base}/register/student/${hash}`
 }
 
@@ -475,14 +515,19 @@ function openDetails(activation) {
                 <div class="fw-semibold">{{ selectedActivation.code }}</div>
               </div>
               <div class="col-12 col-md-8">
-                <div class="d-flex align-items-center justify-content-between">
+               <div class="d-flex align-items-center justify-content-between">
                   <div>
                     <div class="text-muted small">Enlace público</div>
-                    <div style="max-width: 420px;">
-                      {{ selectedActivation.public_link || buildPublicLink(selectedActivation.hash) }}
+                    <div style="max-width: 420px; overflow: hidden;">
+                      {{ getPublicLink(selectedActivation) || '—' }}
                     </div>
                   </div>
-                  <button class="btn btn-outline-secondary btn-sm" @click="copyLink(selectedActivation)">
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    :disabled="!getPublicLink(selectedActivation)"
+                    @click="copyLink(selectedActivation)"
+                    title="Copiar enlace"
+                  >
                     <i class="bi bi-clipboard"></i> Copiar
                   </button>
                 </div>
