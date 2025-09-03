@@ -6,7 +6,7 @@
       { label: 'Cursos', route: '' }
     ]" />
 
-    <section class="section-heading">
+    <section class="section-heading pt-2">
       <div class="container-fluid">
         <div class="row">
           <div class="col-12 d-flex justify-content-between align-items-center">
@@ -21,14 +21,26 @@
       </div>
     </section>
 
-    <CrudFilters v-model:searchQuery="searchQuery" :count="sortedCourses.length" placeholder="Buscar cursos..." item-label="curso(s)" />
+<section class="section-data py-2">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+         <div class="card border">
+           <div class="card-body">
+              <CrudFilters v-model:searchQuery="searchQuery" :count="sortedCourses.length" placeholder="Buscar cursos..." item-label="curso(s)" />
+           </div>
+         </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <section class="section-data my-2">
+    <section class="section-data py-2">
       <div class="container-fluid">
         <div class="card">
           <div class="card-body p-0">
            <div class="table-responsive">
-              <table class="table table-striped table-hover align-middle mb-0">
+             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                   <tr>
                     <th></th>

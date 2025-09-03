@@ -2,19 +2,19 @@
 <template>
   <Head title="Crear Nuevo Estudiante" />
   <AdminLayout>
-    <div class="position-relative">
+ 
       <Breadcrumbs
         username="admin"
         :breadcrumbs="[
           { label: 'Dashboard', route: 'admin.dashboard' },
           { label: 'Estudiantes', route: 'admin.students.index' },
-          { label: 'Crear', route: '' }
+          { label: 'Crear Estudiante', route: '' }
         ]"
       />
 
       <section class="section-heading my-2">
         <div class="container-fluid">
-          <div class="row mb-4">
+          <div class="row ">
             <div class="col-12 d-flex justify-content-between align-items-center">
               <ButtonBack label="Volver" icon="bi bi-arrow-left" :href="route('admin.students.index')" />
               <button 
@@ -31,91 +31,95 @@
         </div>
       </section>
 
-      <section class="section-form my-2">
+      <section class="section-panel my-2">
         <div class="container-fluid">
-          <form @submit.prevent="submit" novalidate>
-            <div class="card">
-              <div class="card-body">
-                <h6 class="text-muted mb-3">Datos de usuario</h6>
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <FieldText
-                      id="name"
-                      label="Nombre de usuario"
-                      v-model="form.name"
-                      :required="true"
-                      :showValidation="touched.name"
-                      :formError="form.errors.name"
-                      :validateFunction="validateName"
-                      placeholder="Ingrese el nombre de usuario"
-                      @blur="() => handleBlur('name')"
-                    />
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <FieldEmail
-                      id="email"
-                      label="Email"
-                      v-model="form.email"
-                      :required="true"
-                      :showValidation="touched.email"
-                      :formError="form.errors.email"
-                      :validateFunction="validateEmail"
-                      placeholder="Ingrese el email"
-                      @blur="() => handleBlur('email')"
-                    />
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <FieldPassword
-                      id="password"
-                      confirmId="password_confirmation"
-                      label="Contraseña"
-                      :password="form.password"
-                      :passwordConfirmation="form.password_confirmation"
-                      :required="true"
-                      :showValidation="touched.password || touched.password_confirmation"
-                      :formError="form.errors.password"
-                      :confirmFormError="form.errors.password_confirmation"
-                      :validateFunction="validatePassword"
-                      :validateConfirmFunction="validatePasswordConfirmation"
-                      @update:password="val => form.password = val"
-                      @update:passwordConfirmation="val => form.password_confirmation = val"
-                      @blur="(field) => handleBlur(field)"
-                    />
-                  </div>
-                </div>
+         <div class="row">
+           <div class="col-12">
+              <form @submit.prevent="submit" novalidate>
+                <div class="card">
+                  <div class="card-body">
+                    <h6 class="text-muted mb-3">Datos de usuario</h6>
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <FieldText
+                          id="name"
+                          label="Nombre de usuario"
+                          v-model="form.name"
+                          :required="true"
+                          :showValidation="touched.name"
+                          :formError="form.errors.name"
+                          :validateFunction="validateName"
+                          placeholder="Ingrese el nombre de usuario"
+                          @blur="() => handleBlur('name')"
+                        />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldEmail
+                          id="email"
+                          label="Email"
+                          v-model="form.email"
+                          :required="true"
+                          :showValidation="touched.email"
+                          :formError="form.errors.email"
+                          :validateFunction="validateEmail"
+                          placeholder="Ingrese el email"
+                          @blur="() => handleBlur('email')"
+                        />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldPassword
+                          id="password"
+                          confirmId="password_confirmation"
+                          label="Contraseña"
+                          :password="form.password"
+                          :passwordConfirmation="form.password_confirmation"
+                          :required="true"
+                          :showValidation="touched.password || touched.password_confirmation"
+                          :formError="form.errors.password"
+                          :confirmFormError="form.errors.password_confirmation"
+                          :validateFunction="validatePassword"
+                          :validateConfirmFunction="validatePasswordConfirmation"
+                          @update:password="val => form.password = val"
+                          @update:passwordConfirmation="val => form.password_confirmation = val"
+                          @blur="(field) => handleBlur(field)"
+                        />
+                      </div>
+                    </div>
 
-                <h6 class="text-muted mt-4 mb-3">Datos del estudiante</h6>
-                <div class="row">
-                  <div v-for="field in studentFields" :key="field.key" class="col-md-6 mb-3">
-                    <component
-                      :is="field.component"
-                      :id="field.key"
-                      :label="field.label"
-                      v-model="form[field.key]"
-                      :required="true"
-                      :showValidation="touched[field.key]"
-                      :formError="form.errors[field.key]"
-                      :validateFunction="() => validateField(field.key)"
-                      :options="field.options"
-                      :placeholder="field.placeholder"
-                      @blur="() => handleBlur(field.key)"
-                    />
+                    <h6 class="text-muted mt-4 mb-3">Datos del estudiante</h6>
+                    <div class="row">
+                      <div v-for="field in studentFields" :key="field.key" class="col-md-6 mb-3">
+                        <component
+                          :is="field.component"
+                          :id="field.key"
+                          :label="field.label"
+                          v-model="form[field.key]"
+                          :required="true"
+                          :showValidation="touched[field.key]"
+                          :formError="form.errors[field.key]"
+                          :validateFunction="() => validateField(field.key)"
+                          :options="field.options"
+                          :placeholder="field.placeholder"
+                          @blur="() => handleBlur(field.key)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-footer text-end">
+                    <button type="submit" class="btn btn-primary" :disabled="form.processing || !isFormValid">
+                      <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
+                      <i class="bi bi-save me-2"></i>Guardar
+                    </button>
                   </div>
                 </div>
-              </div>
-              <div class="card-footer text-end">
-                <button type="submit" class="btn btn-primary" :disabled="form.processing || !isFormValid">
-                  <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
-                  <i class="bi bi-save me-2"></i>Guardar
-                </button>
-              </div>
-            </div>
-          </form>
+              </form>
+           </div>
+         </div>
         </div>
       </section>
 
       <SpinnerOverlay v-if="form.processing" />
-    </div>
+ 
   </AdminLayout>
 </template>
 

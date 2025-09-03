@@ -98,7 +98,7 @@ const hasItems = computed(() => items.value.length > 0)
                 download
                 target="_blank"
                 rel="noopener"
-                class="btn btn-sm btn-outline-secondary"
+                class="btn btn-sm rounded-pill btn-outline-secondary"
                 title="Descargar recurso"
               >
                 <i class="bi bi-download"></i>

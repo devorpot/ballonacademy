@@ -7,7 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdministratorController;
 use App\Http\Controllers\Admin\UserController; 
 use App\Http\Controllers\Admin\StudentController;
-use App\Http\Controllers\Admin\TeacherController; 
+use App\Http\Controllers\Admin\TeacherController;  
 use App\Http\Controllers\Admin\CertificateController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\SubscriptionController;
@@ -29,6 +29,8 @@ use App\Http\Controllers\Admin\EvaluationFileController;
 use App\Http\Controllers\Admin\EvaluationUsersController;
 use App\Http\Controllers\Admin\ActivationsController;
 use App\Http\Controllers\Admin\ExtraClassController;
+use App\Http\Controllers\Admin\VideoCommentsController;
+use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\PublicRegistrationController;
 
 
@@ -47,6 +49,8 @@ use App\Http\Controllers\Frontend\DistributorController  as FrontendDistributorC
 
 use App\Http\Controllers\Frontend\LessonsController  as FrontendLessonsController;
 use App\Http\Controllers\Frontend\VideoCommentsController  as FrontendVideoCommentsController;
+use App\Http\Controllers\Frontend\ExtraClassController as FrontExtraClassController;
+
 use App\Http\Controllers\Api\VideoActivityController;
 use App\Http\Controllers\Api\ActivityController;
  
@@ -188,7 +192,9 @@ Route::middleware(['auth', 'role:admin'])
     // =====================================================================
     //Route::resource('courses.videos', VideoController::class);
     Route::get('videos/{video}/stream', [VideoController::class, 'stream'])->name('videos.stream');
+    
     Route::resource('videos', VideoController::class);
+    
     Route::get('/videos/by-course/{course}', [VideoController::class, 'getByCourse'])->name('videos.by-course');
 
     // Videos → Materiales
@@ -276,6 +282,10 @@ Route::middleware(['auth', 'role:admin'])
 )->name('evaluation-users.byUser');
 
 
+    Route::get('/evaluation-users', [EvaluationUsersController::class, 'all'])
+    ->name('evaluation-users.all');
+
+
     // =====================================================================
     // Usuarios y Roles
     // =====================================================================
@@ -289,19 +299,23 @@ Route::middleware(['auth', 'role:admin'])
     Route::get('teachers/list', [TeacherController::class, 'list'])->name('teachers.list');
     Route::resource('teachers', TeacherController::class);
 
-    // =====================================================================
-    // Estudiantes
-    // =====================================================================
-    Route::resource('students', StudentController::class)->except(['create','edit','show'])
-        ->parameters(['students' => 'user']);
-    Route::get('students/create',         [StudentController::class, 'create'])->name('students.create');
-    Route::get('students/{user}',         [StudentController::class, 'show'])->name('students.show');
-    Route::get('students/{user}/edit',    [StudentController::class, 'edit'])->name('students.edit');
-    // Autocomplete
-    Route::get('students-list',           [StudentController::class, 'list'])->name('students.list');
-    Route::get('students-search',         [StudentController::class, 'search'])->name('students.search');
-    Route::get('students-search/{id}',    [StudentController::class, 'searchById'])->name('students.searchById');
+  // =====================================================================
+// Estudiantes
+// =====================================================================
+// Primero rutas específicas
+Route::get('students-list',        [StudentController::class, 'list'])->name('students.list');
+Route::get('students/search',      [StudentController::class, 'search'])->name('students.search');
+Route::get('students-search/{id}', [StudentController::class, 'searchById'])->name('students.searchById');
 
+// Resource sin create/edit/show
+Route::resource('students', StudentController::class)
+    ->except(['create','edit','show'])
+    ->parameters(['students' => 'user']);
+
+// Luego las que tienen {user}, con restricción
+Route::get('students/create',           [StudentController::class, 'create'])->name('students.create');
+Route::get('students/{user}',           [StudentController::class, 'show'])->name('students.show')->whereNumber('user');
+Route::get('students/{user}/edit',      [StudentController::class, 'edit'])->name('students.edit')->whereNumber('user');
     // =====================================================================
     // Otros recursos (Catálogos/Operaciones)
     // =====================================================================
@@ -328,6 +342,30 @@ Route::middleware(['auth', 'role:admin'])
     Route::resource('activations', ActivationsController::class);
     //Extraclases
      Route::resource('extras', ExtraClassController::class);
+
+
+
+// =====================================================================
+// Comentarios de Video (Admin)
+// =====================================================================
+    Route::get('video-comments',                [VideoCommentsController::class, 'index'])->name('video-comments.index');
+    Route::patch('video-comments/{comment}/toggle', [VideoCommentsController::class, 'toggle'])->name('video-comments.toggle');
+    Route::delete('video-comments/{comment}',   [VideoCommentsController::class, 'destroy'])->name('video-comments.destroy');
+
+
+Route::get('/activities', [AdminActivityController::class, 'index'])->name('activities.index');
+
+    // JSON para datatable (axios)
+    Route::get('/activities/list', [AdminActivityController::class, 'list'])->name('activities.list');
+
+    // Autocomplete de usuarios (axios)
+    Route::get('/activities/users-search', [AdminActivityController::class, 'usersSearch'])->name('activities.users_search');
+
+    // Detalle (dinámica al final o con whereNumber)
+    Route::get('/activities/{activity}', [AdminActivityController::class, 'show'])
+        ->whereNumber('activity')
+        ->name('activities.show');
+
 
 });
 
@@ -394,37 +432,35 @@ Route::middleware(['auth', 'role:student'])
             ->name('courses.videos.show');
 
         // Cursos → Evaluaciones
+
+
         Route::get('/courses/{course}/evaluations', [FrontendEvaluationController::class, 'index'])
             ->name('courses.evaluations.index');
-        Route::post('/courses/{course}/evaluations', [FrontendEvaluationController::class, 'store'])
-            ->name('courses.evaluations.store');
-        Route::get('/courses/{course}/evaluations/create', [FrontendEvaluationController::class, 'create'])
-            ->name('courses.evaluations.create');
-        Route::get('/courses/{course}/evaluations/{evaluation}/edit', [FrontendEvaluationController::class, 'edit'])
-            ->name('courses.evaluations.edit');
-        Route::put('/courses/{course}/evaluations/{evaluation}', [FrontendEvaluationController::class, 'update'])
-            ->name('courses.evaluations.update');
-        Route::get('courses/{course}/evaluations/{evaluation}/show', [FrontendEvaluationController::class, 'show'])
-            ->name('courses.evaluations.show');
+ 
+  
+        Route::put('/courses/{course}/evaluations/{evaluation}', [FrontendEvaluationController::class, 'update'])->name('courses.evaluations.update');
+        Route::get('courses/{course}/evaluations/{evaluation}/show', [FrontendEvaluationController::class, 'show'])->name('courses.evaluations.show');
+      
 
-       Route::post('courses/{course}/evaluations/{evaluation}/retry', [FrontendEvaluationController::class, 'retry'])
-            ->name('courses.evaluations.retry');
-        
+
+        //Acciones del usuario para subir la
         Route::get('courses/{course}/evaluations/{evaluation}/preview', [FrontendEvaluationUsersController::class, 'preview'])
             ->name('courses.evaluations.evaluation.preview');
+
+          Route::post('courses/{course}/evaluations/{evaluation}/retry', [FrontendEvaluationUsersController::class, 'retry'])->name('courses.evaluations.retry');
         
         Route::get('/courses/{course}/evaluations/{evaluation}/download', [FrontendEvaluationUsersController::class, 'download'])
             ->name('courses.evaluations.download');
 
-        // Evaluaciones → Flujos adicionales
+         
         Route::get('/evaluations/{evaluation}/thank-you', [FrontendEvaluationUsersController::class, 'thankyou'])
             ->name('evaluations.thankyou');
 
-        Route::delete('/evaluation-users/by-evaluation', [FrontendEvaluationUsersController::class, 'destroyByEvaluation'])
-            ->name('evaluation-users.destroy-by-evaluation');
+        Route::delete('/evaluation-users/by-evaluation', [FrontendEvaluationUsersController::class, 'destroyByEvaluation'])->name('evaluation-users.destroy-by-evaluation');
 
-        Route::resource('evaluation-users', FrontendEvaluationUsersController::class)
-            ->only(['index', 'store', 'show']);
+        Route::resource('evaluation-users', FrontendEvaluationUsersController::class);
+
+
 
         // Videos
         Route::get('/videos/{course}/video/{video}', [FrontendVideoController::class, 'show'])->name('videos.video.show');
@@ -455,6 +491,9 @@ Route::middleware(['auth', 'role:student'])
             Route::post('/', [FrontendVideoCommentsController::class, 'store'])
                 ->name('video-comments.store');
 
+
+            Route::get('{parentId}/replies', [VideoCommentsController::class, 'replies'])->name('replies');
+
             // Like / Dislike (requieren login)
             Route::post('/{id}/like', [FrontendVideoCommentsController::class, 'like'])
                 ->name('video-comments.like');
@@ -462,4 +501,7 @@ Route::middleware(['auth', 'role:student'])
             Route::post('/{id}/dislike', [FrontendVideoCommentsController::class, 'dislike'])
                 ->name('video-comments.dislike');
         });
+
+        Route::get('/extras', [FrontExtraClassController::class, 'index'])->name('extras.index');
+        Route::get('/extras/{extra}', [FrontExtraClassController::class, 'show'])->name('extras.show');
     });

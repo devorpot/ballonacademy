@@ -98,27 +98,5 @@ class EvaluationController extends Controller
         return Storage::disk('public')->download($evaluation->eva_video_file);
     }
 
-      public function retry(Course $course, Evaluation $evaluation): RedirectResponse
-    {
-        $userId = auth()->id();
-
-        // Validar que la evaluación pertenece al curso
-        if ((int) $evaluation->course_id !== (int) $course->id) {
-            abort(403, 'Evaluación no válida para este curso.');
-        }
-
-        // (Opcional) Aquí podrías validar suscripción al curso si aplica.
-
-        DB::transaction(function () use ($userId, $evaluation) {
-            EvaluationUser::where('user_id', $userId)
-                ->where('evaluation_id', $evaluation->id)
-                ->delete();
-        });
-
-        // Redirección normal: Inertia seguirá el redirect y hará GET al preview
-        return redirect()->route(
-            'dashboard.courses.evaluations.evaluation.preview',
-            ['course' => $course->id, 'evaluation' => $evaluation->id]
-        )->with('success', 'Puedes volver a realizar la evaluación.');
-    }
+  
 }

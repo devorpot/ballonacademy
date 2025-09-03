@@ -16,7 +16,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 class StudentController extends Controller
-{
+{ 
     /**
      * Listado de estudiantes con búsqueda, filtros y ordenación.
      */

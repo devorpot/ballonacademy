@@ -70,6 +70,118 @@ class EvaluationUsersController extends Controller
     ]);
 }
 
+// app/Http/Controllers/Admin/EvaluationUsersController.php
+
+public function all(Request $request)
+{
+    // Fuente: evaluations_users (sin lesson_id porque no existe en tu tabla)
+    $query = EvaluationUser::query()
+        ->select([
+            'id',
+            'user_id',
+            'course_id',
+            'evaluation_id',
+            'video_id',
+            'status',
+            'comments',
+            'created_at',
+        ])
+        ->with([
+            'user:id,name,email',
+            'course:id,title',
+            // Complemento por evaluation (incluye lesson/video a través de evaluation)
+            'evaluation:id,title,course_id,lesson_id,video_id',
+            'evaluation.lesson:id,title',
+            'evaluation.video:id,title',
+            // Relación directa existente en tu modelo
+            'video:id,title',
+        ]);
+
+    // Filtros
+    if ($request->filled('user')) {
+        $query->where('user_id', (int) $request->input('user'));
+    }
+    if ($request->filled('course')) {
+        $query->where('course_id', (int) $request->input('course'));
+    }
+    if ($request->filled('status')) {
+        $query->where('status', $request->input('status'));
+    }
+    if ($request->filled('q')) {
+        $q = trim((string) $request->input('q'));
+        $query->where(function ($sub) use ($q) {
+            $sub->where('comments', 'like', "%{$q}%")
+                // evaluation y sus anidados
+                ->orWhereHas('evaluation', fn($e) => $e->where('title', 'like', "%{$q}%"))
+                ->orWhereHas('evaluation.lesson', fn($l) => $l->where('title', 'like', "%{$q}%"))
+                ->orWhereHas('evaluation.video', fn($v) => $v->where('title', 'like', "%{$q}%"))
+                // curso y usuario
+                ->orWhereHas('course', fn($c) => $c->where('title', 'like', "%{$q}%"))
+                ->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$q}%")
+                                                 ->orWhere('email', 'like', "%{$q}%"))
+                // relación directa existente
+                ->orWhereHas('video', fn($v) => $v->where('title', 'like', "%{$q}%"));
+        });
+    }
+
+    // Ordenamiento
+    $sort = $request->input('sort', 'created_at');
+    $dir  = $request->input('dir', 'desc');
+    $allowedSorts = ['created_at', 'status', 'id'];
+    if (!in_array($sort, $allowedSorts, true)) {
+        $sort = 'created_at';
+    }
+    $dir = $dir === 'asc' ? 'asc' : 'desc';
+
+    $perPage = max(1, (int) $request->input('per_page', 20));
+
+    $submissions = $query
+        ->orderBy($sort, $dir)
+        ->paginate($perPage)
+        ->withQueryString();
+
+
+
+    // Opciones de filtros derivadas de evaluations_users
+    $courseOptions = Course::query()
+        ->whereIn('id', EvaluationUser::query()->select('course_id')->distinct())
+        ->orderBy('title')
+        ->get(['id', 'title'])
+        ->map(fn($c) => ['value' => $c->id, 'label' => $c->title])
+        ->values();
+
+    $userOptions = User::query()
+        ->whereIn('id', EvaluationUser::query()->select('user_id')->distinct())
+        ->orderBy('name')
+        ->get(['id', 'name', 'email'])
+        ->map(fn($u) => ['value' => $u->id, 'label' => "{$u->name} — {$u->email}"])
+        ->values();
+
+ 
+
+    return Inertia::render('Admin/Evaluations/Users/All', [
+        'submissions' => $submissions,
+        'filters'     => [
+            'user'     => $request->input('user'),
+            'course'   => $request->input('course'),
+            'status'   => $request->input('status'),
+            'q'        => $request->input('q'),
+            'per_page' => $perPage,
+            'sort'     => $sort,
+            'dir'      => $dir,
+        ],
+        'courseOptions' => $courseOptions,
+        'userOptions'   => $userOptions,
+        'statusOptions' => collect(\App\Enums\EvaluationUserStatus::cases())->map(fn($case) => [
+            'label' => $case->label(),
+            'value' => $case->value,
+        ]),
+    ]);
+}
+
+
+
+
     // Listar evaluaciones filtradas por curso
     public function byCourse($courseId)
     {

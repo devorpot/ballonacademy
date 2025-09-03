@@ -57,7 +57,7 @@ const props = defineProps({
   },
   fetchUrl: {
     type: String,
-    default: '/admin/users/search'
+    default: '/admin/students/search'
   },
   required: Boolean,
   formError: String,

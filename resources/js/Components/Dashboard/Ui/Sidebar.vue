@@ -34,6 +34,16 @@
     <!-- Menú de navegación -->
     <nav class="w-100 px-3">
       <ul class="nav flex-column gap-2">
+             <li class="nav-item">
+          <Link
+            :href="route('dashboard.profile.edit')"
+            class="btn btn-nav"
+            :class="{ active: $page.url.startsWith('/dashboard/profile') }"
+          >
+            <i class="bi bi-person-circle me-2"></i>
+            {{ L.profile?.myProfile || 'Mi Perfil' }}
+          </Link>
+        </li>
            <li class="nav-item">
           <Link
             :href="route('dashboard.courses.index')"
@@ -44,14 +54,15 @@
             {{ L.nav?.courses || 'Cursos' }}
           </Link>
         </li>
-        <li class="nav-item">
-          <Link
-            :href="route('dashboard.profile.edit')"
+   
+          <li class="nav-item">
+           <Link
+            :href="route('dashboard.extras.index')"
             class="btn btn-nav"
-            :class="{ active: $page.url.startsWith('/dashboard/profile') }"
+            :class="{ active: $page.url.startsWith('/dashboard/extras') }"
           >
             <i class="bi bi-person-circle me-2"></i>
-            {{ L.profile?.myProfile || 'Mi Perfil' }}
+            {{ L.profile?.extras || 'Clases Extra' }}
           </Link>
         </li>
         <li class="nav-item">
@@ -80,6 +91,7 @@
             {{ L.profile?.security || 'Seguridad' }}
           </Link>
         </li>
+       
       </ul>
     </nav>
 

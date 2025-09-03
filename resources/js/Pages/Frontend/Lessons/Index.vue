@@ -13,8 +13,6 @@
       ]"
     />
 
-    Lessons/Index
-  
  
 
  
@@ -70,7 +68,7 @@
                 </span>
 
                 <Link
-                  class="btn btn-sm btn-primary"
+                  class="btn btn-primary rounded-pill  align-items-center px-3 py-2"
                   :href="route('dashboard.courses.lessons.show', { course: course.id, lesson: lesson.id })"
                   title="Ver lección"
                 >
@@ -163,7 +161,7 @@
                                   lesson: lesson.id,
                                   video: video.id
                                 })"
-                                class="btn btn-outline-primary w-100"
+                                class="btn btn-primary rounded-pill  align-items-center px-3 py-2"
                               >
                                 Ver video
                               </Link>

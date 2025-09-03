@@ -1,5 +1,5 @@
 <template>
-  <Head title="Nueva Evaluación" />
+  <Head title="Crear Evaluación" />
   <AdminLayout>
     <div class="position-relative">
       <div :class="{ 'blur-overlay': form.processing }">
@@ -8,7 +8,7 @@
           :breadcrumbs="[
             { label: 'Dashboard', route: 'admin.dashboard' },
             { label: 'Evaluaciones', route: 'admin.evaluations.index' },
-            { label: 'Nueva', route: '' }
+            { label: 'Crear Evaluación', route: '' }
           ]"
         /> 
 

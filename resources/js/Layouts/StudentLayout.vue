@@ -1,13 +1,26 @@
 <script setup>
-import { ref, watch, onBeforeUnmount } from 'vue' 
-import { Head } from '@inertiajs/vue3'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue' 
+import { Head, usePage } from '@inertiajs/vue3'
+
 
 import TopNav from '@/Components/Dashboard/Ui/TopNav.vue'
 import Sidebar from '@/Components/Dashboard/Ui/Sidebar.vue'
 
 import Footer from '@/Components/Dashboard/Footer.vue'
+import WelcomeAlert from '@/Components/Dashboard/Ui/WelcomeAlert.vue'
+
+
+const page = usePage()
+const transientWelcome = ref(null)
 
 const showMobileSidebar = ref(false)
+
+onMounted(() => {
+  if (page.props.welcome) {
+    transientWelcome.value = page.props.welcome
+    setTimeout(() => { transientWelcome.value = null }, 3000)
+  }
+})
 
 function toggleSidebar() {
   showMobileSidebar.value = !showMobileSidebar.value
@@ -76,7 +89,7 @@ onBeforeUnmount(() => {
       </div>
     </Transition>
 
- 
+    <WelcomeAlert v-if="transientWelcome" :message="transientWelcome" />
   </div>
 </template>
 

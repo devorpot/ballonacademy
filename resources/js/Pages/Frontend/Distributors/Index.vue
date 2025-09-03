@@ -34,7 +34,7 @@
                 </div>
               </div>
 
-              <div class="col-12 col-md-4">
+              <div class="col-12 col-md-3">
                 <label class="form-label">País</label>
                 <select v-model="form.country" class="form-select">
                   <option value="">Todos</option>
@@ -44,10 +44,10 @@
 
     
               <div class="col-12 d-flex gap-2 mt-2">
-                <button class="btn btn-primary" @click="applyFilters">
+                <button class="btn btn-primary rounded-pill" @click="applyFilters">
                   <i class="bi bi-funnel me-1"></i> Aplicar
                 </button>
-                <button class="btn btn-outline-secondary" @click="resetFilters">
+                <button class="btn btn-outline-secondary rounded-pill" @click="resetFilters">
                   <i class="bi bi-x-circle me-1"></i> Limpiar
                 </button>
               </div>
@@ -133,7 +133,7 @@
                       <a
                         v-if="d.phone"
                         :href="`tel:${d.phone}`"
-                        class="btn btn-outline-secondary btn-sm"
+                        class="btn btn-outline-secondary btn-sm rounded-pill"
                       >
                         <i class="bi bi-telephone me-1"></i> Llamar
                       </a>
@@ -141,14 +141,14 @@
                       <a
                         v-if="d.whatsapp"
                         :href="whatsUrl(d.whatsapp, `Hola ${d.name}, me interesa su distribución.`)"
-                        class="btn btn-outline-success btn-sm"
+                        class="btn btn-outline-success btn-sm rounded-pill"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <i class="bi bi-whatsapp me-1"></i> WhatsApp
                       </a>
 
-                      <button class="btn btn-primary btn-sm" @click="openModal(d)">
+                      <button class="btn btn-primary rounded-pill btn-sm" @click="openModal(d)">
                         <i class="bi bi-card-text me-1"></i> Ver ficha
                       </button>
                     </div>

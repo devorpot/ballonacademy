@@ -277,7 +277,7 @@ function openDetails(activation) {
       ]"
     />
 
-    <section class="section-heading">
+    <section class="section-heading my-2">
       <div class="container-fluid">
         <div class="row">
           <div class="col-12 d-flex justify-content-between align-items-center gap-2">
@@ -293,7 +293,7 @@ function openDetails(activation) {
     </section>
 
     <!-- Filtros -->
-    <section class="py-3">
+    <section class="section-data py-3">
       <div class="container-fluid">
         <div class="card shadow-sm mb-3">
           <div class="card-body">
@@ -343,8 +343,8 @@ function openDetails(activation) {
       <div class="container-fluid">
         <div class="card shadow-sm">
           <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead>
+              <table class="table table-hover align-middle mb-0">
+             <thead class="table-light">
                 <tr>
                   <th style="width:72px">
                     <button class="btn btn-link p-0" @click="onSort({ sortBy: 'activations.id', sortDir: state.sortDir === 'asc' ? 'desc':'asc' })">

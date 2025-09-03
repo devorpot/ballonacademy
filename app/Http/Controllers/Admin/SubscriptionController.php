@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+
 
 class SubscriptionController extends Controller
 {
@@ -34,26 +37,28 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate($this->validationRules());
+public function store(Request $request)
+{
+    $validated = $request->validate($this->validationRules($request));
 
-        $user = User::findOrFail($validated['user_id']);
+    return DB::transaction(function () use ($validated) {
+        $user     = User::findOrFail($validated['user_id']);
         $courseId = $validated['course_id'];
 
-        // Verificar si ya existe suscripción
-        if ($user->courses()->where('courses.id', $courseId)->exists()) {
-            return back()->withErrors(['user_id' => 'El estudiante ya está inscrito en este curso.']);
-        }
+        // Crea si no existe (seguro ante carreras)
+        $subscription = Subscription::firstOrCreate(
+            ['user_id' => $validated['user_id'], 'course_id' => $courseId],
+            $validated
+        );
 
-        // Crear suscripción y relacionar con curso
-        Subscription::create($validated);
-        $user->courses()->attach($courseId);
+        // Asegura pivote sin duplicados
+        $user->courses()->syncWithoutDetaching([$courseId]);
 
-        return redirect()->route('admin.subscriptions.index')
-                         ->with('success', 'Suscripción creada exitosamente');
-    }
-
+        return redirect()
+            ->route('admin.subscriptions.index')
+            ->with('success', 'Suscripción creada exitosamente');
+    });
+}
     public function edit(Subscription $subscription)
     {
         $studentUsers = User::whereHas('roles', fn ($q) => $q->where('name', 'student'))
@@ -69,33 +74,25 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    public function update(Request $request, Subscription $subscription)
-    {
-        $validated = $request->validate($this->validationRules());
+    
+public function update(Request $request, Subscription $subscription)
+{
+    $validated = $request->validate($this->validationRules($request, $subscription));
 
-        $user = User::findOrFail($validated['user_id']);
+    return DB::transaction(function () use ($validated, $subscription) {
+        $user     = User::findOrFail($validated['user_id']);
         $courseId = $validated['course_id'];
-
-        // Verificar que no haya otra suscripción duplicada
-        $duplicate = Subscription::where('user_id', $validated['user_id'])
-                                ->where('course_id', $courseId)
-                                ->where('id', '!=', $subscription->id)
-                                ->exists();
-
-        if ($duplicate) {
-            return back()->withErrors(['user_id' => 'Este estudiante ya está inscrito en este curso.']);
-        }
 
         $subscription->update($validated);
 
-        // Asegura relación pivote sin duplicados
-        if (! $user->courses->contains($courseId)) {
-            $user->courses()->attach($courseId);
-        }
+        // Asegura pivote sin duplicados
+        $user->courses()->syncWithoutDetaching([$courseId]);
 
-        return redirect()->route('admin.subscriptions.index')
-                         ->with('success', 'Suscripción actualizada correctamente');
-    }
+        return redirect()
+            ->route('admin.subscriptions.index')
+            ->with('success', 'Suscripción actualizada correctamente');
+    });
+}
 
     public function destroy(Subscription $subscription)
 {
@@ -122,30 +119,38 @@ class SubscriptionController extends Controller
     ]);
 }
 
-    private function validationRules(): array
-    {
-        return [
-            'user_id' => 'required|exists:users,id',
-            'course_id' => 'required|exists:courses,id',
-            'payment_amount' => 'required|numeric|min:0',
-            'payment_currency' => 'required|numeric|max:10',
-            'payment_description' => 'nullable|string|max:2000',
-            'payment_type_id' => 'required|exists:payment_types,id',
-            'payment_type' => 'nullable|string|max:50',
-            'payment_card' => 'nullable|string|max:50',
-            'payment_card_type' => 'nullable|string|max:50',
-            'payment_card_brand' => 'nullable|string|max:50',
-            'payment_bank' => 'nullable|string|max:100',
-            'payment_date' => 'nullable|date',
-            'payment_refund_date' => 'nullable|date',
-            'payment_refund_desc' => 'nullable|string|max:2000',
-            'payment_status' => 'nullable|string|max:50',
-            'payment_status_id' => 'required|exists:payment_statuses,id',
-            'payment_stripe_id' => 'required|string|max:50',
-            'payment_refund' => 'nullable|boolean',
-            'used_coupon' => 'nullable|boolean',
-            'coupon_id' => 'required_if:used_coupon,true|nullable|string|max:255',
-            'coupon_discount' => 'required_if:used_coupon,true|nullable|numeric|min:0',
-        ];
+    
+private function validationRules(Request $request, ?Subscription $ignore = null): array
+{
+    $uniqueCoursePerUser = Rule::unique('subscriptions', 'course_id')
+        ->where(fn($q) => $q->where('user_id', $request->input('user_id')));
+
+    if ($ignore) {
+        $uniqueCoursePerUser = $uniqueCoursePerUser->ignore($ignore->id);
     }
+
+    return [
+        'user_id'            => ['required', 'exists:users,id'],
+        'course_id'          => ['required', 'exists:courses,id', $uniqueCoursePerUser],
+        'payment_amount'     => ['required','numeric','min:0'],
+        'payment_currency'   => ['required','numeric','max:10'],
+        'payment_description'=> ['nullable','string','max:2000'],
+        'payment_type_id'    => ['required','exists:payment_types,id'],
+        'payment_type'       => ['nullable','string','max:50'],
+        'payment_card'       => ['nullable','string','max:50'],
+        'payment_card_type'  => ['nullable','string','max:50'],
+        'payment_card_brand' => ['nullable','string','max:50'],
+        'payment_bank'       => ['nullable','string','max:100'],
+        'payment_date'       => ['nullable','date'],
+        'payment_refund_date'=> ['nullable','date'],
+        'payment_refund_desc'=> ['nullable','string','max:2000'],
+        'payment_status'     => ['nullable','string','max:50'],
+        'payment_status_id'  => ['required','exists:payment_statuses,id'],
+        'payment_stripe_id'  => ['required','string','max:50'],
+        'payment_refund'     => ['nullable','boolean'],
+        'used_coupon'        => ['nullable','boolean'],
+        'coupon_id'          => ['required_if:used_coupon,true','nullable','string','max:255'],
+        'coupon_discount'    => ['required_if:used_coupon,true','nullable','numeric','min:0'],
+    ];
+}
 }

@@ -20,14 +20,23 @@ use App\Enums\ActivityType;
 
 class VideoController extends Controller
 {
-    public function index()
-    {
-        $videos = Video::with('course')->latest()->get();
+public function index()
+{
+    $videos = \App\Models\Video::query()
+        ->with([
+            'course:id,title',
+            'teacher:id,firstname,lastname,user_id',
+            'teacher.user:id,name',
+        ])
+        ->latest('id')
+        ->get();
 
-        return Inertia::render('Admin/Videos/Index', [
-            'videos' => $videos
-        ]);
-    }
+    return \Inertia\Inertia::render('Admin/Videos/Index', [
+        'videos' => $videos,
+    ]);
+}
+
+
 
 
     public function show(Video $video)

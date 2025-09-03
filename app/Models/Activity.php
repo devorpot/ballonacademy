@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Activity extends Model
 {
     use HasFactory;
-
+ 
     protected $fillable = [
         'user_id',
         'course_id',
@@ -37,4 +37,7 @@ class Activity extends Model
     {
         return $this->belongsTo(Evaluation::class);
     }
+    protected $casts = [
+        'type' => \App\Enums\ActivityType::class,
+    ];
 }

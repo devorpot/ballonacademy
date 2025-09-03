@@ -7,5 +7,5 @@ const props = defineProps({
 	
 </script>
 <template>
-  <h4 class="admin-title"><i class="bi bi-people-fill me-2"></i> &nbsp; {{title}}</h4>
+  <h4 class="admin-title my-1"><i class="bi bi-people-fill me-2"></i> &nbsp; {{title}}</h4>
 </template>

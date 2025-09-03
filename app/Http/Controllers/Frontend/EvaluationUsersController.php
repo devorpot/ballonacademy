@@ -13,6 +13,12 @@ use App\Models\Activity;
 use App\Enums\ActivityType;
 use App\Enums\EvaluationUserStatus;
 use App\Models\CourseActivity; 
+use Illuminate\Support\Facades\DB;
+ 
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+ 
+ 
 
 class EvaluationUsersController extends Controller
 {
@@ -26,38 +32,60 @@ class EvaluationUsersController extends Controller
     
     // Guarda una nueva evaluación del usuario
     public function store(Request $request)
-    {
-        $data = $request->validate([
-            'course_id' => 'required|exists:courses,id',
-            'comments' => 'nullable|string',
-            'data' => 'required|string',
-            'files' => 'nullable|file|max:51200',
-        ]);
+{
+    $data = $request->validate([
+        'course_id' => 'required|exists:courses,id',
+        'comments'  => 'nullable|string',
+        'data'      => 'required|string',
+        'files'     => 'nullable|file|max:51200',
+    ]);
 
-        $data['user_id'] = auth()->id();
+    $data['user_id'] = auth()->id();
 
+    return DB::transaction(function () use ($request, $data) {
+        // Subir archivo (si aplica)
         $filePath = null;
         if ($request->hasFile('files')) {
             $filePath = $request->file('files')->store('evaluations/files', 'public');
         }
 
+        // Decodificar payload de la evaluación
         $evalData = json_decode($data['data'], true);
 
+        // Crear el envío de evaluación del usuario
         $evaluationUser = EvaluationUser::create([
-            'user_id'      => $data['user_id'],
-            'course_id'    => $data['course_id'],
-            'comments'     => $data['comments'] ?? null,
-            'files'        => $filePath,
-            'data'         => $evalData,
-            'evaluation_id'=> $evalData['evaluation_id'] ?? null,
-            'status'       => EvaluationUserStatus::SEND, // Enum!
+            'user_id'       => $data['user_id'],
+            'course_id'     => $data['course_id'],
+            'comments'      => $data['comments'] ?? null,
+            'files'         => $filePath,
+            'data'          => $evalData,
+            'evaluation_id' => $evalData['evaluation_id'] ?? null,
+            'status'        => EvaluationUserStatus::SEND,
         ]);
 
-        // Redireccionar a la página de agradecimiento
-        return redirect()->route('dashboard.evaluations.thankyou', [
-            'evaluation' => $evalData['evaluation_id'] ?? null
+        // Registrar actividad
+        Activity::create([
+            'user_id'       => $data['user_id'],
+            'course_id'     => $data['course_id'],
+            'video_id'      => null, // si aplica, pon el ID del video
+            'evaluation_id' => $evalData['evaluation_id'] ?? null,
+            // IMPORTANTE: ajusta el case del enum a tu definición real
+            // Ejemplos posibles: ActivityType::EVALUATION_CREATED, ::EVALUATION_SUBMITTED, ::EVALUATION_USER_CREATED
+            'type'          => ActivityType::EVALUATION_SEND,
+            'description'   => sprintf(
+                'El usuario %s envió una nueva evaluación (EvaluationUser #%d) para el curso #%d.',
+                $request->user()->name ?? ('user:'.$data['user_id']),
+                $evaluationUser->id,
+                (int) $data['course_id']
+            ),
         ]);
-    }
+
+        // Redirección a la pantalla de agradecimiento
+        return redirect()->route('dashboard.evaluations.thankyou', [
+            'evaluation' => $evalData['evaluation_id'] ?? null,
+        ]);
+    });
+}
 
     // Muestra una evaluación en específico
     public function show($id)
@@ -90,13 +118,33 @@ class EvaluationUsersController extends Controller
     }
 
     // Elimina una evaluación (opcional)
-    public function destroy($id)
-    {
-        $evaluation = EvaluationUser::findOrFail($id);
-        $evaluation->delete();
+public function destroy($id)
+{
+    $evaluation = EvaluationUser::findOrFail($id);
 
-        return response()->json(['message' => 'Evaluación eliminada']);
-    }
+    // Guardar info antes de eliminar
+    $userId       = $evaluation->user_id;
+    $courseId     = $evaluation->course_id;
+    $evaluationId = $evaluation->evaluation_id;
+
+    $evaluation->delete();
+
+    // Registrar la actividad
+    Activity::create([
+        'user_id'       => $userId,
+        'course_id'     => $courseId,
+        'evaluation_id' => $evaluationId,
+        'type'          => ActivityType::EVALUATION_DELETE,
+        'description'   => sprintf(
+            'El usuario %s eliminó su evaluación #%d del curso #%d.',
+            auth()->user()->name ?? ('user:'.$userId),
+            $id,
+            (int) $courseId
+        ),
+    ]);
+
+    return response()->json(['message' => 'Evaluación eliminada']);
+}
 
     // Pantalla de agradecimiento tras enviar evaluación
     public function thankyou($course = null, $evaluation = null)
@@ -113,6 +161,7 @@ class EvaluationUsersController extends Controller
     // Vista previa de la evaluación antes de enviar
     public function preview(Course $course, Evaluation $evaluation)
     {
+  
         $this->authorizeEvaluation($evaluation, $course);
 
         $questions = $evaluation->questions()
@@ -148,34 +197,50 @@ class EvaluationUsersController extends Controller
 
     // Eliminar evaluación por ID de evaluación y curso (usado para "Rehacer test")
     public function destroyByEvaluation(Request $request)
-    {
-        $userId = auth()->id();
-        $evaluationId = $request->input('evaluation_id');
-        $courseId = $request->input('course_id'); // Recibe el course_id desde el frontend
+{
+    $userId      = auth()->id();
+    $evaluationId = $request->input('evaluation_id');
+    $courseId     = $request->input('course_id'); // Recibe el course_id desde el frontend
 
-        $evaluationUser = EvaluationUser::where('user_id', $userId)
-            ->where('evaluation_id', $evaluationId)
-            ->first();
+    $evaluationUser = EvaluationUser::where('user_id', $userId)
+        ->where('evaluation_id', $evaluationId)
+        ->first();
 
-        if ($evaluationUser) {
-            if ($evaluationUser->files && Storage::disk('public')->exists($evaluationUser->files)) {
-                Storage::disk('public')->delete($evaluationUser->files);
-            }
-            $evaluationUser->delete();
-
-            // Redirecciona al preview de nuevo
-            return redirect()->route('dashboard.courses.evaluations.evaluation.preview', [
-                'course' => $courseId,
-                'evaluation' => $evaluationId
-            ]);
+    if ($evaluationUser) {
+        if ($evaluationUser->files && Storage::disk('public')->exists($evaluationUser->files)) {
+            Storage::disk('public')->delete($evaluationUser->files);
         }
 
-        // Opcional: redirige aunque no haya registro, para evitar errores en frontend
+        $evaluationUser->delete();
+
+        // Registrar la actividad
+        Activity::create([
+            'user_id'       => $userId,
+            'course_id'     => $courseId,
+            'evaluation_id' => $evaluationId,
+            'type'          => ActivityType::EVALUATION_DELETE,
+            'description'   => sprintf(
+                'El usuario %s eliminó su evaluación #%d del curso #%d.',
+                auth()->user()->name ?? ('user:'.$userId),
+                $evaluationId,
+                (int) $courseId
+            ),
+        ]);
+
+        // Redirecciona al preview de nuevo
         return redirect()->route('dashboard.courses.evaluations.evaluation.preview', [
-            'course' => $courseId,
-            'evaluation' => $evaluationId
+            'course'     => $courseId,
+            'evaluation' => $evaluationId,
         ]);
     }
+
+    // Opcional: redirige aunque no haya registro, para evitar errores en frontend
+    return redirect()->route('dashboard.courses.evaluations.evaluation.preview', [
+        'course'     => $courseId,
+        'evaluation' => $evaluationId,
+    ]);
+}
+
 
     // Proteger acceso a evaluación solo si pertenece al curso
     protected function authorizeEvaluation(Evaluation $evaluation, Course $course)
@@ -183,5 +248,54 @@ class EvaluationUsersController extends Controller
         if ($evaluation->course_id !== $course->id) {
             abort(403);
         }
+    }
+
+    public function retry(Course $course, Evaluation $evaluation): RedirectResponse
+    {
+        $userId = auth()->id();
+
+        // Validar que la evaluación pertenece al curso
+        if ((int) $evaluation->course_id !== (int) $course->id) {
+            abort(403, 'Evaluación no válida para este curso.');
+        }
+
+        DB::transaction(function () use ($userId, $course, $evaluation) {
+            // Traemos los envíos previos para borrar archivos y contar
+            $prevSubmissions = EvaluationUser::where('user_id', $userId)
+                ->where('evaluation_id', $evaluation->id)
+                ->get(['id', 'files']);
+
+            // Borrar archivos si existen
+            foreach ($prevSubmissions as $submission) {
+                if ($submission->files && Storage::disk('public')->exists($submission->files)) {
+                    Storage::disk('public')->delete($submission->files);
+                }
+            }
+
+            // Borrar envíos
+            $deleted = EvaluationUser::where('user_id', $userId)
+                ->where('evaluation_id', $evaluation->id)
+                ->delete();
+
+            // Registrar actividad (una sola) indicando cuántos se eliminaron
+            Activity::create([
+                'user_id'       => $userId,
+                'course_id'     => $course->id,
+                'evaluation_id' => $evaluation->id,
+                'type'          => ActivityType::EVALUATION_DELETE,
+                'description'   => sprintf(
+                    'El usuario %s reinició la evaluación #%d del curso #%d. Envíos eliminados: %d.',
+                    auth()->user()->name ?? ('user:'.$userId),
+                    $evaluation->id,
+                    $course->id,
+                    $deleted
+                ),
+            ]);
+        });
+
+        return redirect()->route(
+            'dashboard.courses.evaluations.evaluation.preview',
+            ['course' => $course->id, 'evaluation' => $evaluation->id]
+        )->with('success', 'Puedes volver a realizar la evaluación.');
     }
 }

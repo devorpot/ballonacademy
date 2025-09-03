@@ -37,7 +37,8 @@ const handleClick = () => {
 
 <template>
   <button
-    :class="['btn', `btn-${color}`, `btn-${size}`]"
+  class=""
+    :class="['btn', `btn-${color}`,  ]"
     @click="handleClick"
   >
     <i v-if="icon" :class="[icon, 'me-2']"></i>

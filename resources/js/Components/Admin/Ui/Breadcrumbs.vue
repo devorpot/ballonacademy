@@ -22,13 +22,15 @@ function isRouteName(value) {
 </script>
 
 <template>
-  <section class="section-breadcrumbs w-100 d-block my-2">
+  <section class="section-breadcrumbs w-100 d-block my-1">
     <div class="container-fluid">
+      <div class="card border-0 border-bottom   rounded">
+        
+      <div class="card-body   p-2">
       <div class="row align-items-center">
-        <div class="col-12 col-md-6">
-          <div class="d-block">
-            <!-- Título del breadcrumb -->
-            <h2 class="fw-bold h3">
+        <div class="col-12 col-md-6 my-0">
+          
+              <h2 class="fw-bold h6 text-uppercase">
               {{ breadcrumbs.at(-1)?.label || 'Dashboard' }}
             </h2>
 
@@ -59,6 +61,7 @@ function isRouteName(value) {
                 </li>
               </ol>
             </nav>
+           </div>
           </div>
         </div>
       </div>

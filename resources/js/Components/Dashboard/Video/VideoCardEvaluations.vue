@@ -86,7 +86,7 @@ const items = computed(() => {
               <Link
                 v-if="ev.url"
                 :href="ev.url"
-                class="btn btn-sm"
+                class="btn btn-sm rounded-pill"
                 :class="ev.hasSubmission ? 'btn-outline-primary' : 'btn-primary'"
               >
                 <i :class="ev.hasSubmission ? 'bi bi-file-check' : 'bi bi-play-circle'"></i>

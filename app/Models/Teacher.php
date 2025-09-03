@@ -30,6 +30,7 @@ class Teacher extends Model
         'cover_image'
     ];
 
+       protected $appends = ['display_name'];
     /**
      * Relación: Un maestro pertenece a un usuario.
      */
@@ -45,5 +46,12 @@ class Teacher extends Model
      public function lessons()
     {
         return $this->hasMany(\App\Models\Lesson::class);
+    }
+
+      public function getDisplayNameAttribute(): string
+    {
+        $fromNames = trim(trim(($this->firstname ?? '').' '.($this->lastname ?? '')));
+        $fromUser  = optional($this->user)->name ?? '';
+        return $fromNames !== '' ? $fromNames : $fromUser;
     }
 }

@@ -126,7 +126,7 @@ const summary = computed(() => {
               </div>
 
               <div v-if="mat.buyLink" class="small mt-1">
-                <a :href="mat.buyLink" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+                <a :href="mat.buyLink" target="_blank" rel="noopener" class="btn btn-primary rounded-pill btn-sm">
                   Comprar
                 </a>
               </div>

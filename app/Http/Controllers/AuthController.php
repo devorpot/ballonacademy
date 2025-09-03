@@ -40,36 +40,41 @@ class AuthController extends Controller
 
     // Procesar login
     public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
-        ]);
+{
+    $credentials = $request->validate([
+        'email'    => 'required|email',
+        'password' => 'required',
+    ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
 
-            $user = Auth::user();
+        $user = Auth::user();
 
-            if ($user->hasRole('admin')) {
-                return redirect()->route('admin.dashboard');
-            }
+        // Flash solo para la siguiente petición
+        session()->flash(
+            'welcome_message',
+            'Bienvenido a la Academia Internacional de Globos' // o "Bienvenido, '.$user->name.'"
+        );
 
-            if ($user->hasRole('student')) {
-                return redirect()->route('dashboard.index');
-            }
-
-            // Rol no autorizado
-            Auth::logout();
-            return back()->withErrors([
-                'email' => 'Tu cuenta no tiene acceso autorizado.',
-            ]);
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.dashboard');
         }
 
+        if ($user->hasRole('student')) {
+            return redirect()->route('dashboard.index');
+        }
+
+        Auth::logout();
         return back()->withErrors([
-            'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
+            'email' => 'Tu cuenta no tiene acceso autorizado.',
         ]);
     }
+
+    return back()->withErrors([
+        'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
+    ]);
+}
 
     // Cerrar sesión
     public function logout(Request $request)

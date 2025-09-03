@@ -54,7 +54,7 @@
     <div class="card">
       <div class="card-body p-0">
         <div class="table-responsive">
-          <table class="table table-striped table-hover align-middle mb-0">
+           <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
                 <th class="col-id" role="button" @click="emitSort('users.id')">
@@ -130,10 +130,10 @@
                 </td>
 
                 <td class="text-end pe-4">
-                  <div class="btn-group btn-group-sm">
+                  <div class="btn-group btn-group-sm rounded-pill">
                     <Link
                       :href="route('admin.students.show', { user: student.id })"
-                      class="btn btn-outline-success"
+                      class="btn btn-primary"
                       title="Mostrar"
                     >
                       <i class="bi bi-eye-fill"></i>
@@ -141,14 +141,14 @@
 
                     <Link
                       :href="route('admin.students.edit', { user: student.id })"
-                      class="btn btn-outline-primary"
+                      class="btn btn-primary"
                       title="Editar"
                     >
                       <i class="bi bi-pencil-fill"></i>
                     </Link>
-
+ 
                     <button
-                      class="btn btn-outline-danger"
+                      class="btn btn-danger"
                       @click="emit('delete', student.id)"
                       :disabled="isDeleting"
                       title="Eliminar"
@@ -158,7 +158,7 @@
 
                     <button
                       v-if="!student.active"
-                      class="btn btn-outline-success"
+                      class="btn btn-primary"
                       @click="emit('activate', student)"
                       title="Activar usuario"
                     >
@@ -167,9 +167,9 @@
 
                     <Link
                       :href="route('admin.evaluation-users.byUser', { user: student.id })"
-                      class="btn btn-outline-info btn-sm"
+                      class="btn btn-primary btn-sm"
                     >
-                      <i class="bi bi-journal-text me-1"></i> Evaluaciones
+                      <i class="bi bi-journal-text me-1"></i>  
                     </Link>
 
                   </div>

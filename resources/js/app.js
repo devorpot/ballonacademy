@@ -1,6 +1,7 @@
 import { createInertiaApp } from '@inertiajs/vue3'
 import { createApp, h } from 'vue'
 
+
 // Bootstrap y estilos
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -22,6 +23,13 @@ createInertiaApp({
       throw new Error(`Unknown page: ${name}. Available: ${Object.keys(pages).join(', ')}`)
     }
     return page()
+  },
+    progress: {
+    // muestra barra sin spinner y con un pequeño delay para navegación muy rápida
+     delay: 200,           // espera antes de mostrar la barra
+    color: '#28a745',     // combinada con tu CSS
+    includeCSS: false,    // usamos nuestros estilos
+    showSpinner: true     // muestra el spinner de 
   },
   setup({ el, App, props, plugin }) {
     createApp({ render: () => h(App, props) })

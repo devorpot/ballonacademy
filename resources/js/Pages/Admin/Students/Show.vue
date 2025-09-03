@@ -2,9 +2,9 @@
   <Head :title="`Perfil de ${displayName}`" />
 
   <AdminLayout>
-    <div class="container-fluid py-3">
+ 
       <!-- Breadcrumbs + Actions -->
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      
         <Breadcrumbs
           username="admin"
           :breadcrumbs="[
@@ -13,16 +13,29 @@
             { label: displayName, route: '' }
           ]"
         />
+    <section class="section-panel py-3">
+          <div class="continer-fluid">
+            <div class="row">
+              <div class="col-12">
+                 <div class="d-flex justify-content-between">
+            <Link 
+              :href="route('admin.students.edit', { user: user.id })" 
+              class="btn btn-warning btn-sm"
+            >
+              <i class="bi bi-pencil-fill me-1"></i>Editar
+            </Link>
 
-        <div class="d-flex gap-2">
-          <Link :href="route('admin.students.edit', { user: user.id })" class="btn btn-warning">
-            <i class="bi bi-pencil-fill me-1"></i>Editar
-          </Link>
-          <Link :href="route('admin.students.index')" class="btn btn-outline-secondary">
-            <i class="bi bi-list me-1"></i>Listado
-          </Link>
+            <Link 
+              :href="route('admin.students.index')" 
+              class="btn btn-outline-secondary btn-sm"
+            >
+              <i class="bi bi-list me-1"></i>Listado
+            </Link>
+          </div>
+          </div>
         </div>
       </div>
+    </section>
  
       <!-- Header Card -->
       <div class="card shadow-sm mb-3 overflow-hidden">
@@ -204,7 +217,7 @@
         </div>
 
       </div><!-- /row -->
-    </div>
+   
   </AdminLayout>
 </template>
 

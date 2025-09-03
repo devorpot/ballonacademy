@@ -84,7 +84,8 @@ const hasLessonEvals = computed(() => props.groups?.lesson?.length > 0)
     />
 
     <section class="section-panel my-3">
-      <div class="accordion" id="evaluationsAccordion">
+     <div class="container-fluid">
+        <div class="accordion" id="evaluationsAccordion">
 
         <!-- ITEM 1: Curso -->
         <div class="accordion-item">
@@ -379,6 +380,7 @@ const hasLessonEvals = computed(() => props.groups?.lesson?.length > 0)
         </div> <!-- accordion-item -->
 
       </div> <!-- accordion root -->
+     </div>
     </section>
   </StudentLayout>
 </template>

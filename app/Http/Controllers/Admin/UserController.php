@@ -16,7 +16,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
-
+ 
 
 
 
@@ -256,7 +256,7 @@ public function store(Request $request)
     // Determinar password
     $passwordToSet = $validated['assign_password']
         ? ($validated['password'] ?? null)
-        : $this->generatePassword(12);
+        : $this->generatePassword(10);
 
     if (!$passwordToSet) {
         return back()->withErrors(['password' => 'Debe indicar el password o desactivar "Asignar password manualmente".']);

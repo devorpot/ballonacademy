@@ -80,7 +80,7 @@
                 <div class="mt-auto d-flex gap-2">
                   <Link
                     :href="lessonsUrl(course.id)"
-                    class="btn btn-primary btn-sm"
+                    class="btn btn-primary rounded-pill  align-items-center px-3 py-2"
                     :title="`Ver lecciones de ${course.title}`"
                   >
                     Ver Lecciones

@@ -188,7 +188,7 @@ const onCreated = () => {
       ]"
     />
 
-    <section class="section-heading">
+    <section class="section-heading py-2">
       <div class="container-fluid">
         <div class="row">
           <div class="col-12 d-flex justify-content-between align-items-center">
@@ -203,7 +203,12 @@ const onCreated = () => {
       </div>
     </section>
 
-    <!-- Filtros: búsqueda, estado, categoría, per_page -->
+<section class="section-data py-2">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+         <div class="card border">
+           <div class="card-body">
     <CrudFilters
        v-model:searchQuery="searchQuery"
   :count="props.extras?.meta?.total || 0"
@@ -233,6 +238,12 @@ const onCreated = () => {
         </div>
       </template>
     </CrudFilters>
+           </div>
+         </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
     <section class="section-data my-2">
       <div class="container-fluid">
