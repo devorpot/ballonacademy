@@ -321,7 +321,7 @@ const handleBlur = (field) => { touched.value[field] = true }
 const hasExistingVideo = computed(() => !!props.extra?.video_path)
 const hasExistingSubs  = computed(() => !!props.extra?.subt_path)
 
-// --- Validaciones ---
+// --- Validaciones (FIX: casos con :) ---
 const validateField = (field) => {
   switch (field) {
     case 'title':
@@ -355,14 +355,14 @@ const validateField = (field) => {
       return (Number(form.active) === 1 || Number(form.active) === 2)
         ? '' : 'Estado inválido'
 
-    // Opcionales
-    case 'description'
-    case 'extract'
-    case 'category'
-    case 'tags'
-    case 'image'
-    case 'cover'
-    case 'subt_str'
+    // Opcionales sin validación estricta (agrupados)
+    case 'description':
+    case 'extract':
+    case 'category':
+    case 'tags':
+    case 'image':
+    case 'cover':
+    case 'subt_str':
     default:
       return ''
   }
@@ -382,10 +382,8 @@ const isFormValid = computed(() => {
 // Mantener consistencia al cambiar origen
 watch(() => form.is_youtube, (val) => {
   if (Number(val) === 1) {
-    // Cambiaron a YouTube: limpia archivo
     form.video = null
   } else {
-    // Cambiaron a Archivo: asegura string para youtube_url
     form.youtube_url = form.youtube_url || ''
   }
 })
@@ -427,5 +425,5 @@ const submit = () => {
 </script>
 
 <style scoped>
-/* Opcional */
+/* Estilos opcionales específicos de esta vista */
 </style>
