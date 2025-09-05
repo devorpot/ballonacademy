@@ -240,12 +240,15 @@ async function changeLocale(locale) {
             <nav class="w-100 px-3">
               <ul class="nav flex-column gap-2">
                 <li class="nav-item">
-                  <Link :href="route('dashboard.profile.edit')"
-                        class="btn btn-nav"
-                        :class="{ active: $page.url.startsWith('/dashboard/profile') }">
-                    <i class="bi bi-person-circle me-2"></i>
-                    {{ L.profile?.myProfile || 'Mi Perfil' }}
-                  </Link>
+             
+
+                 <a
+              :href="route('dashboard.profile.show', { nickname: nickname })"
+              class="btn btn-nav" 
+              :class="{ active: $page.url.startsWith('/u') }"  target="_blank"
+            >  <i class="bi bi-person-circle me-2"></i>
+              Ver perfil
+            </a>
                 </li>
                 <li class="nav-item">
                   <Link :href="route('dashboard.courses.index')"
@@ -272,7 +275,7 @@ async function changeLocale(locale) {
                   </Link>
                 </li>
                 <li class="nav-item">
-                  <Link :href="route('dashboard.profile.edit')" class="btn btn-nav">
+                  <Link :href="route('dashboard.blog.index')" class="btn btn-nav">
                     <i class="bi bi-pencil-square me-2"></i> Blog
                   </Link>
                 </li>

@@ -1,4 +1,4 @@
-<!-- resources/js/Components/Dashboard/Video/VideoCardResources.vue -->
+<!-- resources/js/Components/Dashboard/Video/VideoResourcesCompact.vue -->
 <script setup>
 import { computed, ref } from 'vue'
 
@@ -15,20 +15,26 @@ function mapTypeInfo(type) {
   return { label: 'Recurso', icon: 'bi-file-earmark' }
 }
 
+function normalizeSrc(r) {
+  const src = r.file_src || r.video_src || r.img_src || ''
+  if (!src) return null
+  if (/^https?:\/\//i.test(src)) return src
+  if (src.startsWith('/')) return src
+  return `/storage/${src}`
+}
+
 const items = computed(() => {
   const arr = Array.isArray(props.videoResources) ? props.videoResources : []
   return arr.map(r => {
-    const typeInfo = mapTypeInfo(r.type)
-    const source = r.file_src || r.video_src || r.img_src || null
+    const t = mapTypeInfo(r.type)
+    const href = normalizeSrc(r)
     return {
       id: r.id,
       title: r.title || 'Recurso',
-      description: r.description || '',
-      uploaded: r.uploaded || null,
-      typeLabel: typeInfo.label,
-      icon: typeInfo.icon,
-      downloadUrl: source,
-      canDownload: !!source
+      typeLabel: t.label,
+      icon: t.icon,
+      href,
+      canDownload: !!href
     }
   })
 })
@@ -36,17 +42,17 @@ const items = computed(() => {
 const hasItems = computed(() => items.value.length > 0)
 
 /* Toggle del cuerpo de la card */
-const isOpen = ref(true)
-const bodyId = computed(() => `card-res-body-${props.videoId}`)
+const isOpen = ref(false)
+const bodyId = computed(() => `card-res-compact-body-${props.videoId}`)
 </script>
 
 <template>
-  <div class="card border-0 shadow ">
+  <div class="card border-0 shadow-sm">
     <!-- Header con título, contador y botón toggle -->
     <div class="card-header d-flex align-items-center justify-content-between">
       <div class="d-flex align-items-center gap-2">
         <i class="bi bi-folder2-open"></i>
-         <h6 class="fw-bold mb-0"> Archivos del Video</h6>
+        <h6 class="fw-bold mb-0">Archivos del Video</h6>
         <small class="text-muted ms-2">
           Video #{{ videoId }} · {{ hasItems ? items.length : 0 }} recurso(s)
         </small>
@@ -68,58 +74,50 @@ const bodyId = computed(() => `card-res-body-${props.videoId}`)
     <!-- Cuerpo colapsable -->
     <Transition name="collapse-fade">
       <div v-show="isOpen" :id="bodyId" class="card-body p-0">
-        <div v-if="hasItems">
-          <ul class="list-group list-group-flush">
-            <li
-              v-for="res in items"
-              :key="res.id"
-              class="list-group-item d-flex align-items-start gap-3"
-            >
-              <div class="pt-1">
-                <i class="bi" :class="res.icon" style="font-size:1.1rem;"></i>
-              </div>
+        <ul v-if="hasItems" class="list-group list-group-flush">
+          <li
+            v-for="res in items"
+            :key="res.id"
+            class="list-group-item d-flex align-items-center gap-2 py-2"
+          >
+            <!-- Icono compacto -->
+            <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded border bg-light"
+                 style="width:40px;height:40px;">
+              <i class="bi" :class="res.icon"></i>
+            </div>
 
-              <div class="flex-grow-1" style="min-width:0">
-                <div class="d-flex align-items-center gap-2">
-                  <span class="fw-semibold text-truncate">{{ res.title }}</span>
-                  <span class="badge text-bg-secondary">{{ res.typeLabel }}</span>
-                </div>
-                <div v-if="res.description" class="text-muted small mt-1 text-truncate">
-                  {{ res.description }}
-                </div>
-              </div>
+            <!-- Título y tipo -->
+            <div class="flex-grow-1 d-flex justify-content-between align-items-center" style="min-width:0;">
+              <span class="text-truncate">{{ res.title }}</span>
+              <span class="badge text-bg-secondary ms-2">{{ res.typeLabel }}</span>
+            </div>
 
-              <div class="ms-auto">
-                <a
-                  v-if="res.canDownload"
-                  :href="`/storage/${res.downloadUrl}`"
-                  download
-                  target="_blank"
-                  rel="noopener"
-                  class="btn btn-sm rounded-pill btn-outline-secondary"
-                  title="Descargar recurso"
-                >
-                  <i class="bi bi-download"></i>
-                  <span class="ms-1 d-none d-sm-inline">Descargar</span>
-                </a>
+            <!-- Acción -->
+            <div class="ms-2">
+              <a
+                v-if="res.canDownload"
+                :href="res.href"
+                download
+                target="_blank"
+                rel="noopener"
+                class="btn btn-sm btn-outline-secondary"
+                title="Descargar recurso"
+              >
+                <i class="bi bi-download"></i>
+              </a>
+              <span
+                v-else
+                class="btn btn-sm btn-outline-secondary disabled"
+                title="Sin archivo disponible"
+              >
+                <i class="bi bi-download"></i>
+              </span>
+            </div>
+          </li>
+        </ul>
 
-                <span
-                  v-else
-                  class="btn btn-sm btn-outline-secondary disabled"
-                  title="Sin archivo disponible"
-                >
-                  <i class="bi bi-download"></i>
-                  <span class="ms-1 d-none d-sm-inline">Descargar</span>
-                </span>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <div v-else class="p-3">
-          <div class="alert alert-light border mb-0">
-            No hay recursos disponibles para este video.
-          </div>
+        <div v-else class="p-3 small text-muted">
+          No hay recursos disponibles para este video.
         </div>
       </div>
     </Transition>
@@ -127,9 +125,19 @@ const bodyId = computed(() => `card-res-body-${props.videoId}`)
 </template>
 
 <style scoped>
-.list-group-item { padding-top: .9rem; padding-bottom: .9rem; }
+.list-group-item {
+  font-size: 0.9rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+/* Animación del colapso */
 .collapse-fade-enter-active,
-.collapse-fade-leave-active {   }
+.collapse-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
 .collapse-fade-enter-from,
-.collapse-fade-leave-to { opacity: 0; }
+.collapse-fade-leave-to {
+  opacity: 0;
+}
 </style>

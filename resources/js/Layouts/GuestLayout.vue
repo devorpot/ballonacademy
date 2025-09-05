@@ -8,12 +8,12 @@ import { Head } from '@inertiajs/vue3';
             <slot name="head" />
         </Head>
 
-        <main class="container py-5">
+ 
             
                
                     <slot />
               
-        </main>
+   
     </div>
 </template>
 

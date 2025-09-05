@@ -34,7 +34,7 @@ const summary = computed(() => {
 })
 
 /* Toggle del cuerpo de la card */
-const isOpen = ref(true)
+const isOpen = ref(false)
 const bodyId = computed(() => `card-mat-body-${props.videoId}`)
 </script>
 

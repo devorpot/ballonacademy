@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Profile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -20,6 +21,47 @@ class ProfileController extends Controller
             'profile' => $user->profile,
         ]);
     }
+
+ 
+    // ... edit(), update(), validateProfile() que ya tienes
+
+    /**
+     * Muestra el perfil público tipo red social.
+     * - Si no se pasa $nickname y hay usuario autenticado, muestra su propio perfil.
+     * - Si se pasa $nickname, busca el perfil por nickname.
+     */
+    public function show(?string $nickname = null)
+    {
+        $viewer = auth()->user();
+
+        // 1) Resolver el perfil a mostrar
+        if ($nickname) {
+            $profile = Profile::with('user')
+                ->where('nickname', $nickname)
+                ->firstOrFail();
+        } else {
+            // Perfil propio (requiere sesión)
+            abort_unless($viewer, 404);
+            $profile = $viewer->profile()->with('user')->firstOrFail();
+        }
+
+        // 2) Datos derivados útiles para el front
+        $fullName = trim(($profile->firstname ?? '') . ' ' . ($profile->lastname ?? ''));
+        $data = $profile->toArray();
+        $data['full_name'] = $fullName !== '' ? $fullName : ($profile->user->name ?? 'Usuario');
+        $data['profile_image_url'] = $profile->profile_image ? Storage::url($profile->profile_image) : null;
+        $data['cover_image_url']   = $profile->cover_image ? Storage::url($profile->cover_image) : null;
+
+        // ¿El visitante es dueño del perfil?
+        $isOwner = $viewer && (int)$viewer->id === (int)$profile->user_id;
+
+        return Inertia::render('Frontend/Profiles/ShowBehance', [
+            'profile'  => $data,
+            'is_owner' => $isOwner,
+        ]);
+    }
+ 
+
 
     public function update(Request $request)
     {

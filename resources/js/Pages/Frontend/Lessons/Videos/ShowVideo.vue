@@ -71,7 +71,7 @@
           />
           </div>
           <div class="d-block my-3">
-               <VideoCardMaterials
+               <VideoMaterialsCompact
                 :video-id="video.id"
                 :video-materials="videoMaterials"
                 :materials-summary="materialsSummary"
@@ -168,6 +168,7 @@ import VideoComments from '@/Components/Dashboard/Video/VideoComments.vue'
  
 import LessonEvalAdvanceModal from '@/Components/Dashboard/Lesson/LessonEvalAdvanceModal.vue'
 import LessonCompleteModal from '@/Components/Dashboard/Lesson/LessonCompleteModal.vue'
+import VideoMaterialsCompact from '@/Components/Dashboard/Lesson/VideoMaterialsCompact.vue'
 
 import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue'
 

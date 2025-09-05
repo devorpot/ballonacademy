@@ -144,6 +144,7 @@ onMounted(() => {
        { label: 'Mi Perfil', route: '' },
     ]" />
       
+ 
     <ToastNotification v-if="toast" :message="toast.message" :type="toast.type" @hidden="toast = null" />
     <section class="section-panel mb-4">
       <div class="container-fluid">

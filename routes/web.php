@@ -51,6 +51,9 @@ use App\Http\Controllers\Frontend\LessonsController  as FrontendLessonsControlle
 use App\Http\Controllers\Frontend\VideoCommentsController  as FrontendVideoCommentsController;
 use App\Http\Controllers\Frontend\ExtraClassController as FrontendExtraClassController;
 use App\Http\Controllers\Frontend\CourseVideosController as FrontendCourseVideosController;
+use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
+
+
 
 use App\Http\Controllers\Api\VideoActivityController;
 use App\Http\Controllers\Api\ActivityController;
@@ -373,7 +376,8 @@ Route::get('/activities', [AdminActivityController::class, 'index'])->name('acti
 // ----------------------------------
 // Panel del estudiante (solo student)
 // ----------------------------------
-
+ Route::get('/u/{nickname?}', [FrontendProfileController::class, 'show'])
+    ->name('dashboard.profile.show');
 
 Route::middleware(['auth', 'role:student'])
     ->prefix('frontend')
@@ -385,7 +389,7 @@ Route::middleware(['auth', 'role:student'])
         // Perfil del estudiante
         Route::get('/profile', [FrontendProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [FrontendProfileController::class, 'update'])->name('profile.update');
-
+       
         // Seguridad
         Route::get('/security', [FrontendSecurityController::class, 'edit'])->name('security.edit');
         Route::put('/security', [FrontendSecurityController::class, 'update'])->name('security.update');
@@ -510,4 +514,8 @@ Route::middleware(['auth', 'role:student'])
 
         Route::get('/extras', [FrontendExtraClassController::class, 'index'])->name('extras.index');
         Route::get('/extras/{extra}', [FrontendExtraClassController::class, 'show'])->name('extras.show');
+
+        
+            Route::get('/blog', [FrontendBlogController::class, 'index'])->name('blog.index');
+            Route::get('/blog/{slug}', [FrontendBlogController::class, 'show'])->name('blog.show');
     });
