@@ -296,7 +296,7 @@ const clearFilters = () => {
                       </div>
                     </td>
                     <td>
-                      <span class="badge rounded-pill"
+                      <span class="badge "
                             :class="{
                               'bg-secondary': item.status === 111,
                               'bg-warning':  item.status === 222,

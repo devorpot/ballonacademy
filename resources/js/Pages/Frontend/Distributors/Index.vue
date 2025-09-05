@@ -9,6 +9,7 @@
         { label: 'Distribuidores', route: '' }
       ]"
     />
+ 
 
     <section class="section-panel py-3">
       <div class="container-fluid">
@@ -44,10 +45,10 @@
 
     
               <div class="col-12 d-flex gap-2 mt-2">
-                <button class="btn btn-primary rounded-pill" @click="applyFilters">
+                <button class="btn btn-primary " @click="applyFilters">
                   <i class="bi bi-funnel me-1"></i> Aplicar
                 </button>
-                <button class="btn btn-outline-secondary rounded-pill" @click="resetFilters">
+                <button class="btn btn-outline-secondary " @click="resetFilters">
                   <i class="bi bi-x-circle me-1"></i> Limpiar
                 </button>
               </div>
@@ -133,7 +134,7 @@
                       <a
                         v-if="d.phone"
                         :href="`tel:${d.phone}`"
-                        class="btn btn-outline-secondary btn-sm rounded-pill"
+                        class="btn btn-outline-secondary btn-sm "
                       >
                         <i class="bi bi-telephone me-1"></i> Llamar
                       </a>
@@ -141,14 +142,14 @@
                       <a
                         v-if="d.whatsapp"
                         :href="whatsUrl(d.whatsapp, `Hola ${d.name}, me interesa su distribución.`)"
-                        class="btn btn-outline-success btn-sm rounded-pill"
+                        class="btn btn-outline-success btn-sm "
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <i class="bi bi-whatsapp me-1"></i> WhatsApp
                       </a>
 
-                      <button class="btn btn-primary rounded-pill btn-sm" @click="openModal(d)">
+                      <button class="btn btn-primary  btn-sm" @click="openModal(d)">
                         <i class="bi bi-card-text me-1"></i> Ver ficha
                       </button>
                     </div>
@@ -201,100 +202,122 @@
           </div>
 
           <div class="modal-body" v-if="selected">
-           <div class="row g-4 align-items-start">
-  <!-- Logo -->
-        <div class="col-12 col-md-4 text-center">
-          <div class="p-3 bg-light rounded shadow-sm">
-            <img
-              v-if="selected.logo_url"
-              :src="selected.logo_url"
-              :alt="selected.name"
-              class="img-fluid rounded"
-              style="max-height: 160px; object-fit: contain;"
-            />
-            <div v-else class="d-flex align-items-center justify-content-center h-100 text-muted fs-1">
-              <i class="bi bi-building"></i>
-            </div>
-          </div>
-        </div>
-
-        <!-- Info -->
-        <div class="col-12 col-md-8">
-          <h3 class="fw-semibold mb-2">{{ selected.name }}</h3>
-
-          <!-- Ubicación + tags -->
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-3 text-muted small">
-            <span>
-              <i class="bi bi-geo-alt me-1"></i>
-              {{ selected.country }}<span v-if="selected.state">, {{ selected.state }}</span>
-            </span>
-            <span v-if="selected.region" class="badge rounded-pill text-bg-light border">
-              <i class="bi bi-diagram-3 me-1"></i>{{ selected.region }}
-            </span>
-            <span v-if="selected.zone" class="badge rounded-pill text-bg-light border">
-              <i class="bi bi-grid-3x3-gap me-1"></i>{{ selected.zone }}
-            </span>
-          </div>
-
-          <!-- Contacto -->
-          <ul class="list-unstyled mb-0">
-            <li v-if="selected.address" class="mb-2">
-              <i class="bi bi-signpost text-primary me-2"></i>
-              {{ selected.address }}
-            </li>
-            <li v-if="selected.email" class="mb-2">
-              <i class="bi bi-envelope text-primary me-2"></i>
-              <a :href="`mailto:${selected.email}`" class="text-decoration-none">{{ selected.email }}</a>
-            </li>
-            <li v-if="selected.phone" class="mb-2">
-              <i class="bi bi-telephone text-primary me-2"></i>
-              <a :href="`tel:${selected.phone}`" class="text-decoration-none">{{ selected.phone }}</a>
-            </li>
-            <li v-if="selected.whatsapp" class="mb-2">
-              <i class="bi bi-whatsapp text-success me-2"></i>
-              <a
-                :href="whatsUrl(selected.whatsapp, `Hola ${selected.name}, me interesa su distribución.`)"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-decoration-none"
-              >
-                {{ prettyPhone(selected.whatsapp) }}
-              </a>
-            </li>
-            <li v-if="selected.website" class="mb-2">
-              <i class="bi bi-globe text-primary me-2"></i>
-              <a :href="ensureProtocol(selected.website)" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
-                {{ selected.website }}
-              </a>
-            </li>
-            <li v-if="selected.facebook" class="mb-2">
-              <i class="bi bi-facebook text-primary me-2"></i>
-              <a :href="ensureProtocol(selected.facebook)" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
-                Facebook
-              </a>
-            </li>
-            <li v-if="selected.instagram" class="mb-2">
-              <i class="bi bi-instagram text-danger me-2"></i>
-              <a :href="ensureProtocol(selected.instagram)" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
-                Instagram
-              </a>
-            </li>
-            <li v-if="selected.tiktok" class="mb-2">
-              <i class="bi bi-tiktok text-dark me-2"></i>
-              <a :href="ensureProtocol(selected.tiktok)" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
-                TikTok
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Descripción -->
-        <div class="col-12">
-          <div v-if="selected.description" class="p-3 bg-light rounded shadow-sm">
-            <p class="mb-0">{{ selected.description }}</p>
-          </div>
+           <div class="card border-0 shadow-sm">
+  <div class="card-body p-3 p-md-4">
+    <div class="row g-3 align-items-start">
+      <!-- Logo -->
+      <div class="col-12 col-md-4 order-1">
+        <div class="ratio ratio-4x3 bg-light rounded d-flex align-items-center justify-content-center">
+          <img
+            v-if="selected.logo_url"
+            :src="selected.logo_url"
+            :alt="selected.name"
+            class="w-100 h-100 logo-img"
+            loading="lazy"
+            @error="onImgError"
+          />
+          <i v-else class="bi bi-building text-muted fs-1"></i>
         </div>
       </div>
+
+      <!-- Info -->
+      <div class="col-12 col-md-8 order-2">
+        <h3 class="fw-semibold mb-2 text-break">{{ selected.name }}</h3>
+
+        <!-- Ubicación + tags -->
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3 text-muted small">
+          <span class="me-2">
+            <i class="bi bi-geo-alt me-1"></i>
+            {{ selected.country }}<span v-if="selected.state">, {{ selected.state }}</span>
+          </span>
+          <span v-if="selected.region" class="badge text-bg-light border">
+            <i class="bi bi-diagram-3 me-1"></i>{{ selected.region }}
+          </span>
+          <span v-if="selected.zone" class="badge text-bg-light border">
+            <i class="bi bi-grid-3x3-gap me-1"></i>{{ selected.zone }}
+          </span>
+        </div>
+
+        <!-- Contacto (list-group para mejor lectura en móvil) -->
+        <ul class="list-group list-group-flush small mb-3">
+          <li v-if="selected.address" class="list-group-item px-0">
+            <i class="bi bi-signpost text-primary me-2"></i>
+            <span class="text-break">{{ selected.address }}</span>
+          </li>
+          <li v-if="selected.email" class="list-group-item px-0">
+            <i class="bi bi-envelope text-primary me-2"></i>
+            <a :href="`mailto:${selected.email}`" class="text-decoration-none text-break">
+              {{ selected.email }}
+            </a>
+          </li>
+          <li v-if="selected.phone" class="list-group-item px-0">
+            <i class="bi bi-telephone text-primary me-2"></i>
+            <a :href="`tel:${selected.phone}`" class="text-decoration-none">{{ selected.phone }}</a>
+          </li>
+          <li v-if="selected.whatsapp" class="list-group-item px-0">
+            <i class="bi bi-whatsapp text-success me-2"></i>
+            <a
+              :href="whatsUrl(selected.whatsapp, `Hola ${selected.name}, me interesa su distribución.`)"
+              target="_blank" rel="noopener"
+              class="text-decoration-none"
+            >
+              {{ prettyPhone(selected.whatsapp) }}
+            </a>
+          </li>
+          <li v-if="selected.website" class="list-group-item px-0">
+            <i class="bi bi-globe text-primary me-2"></i>
+            <a :href="ensureProtocol(selected.website)" target="_blank" rel="noopener" class="text-decoration-none text-break">
+              {{ selected.website }}
+            </a>
+          </li>
+          <li v-if="selected.facebook" class="list-group-item px-0">
+            <i class="bi bi-facebook text-primary me-2"></i>
+            <a :href="ensureProtocol(selected.facebook)" target="_blank" rel="noopener" class="text-decoration-none">Facebook</a>
+          </li>
+          <li v-if="selected.instagram" class="list-group-item px-0">
+            <i class="bi bi-instagram text-danger me-2"></i>
+            <a :href="ensureProtocol(selected.instagram)" target="_blank" rel="noopener" class="text-decoration-none">Instagram</a>
+          </li>
+          <li v-if="selected.tiktok" class="list-group-item px-0">
+            <i class="bi bi-tiktok text-dark me-2"></i>
+            <a :href="ensureProtocol(selected.tiktok)" target="_blank" rel="noopener" class="text-decoration-none">TikTok</a>
+          </li>
+        </ul>
+
+        <!-- Acciones rápidas: full width en móvil, inline en desktop -->
+        <div class="d-grid gap-2 d-md-flex">
+          <a v-if="selected.phone" :href="`tel:${selected.phone}`" class="btn btn-primary btn-sm">
+            <i class="bi bi-telephone me-1"></i> Llamar
+          </a>
+          <a
+            v-if="selected.whatsapp"
+            :href="whatsUrl(selected.whatsapp, `Hola ${selected.name}, me interesa su distribución.`)"
+            target="_blank" rel="noopener"
+            class="btn btn-success btn-sm"
+          >
+            <i class="bi bi-whatsapp me-1"></i> WhatsApp
+          </a>
+          <a
+            v-if="mapUrl(selected)"
+            :href="mapUrl(selected)"
+            target="_blank" rel="noopener"
+            class="btn btn-outline-secondary btn-sm"
+          >
+            <i class="bi bi-geo-alt me-1"></i> Mapa
+          </a>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="col-12 order-3">
+        <div v-if="selected.description" class="bg-light rounded p-3 mt-2">
+          <p class="mb-0 clamp-4">{{ selected.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
           </div>
 
@@ -344,6 +367,12 @@ const form = reactive({
   country: props.filters.country || '',
   state: props.filters.state || ''
 })
+
+const mapUrl = (s) => {
+  if (s?.gmap_link) return ensureProtocol(s.gmap_link)
+  if (s?.lat && s?.lng) return `https://maps.google.com/?q=${s.lat},${s.lng}`
+  return null
+}
 
 watch(() => form.country, () => {
   form.state = ''
@@ -450,5 +479,14 @@ function prettyPhone(p) {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.logo-img { object-fit: contain; }
+.clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 
 </style>

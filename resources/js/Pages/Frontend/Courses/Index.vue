@@ -10,8 +10,7 @@
       ]"
     />
 
-
-
+ 
  
 
     <section class="section-panel py-3">
@@ -26,72 +25,16 @@
               </div>
               <div class="card-body">
                 <!-- Empty -->
-        <div v-if="!courses || courses.length === 0" class="alert alert-info">
-          No estás inscrito en ningún curso por el momento.
-        </div>
-
-        <!-- Grid -->
-        <div v-else class="row g-4">
-          <div v-for="course in courses" :key="course.id" class="col-12 col-lg-6">
-            <article class="course-hero h-100 rounded-4 overflow-hidden  d-flex flex-column flex-lg-row shadow-0 border-0">
-              <!-- Media -->
-              <div class="course-hero__media position-relative">
-                <img
-                  :src="coverUrl(course.image_cover)"
-                  :alt="course.title"
-                  class="w-100 h-100 object-cover"
-                  loading="lazy"
-                  @error="onImgError"
-                />
-                <img
-                  v-if="course.logo"
-                  :src="coverUrl(course.logo)"
-                  alt="logo"
-                  class="position-absolute top-0 start-0 m-2 bg-white p-1 rounded"
-                  style="max-height:50px; max-width:80px;"
-                />
-                <span
-                  v-if="course.level"
-                  class="badge bg-primary position-absolute top-0 end-0 m-2"
-                >
-                  Nivel {{ course.level }}
-                </span>
-              </div>
-
-              <!-- Content -->
-              <div class="course-hero__content p-4 d-flex flex-column flex-grow-1">
-                <h3 class="h5 fw-bold mb-2 text-body text-wrap">{{ course.title }}</h3>
-
-                <p v-if="course.description_short" class="text-secondary mb-3 clamp-2">
-                  {{ course.description_short }}
-                </p>
-
-                <ul class="list-unstyled small text-secondary mb-4">
-                  <li v-if="course.date_start">
-                    <i class="bi bi-calendar-event me-1"></i>
-                    Inicio: {{ formatDate(course.date_start) }}
-                  </li>
-                  <li v-if="course.date_end">
-                    <i class="bi bi-calendar-check me-1"></i>
-                    Fin: {{ formatDate(course.date_end) }}
-                  </li>
-                </ul>
-
-                <div class="mt-auto d-flex gap-2">
-                  <Link
-                    :href="lessonsUrl(course.id)"
-                    class="btn btn-primary rounded-pill  align-items-center px-3 py-2"
-                    :title="`Ver lecciones de ${course.title}`"
-                  >
-                    Ver Lecciones
-                  </Link>
-
-                   
+                <div v-if="!courses || courses.length === 0" class="alert alert-info">
+                  No estás inscrito en ningún curso por el momento.
                 </div>
-              </div>
-            </article>
-          </div>
-        </div>
+
+                <!-- Grid -->
+                <div v-else class="row g-4">
+                  <div v-for="course in courses" :key="course.id" class="col-12 col-lg-6">
+                      <CourseCardIndex :course="course" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -106,6 +49,7 @@ import { Head, Link } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
 import StudentLayout from '@/Layouts/StudentLayout.vue'
 import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue'
+import CourseCardIndex from '@/Components/Dashboard/Courses/CourseCardIndex.vue'
 
 const props = defineProps({
   courses: { type: Array, default: () => [] }

@@ -36,49 +36,90 @@
             <div class="card">
               <div class="card-body">
                 <div class="row">
-                  <!-- Básicos -->
-                  <div class="col-md-6 mb-3">
-                    <FieldText
-                      id="title"
-                      label="Título"
-                      v-model="form.title"
-                      :required="true"
-                      :showValidation="touched.title"
-                      :formError="form.errors.title"
-                      :validateFunction="() => validateField('title')"
-                      placeholder="Título de la clase"
-                      @blur="() => handleBlur('title')"
+                  <!--content-->
+                  <div class="col-12 col-md-9">
+                    <div class="row">
+                      <!-- Básicos -->
+                      <div class="col-md-12 mb-3">
+                        <FieldText
+                          id="title"
+                          label="Título"
+                          v-model="form.title"
+                          :required="true"
+                          :showValidation="touched.title"
+                          :formError="form.errors.title"
+                          :validateFunction="() => validateField('title')"
+                          placeholder="Título de la clase"
+                          @blur="() => handleBlur('title')"
+                        />
+                       </div>
+                       <div class="col-md-12 mb-3">
+                        <FieldTextarea
+                          id="extract"
+                          label="Extracto"
+                          v-model="form.extract"
+                          :showValidation="touched.extract"
+                          :formError="form.errors.extract"
+                          :validateFunction="() => validateField('extract')"
+                          placeholder="Resumen corto (opcional)"
+                          @blur="() => handleBlur('extract')"
+                          :height="100"
+                        />
+                      </div>
+                      <div class="col-12 mb-3">
+                        <FieldTextarea
+                          id="description"
+                          label="Descripción"
+                          v-model="form.description"
+                          :showValidation="touched.description"
+                          :formError="form.errors.description"
+                          :validateFunction="() => validateField('description')"
+                          placeholder="Describe la clase (opcional)"
+                          @blur="() => handleBlur('description')"
+                          :height="300"
+                          :required="true"
+                        />
+                    </div>
+                         <div class="col-12 mb-3" v-if="Number(form.is_youtube) === 1">
+                      <FieldText
+                        id="youtube_url"
+                        label="URL de YouTube"
+                        v-model="form.youtube_url"
+                        :required="true"
+                        :showValidation="touched.youtube_url"
+                        :formError="form.errors.youtube_url"
+                        :validateFunction="() => validateField('youtube_url')"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        @blur="() => handleBlur('youtube_url')"
+                      />
+                  </div>
+                   <div class="col-12 mb-3" v-else>
+                      <FieldVideo
+                        id="video"
+                        label="Archivo de video"
+                        v-model="form.video"
+                        :showValidation="touched.video"
+                        :formError="form.errors.video"
+                        :validateFunction="() => validateField('video')"
+                        @blur="() => handleBlur('video')"
+                        accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska"
+                      />
+                    </div>
+                   <div class="col-md-4 mb-12" v-if="Number(form.is_youtube) === 2">
+                    <FieldFile
+                      id="subt_str"
+                      label="Subtítulos (.vtt/.srt)"
+                      v-model="form.subt_str"
+                      :showValidation="touched.subt_str"
+                      :formError="form.errors.subt_str"
+                      :validateFunction="() => validateField('subt_str')"
+                      @blur="() => handleBlur('subt_str')"
+                      accept=".vtt,text/vtt,.srt,text/plain"
                     />
                   </div>
 
-                  <div class="col-md-6 mb-3">
-                    <FieldText
-                      id="extract"
-                      label="Extracto"
-                      v-model="form.extract"
-                      :showValidation="touched.extract"
-                      :formError="form.errors.extract"
-                      :validateFunction="() => validateField('extract')"
-                      placeholder="Resumen corto (opcional)"
-                      @blur="() => handleBlur('extract')"
-                    />
-                  </div>
 
-                  <div class="col-12 mb-3">
-                    <FieldTextarea
-                      id="description"
-                      label="Descripción"
-                      v-model="form.description"
-                      :showValidation="touched.description"
-                      :formError="form.errors.description"
-                      :validateFunction="() => validateField('description')"
-                      placeholder="Describe la clase (opcional)"
-                      @blur="() => handleBlur('description')"
-                    />
-                  </div>
-
-                  <!-- Media -->
-                  <div class="col-md-6 mb-3">
+                      <div class="col-md-6 mb-3">
                     <FieldImage
                       id="image"
                       label="Imagen"
@@ -101,65 +142,30 @@
                       @blur="() => handleBlur('cover')"
                     />
                   </div>
+                   
 
-                  <!-- Origen -->
-                  <div class="col-md-4 mb-3">
-                    <FieldSelect
-                      id="is_youtube"
-                      label="Origen del video"
-                      v-model="form.is_youtube"
-                      :options="originOptions"
-                      :required="true"
-                      :showValidation="touched.is_youtube"
-                      :formError="form.errors.is_youtube"
-                      :validateFunction="() => validateField('is_youtube')"
-                      @blur="() => handleBlur('is_youtube')"
-                    />
-                    <div class="form-text">1 = YouTube, 2 = Archivo</div>
+
+
+                    </div>  
+                    
                   </div>
-
-                  <div class="col-md-8 mb-3" v-if="Number(form.is_youtube) === 1">
-                    <FieldText
-                      id="youtube_url"
-                      label="URL de YouTube"
-                      v-model="form.youtube_url"
-                      :required="true"
-                      :showValidation="touched.youtube_url"
-                      :formError="form.errors.youtube_url"
-                      :validateFunction="() => validateField('youtube_url')"
-                      placeholder="https://www.youtube.com/watch?v=..."
-                      @blur="() => handleBlur('youtube_url')"
-                    />
-                  </div>
-
-                  <div class="col-md-8 mb-3" v-else>
-                    <FieldVideo
-                      id="video"
-                      label="Archivo de video"
-                      v-model="form.video"
-                      :showValidation="touched.video"
-                      :formError="form.errors.video"
-                      :validateFunction="() => validateField('video')"
-                      @blur="() => handleBlur('video')"
-                      accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska"
-                    />
-                  </div>
-
-                  <div class="col-md-4 mb-3" v-if="Number(form.is_youtube) === 2">
-                    <FieldFile
-                      id="subt_str"
-                      label="Subtítulos (.vtt/.srt)"
-                      v-model="form.subt_str"
-                      :showValidation="touched.subt_str"
-                      :formError="form.errors.subt_str"
-                      :validateFunction="() => validateField('subt_str')"
-                      @blur="() => handleBlur('subt_str')"
-                      accept=".vtt,text/vtt,.srt,text/plain"
-                    />
-                  </div>
-
-                  <!-- Metadatos -->
-                  <div class="col-md-4 mb-3">
+                   <!--/content-->
+                   <!--sidebar-->
+                  <aside class="col-12 col-md-3">
+                    <div class="col-12 mb-3">
+                        <FieldSelect
+                          id="is_youtube"
+                          label="Origen del video"
+                          v-model="form.is_youtube"
+                          :options="originOptions"
+                          :required="true"
+                          :showValidation="touched.is_youtube"
+                          :formError="form.errors.is_youtube"
+                          :validateFunction="() => validateField('is_youtube')"
+                          @blur="() => handleBlur('is_youtube')"
+                        />
+                    </div>
+                    <div class="col-12 mb-3">
                     <FieldText
                       id="category"
                       label="Categoría"
@@ -171,8 +177,7 @@
                       placeholder="Opcional"
                     />
                   </div>
-
-                  <div class="col-md-4 mb-3">
+                  <div class="col-12 mb-3">
                     <FieldText
                       id="tags"
                       label="Tags"
@@ -185,7 +190,7 @@
                     />
                   </div>
 
-                  <div class="col-md-2 mb-3">
+                   <div class="col-12 mb-3">
                     <FieldSelect
                       id="active"
                       label="Estado"
@@ -199,18 +204,12 @@
                     />
                   </div>
 
-                  <div class="col-md-2 mb-3">
-                    <FieldText
-                      id="order"
-                      label="Orden"
-                      v-model="form.order"
-                      :showValidation="touched.order"
-                      :formError="form.errors.order"
-                      :validateFunction="() => validateField('order')"
-                      @blur="() => handleBlur('order')"
-                      placeholder="0"
-                    />
+                  <div class="col-12 mb-3">
+                    <FieldHidden id="order" v-model="form.order" />
                   </div>
+
+                  </aside>
+                  <!--/sidebar-->
                 </div>
               </div>
 
@@ -246,7 +245,7 @@ import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue'
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue'
 import FieldFile from '@/Components/Admin/Fields/FieldFile.vue'
 import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue'
-
+import FieldHidden from '@/Components/Admin/Fields/FieldHidden.vue'
 // Backend: 1 = YouTube, 2 = Archivo
 const originOptions = [
   { value: 1, label: 'YouTube' },

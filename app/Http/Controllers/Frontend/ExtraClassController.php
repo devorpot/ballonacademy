@@ -77,14 +77,12 @@ class ExtraClassController extends Controller
      */
     public function show(ExtraClass $extra)
     {
-        // Ocultar clases inactivas
         if ((int) $extra->active !== 1) {
             abort(404);
         }
 
         $extra->append(['image_url', 'cover_url', 'video_url', 'subt_url']);
 
-        // Información útil para el reproductor en frontend
         $payload = [
             'id'          => $extra->id,
             'title'       => $extra->title,
@@ -101,15 +99,16 @@ class ExtraClassController extends Controller
             'created_at'  => $extra->created_at,
         ];
 
+        // NUEVO: otras clases
+        $extras = $this->otherExtras($extra, 8);
+
+
         return Inertia::render('Frontend/ExtraClasses/Show', [
-            'extra' => $payload,
+            'extra'  => $payload,
+            'extras' => $extras,
         ]);
     }
 
-    /**
-     * Lista opcional de categorías para poblar selects en frontend.
-     * Mantener en sincronía con el admin.
-     */ 
     private function categories(): array
     {
         return [
@@ -120,5 +119,51 @@ class ExtraClassController extends Controller
             'Evento',
             'Otros',
         ];
+    }
+
+    /**
+     * Devuelve una colección con otras clases:
+     * - Activas
+     * - Excluye la actual
+     * - Prioriza misma categoría, luego rellena con cualquier otra
+     * - Ordena por `order` asc y `created_at` desc
+     */
+    private function otherExtras(ExtraClass $current, int $limit = 6)
+    {
+        $base = ExtraClass::query()
+            ->where('active', 1)
+            ->where('id', '<>', $current->id);
+
+        // 1) Prioriza misma categoría
+        $primary = (clone $base)
+            ->when(!empty($current->category), function ($q) use ($current) {
+                $q->where('category', $current->category);
+            })
+            ->orderBy('order', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get([
+                'id', 'title', 'category', 'image', 'cover', 'is_youtube', 'youtube_url', 'created_at'
+            ]);
+
+        // 2) Si faltan, rellena con otras categorías
+        $missing = $limit - $primary->count();
+        if ($missing > 0) {
+            $more = (clone $base)
+                ->whereNotIn('id', $primary->pluck('id'))
+                ->orderBy('order', 'asc')
+                ->orderBy('created_at', 'desc')
+                ->limit($missing)
+                ->get([
+                    'id', 'title', 'category', 'image', 'cover', 'is_youtube', 'youtube_url', 'created_at'
+                ]);
+
+            $primary = $primary->concat($more)->values();
+        }
+
+        // Añade URLs calculadas para las tarjetas
+        $primary->each->append(['image_url', 'cover_url']);
+
+        return $primary;
     }
 }

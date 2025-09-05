@@ -12,14 +12,12 @@
       ]"
     />
 
-    <section class="section-panel py-3">
+    <!-- Sección 1: Video a todo el ancho -->
+    <section class="section-video w-100 mb-3">
       <div class="container-fluid">
-        <div class="row g-4">
-          <!-- Columna principal -->
-          <div class="col-12 col-lg-8" id="content" ref="contentCol" :class="{ 'lg-sticky': stickContent }" :style="stickyStyle">
-
-            <!-- Reproductor -->
-            <div class="card shadow-sm border-0 mb-3">
+        <div class="row">
+          <div class="col-12">
+            <div class="card shadow-sm border-0">
               <div class="card-body p-0">
                 <!-- YouTube -->
                 <div v-if="Number(extra.is_youtube) === 1 && extra.youtube_url" class="ratio ratio-16x9">
@@ -57,8 +55,16 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-            <!-- Detalles -->
+    <!-- Sección 2: Detalles debajo del video -->
+    <section class="section-details mb-4">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
             <div class="card shadow-sm border-0">
               <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
@@ -107,49 +113,99 @@
                 </div>
               </div>
             </div>
-
           </div>
+        </div>
+      </div>
+    </section>
 
-          <!-- Sidebar: Otras clases -->
-          <div class="col-12 col-lg-4" id="sidebar" ref="sidebarCol" :class="{ 'lg-sticky': stickSidebar }" :style="stickyStyle">
-            <div class="card shadow-sm border-0 h-100">
-              <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
-                <h6 class="fw-bold mb-0">Otras clases</h6>
-                <Link :href="route('dashboard.extras.index')" class="small">Ver todas</Link>
-              </div>
-              <div class="card-body pt-3 pb-0 px-3" id="extra-list">
-                <div v-for="e in extras" :key="e.id" class="mb-3">
-                  <a class="text-decoration-none" :href="route('dashboard.extras.show', { extra: e.id })">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="flex-shrink-0">
-                        <div class="ratio ratio-16x9 rounded overflow-hidden" style="width: 120px;">
-                          <img
-                            :src="e.cover_url || e.image_url"
-                            class="w-100 h-100 object-fit-cover"
-                            :alt="e.title"
-                            v-if="e.cover_url || e.image_url"
-                          />
-                          <div v-else class="bg-light d-flex align-items-center justify-content-center">
-                            <i class="bi bi-image text-muted"></i>
-                          </div>
-                        </div>
+    <!-- Sección 3: Otras clases (cards + paginación 9 por página) -->
+    <section class="section-others py-3">
+      <div class="container-fluid">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h2 class="h5 fw-bold mb-0">Más clases</h2>
+          <Link :href="route('dashboard.extras.index')" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-list me-1"></i>Ver todas
+          </Link>
+        </div>
+
+        <div v-if="totalExtras > 0" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+          <div v-for="e in pagedExtras" :key="e.id" class="col">
+           <!-- Card Extra mejorada -->
+                  <div class="card card-extra h-100 shadow-sm border-0 position-relative">
+                    <!-- Media -->
+                    <div class="ratio ratio-16x9 bg-light rounded-top overflow-hidden position-relative">
+                      <img
+                        v-if="e.cover_url || e.image_url"
+                        :src="e.cover_url || e.image_url"
+                        :alt="e.title"
+                        class="card-img w-100 h-100"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <div v-else class="w-100 h-100 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-image text-muted fs-3"></i>
                       </div>
-                      <div class="flex-grow-1">
-                        <div class="fw-semibold text-dark text-truncate">{{ e.title }}</div>
-                        <div class="small text-muted text-truncate-2">{{ e.extract }}</div>
+
+                      <!-- Gradiente y play -->
+                      <div class="media-overlay"></div>
+                      <div class="play-indicator">
+                        <i class="bi" :class="Number(e.is_youtube) === 1 ? 'bi-youtube' : 'bi-play-btn-fill'"></i>
+                      </div>
+
+                      <!-- Badges superiores -->
+                      <div class="position-absolute top-0 start-0 p-2 d-flex gap-1">
+                        <span v-if="Number(e.is_youtube) === 1" class="badge bg-danger text-white">YouTube</span>
+                        <span v-else class="badge bg-secondary text-white">Archivo</span>
+                        <span v-if="e.subt_url || e.subt_str" class="badge bg-dark">Sub</span>
                       </div>
                     </div>
-                  </a>
-                </div>
 
-                <div v-if="!extras || !extras.length" class="text-muted">
-                  No hay más clases listadas.
-                </div>
-              </div>
-            </div>
+                    <!-- Body -->
+                    <div class="card-body">
+                      <h3 class="h6 fw-semibold text-truncate mb-1" :title="e.title">{{ e.title }}</h3>
+                      <div v-if="e.extract" class="small text-muted text-truncate-2">{{ e.extract }}</div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="card-footer bg-transparent border-0 pt-0 d-flex align-items-center justify-content-between">
+                      <div class="d-flex flex-wrap align-items-center gap-1">
+                        <span v-if="e.category" class="badge bg-light text-dark border">{{ e.category }}</span>
+                        <span
+                          v-for="t in (e.tags ? e.tags.split(',').slice(0, 2) : [])"
+                          :key="t"
+                          class="badge bg-light text-dark border small"
+                        >
+                          #{{ t.trim() }}
+                        </span>
+                      </div>
+                      <Link :href="route('dashboard.extras.show', { extra: e.id })" class="btn btn-sm btn-primary">
+                        Ver
+                      </Link>
+                    </div>
+
+                    <!-- Hace toda la card clickeable -->
+                    <Link :href="route('dashboard.extras.show', { extra: e.id })" class="stretched-link" aria-label="Ver clase"></Link>
+                  </div>
+
           </div>
-          <!-- /Sidebar -->
         </div>
+
+        <div v-else class="alert alert-light border text-muted">No hay más clases listadas.</div>
+
+        <!-- Paginación -->
+        <nav v-if="totalPages > 1" class="mt-3" aria-label="Paginación de otras clases">
+          <ul class="pagination justify-content-center mb-0 flex-wrap">
+            <li class="page-item" :class="{ disabled: page === 1 }">
+              <button class="page-link" @click="prevPage" :disabled="page === 1">Anterior</button>
+            </li>
+            <li v-for="p in pagesArray" :key="`p-${p}`" class="page-item" :class="{ active: p === page }">
+              <button class="page-link" @click="goToPage(p)">{{ p }}</button>
+            </li>
+            <li class="page-item" :class="{ disabled: page === totalPages }">
+              <button class="page-link" @click="nextPage" :disabled="page === totalPages">Siguiente</button>
+            </li>
+          </ul>
+        </nav>
       </div>
     </section>
   </StudentLayout>
@@ -157,21 +213,41 @@
 
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { route } from 'ziggy-js'
 import StudentLayout from '@/Layouts/StudentLayout.vue'
 import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue'
 
 const props = defineProps({
   extra: { type: Object, required: true },      // {id,title,extract,description,category,tags,is_youtube,youtube_url,image_url,cover_url,video_url,subt_url,created_at,...}
-  extras: { type: Array, default: () => [] },   // otras clases (idealmente excluye la actual)
+  extras: { type: Array, default: () => [] },   // otras clases (excluye la actual)
   resources: { type: Array, default: () => [] } // opcional
 })
 
 const extra = computed(() => props.extra)
-const extras = computed(() => props.extras)
 const resources = computed(() => props.resources)
 const hasResources = computed(() => Array.isArray(resources.value) && resources.value.length > 0)
+
+// Paginación client-side para "extras"
+const perPage = 9
+const page = ref(1)
+const totalExtras = computed(() => props.extras?.length || 0)
+const totalPages = computed(() => Math.max(1, Math.ceil(totalExtras.value / perPage)))
+
+const pagedExtras = computed(() => {
+  const start = (page.value - 1) * perPage
+  return props.extras.slice(start, start + perPage)
+})
+
+const pagesArray = computed(() => Array.from({ length: totalPages.value }, (_, i) => i + 1))
+function goToPage(p) {
+  if (p >= 1 && p <= totalPages.value) page.value = p
+}
+function prevPage() { if (page.value > 1) page.value-- }
+function nextPage() { if (page.value < totalPages.value) page.value++ }
+
+watch(() => totalPages.value, () => { if (page.value > totalPages.value) page.value = 1 })
+watch(() => props.extras, () => { page.value = 1 })
 
 // Embeds
 function embedYoutube(url) {
@@ -198,110 +274,14 @@ function formatDate(iso) {
     return iso
   }
 }
-
-/* ===== Sticky layout (misma lógica que usas en videos) ===== */
-const contentCol = ref(null)
-const sidebarCol = ref(null)
-const stickContent = ref(false)
-const stickSidebar = ref(false)
-const topOffset = ref(16) // px; se recalcula
-
-const stickyStyle = computed(() => ({ '--stick-top': `${topOffset.value}px` }))
-
-let resizeObs
-let rafId = null
-
-function computeTopOffset() {
-  let offset = 16
-  const candidates = [
-    document.querySelector('.navbar'),
-    document.querySelector('.topnav'),
-    document.querySelector('header'),
-    document.querySelector('.bg-light.border-bottom')
-  ]
-  for (const el of candidates) {
-    if (el) offset += el.getBoundingClientRect().height
-  }
-  topOffset.value = Math.max(16, Math.round(offset))
-}
-
-function updateStickiness() {
-  if (window.innerWidth < 992) {
-    stickContent.value = false
-    stickSidebar.value = false
-    return
-  }
-  const c = contentCol.value
-  const s = sidebarCol.value
-  if (!c || !s) return
-
-  const ch = c.scrollHeight
-  const sh = s.scrollHeight
-  const tol = 24
-
-  if (sh > ch + tol) {
-    stickContent.value = true
-    stickSidebar.value = false
-  } else if (ch > sh + tol) {
-    stickContent.value = false
-    stickSidebar.value = true
-  } else {
-    stickContent.value = false
-    stickSidebar.value = false
-  }
-}
-
-function scheduleMeasure() {
-  cancelAnimationFrame(rafId)
-  rafId = requestAnimationFrame(() => {
-    computeTopOffset()
-    updateStickiness()
-  })
-}
-
-onMounted(() => {
-  scheduleMeasure()
-  if ('ResizeObserver' in window) {
-    resizeObs = new ResizeObserver(scheduleMeasure)
-    if (contentCol.value) resizeObs.observe(contentCol.value)
-    if (sidebarCol.value) resizeObs.observe(sidebarCol.value)
-  }
-  window.addEventListener('resize', scheduleMeasure, { passive: true })
-  window.addEventListener('orientationchange', scheduleMeasure, { passive: true })
-})
-
-onBeforeUnmount(() => {
-  cancelAnimationFrame(rafId)
-  window.removeEventListener('resize', scheduleMeasure)
-  window.removeEventListener('orientationchange', scheduleMeasure)
-  if (resizeObs) {
-    try {
-      if (contentCol.value) resizeObs.unobserve(contentCol.value)
-      if (sidebarCol.value) resizeObs.unobserve(sidebarCol.value)
-      resizeObs.disconnect()
-    } catch {}
-  }
-})
 </script>
 
 <style scoped>
-#extra-list {
-  max-height: 70vh;
-  padding-right: 6px;
-}
-
 .text-truncate-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-@media (min-width: 992px) {
-  .lg-sticky {
-    position: sticky;
-    top: var(--stick-top, 16px);
-  }
 }
 
 /* Contenido enriquecido */
@@ -310,5 +290,48 @@ onBeforeUnmount(() => {
   max-width: 100%;
   height: auto;
   border-radius: .5rem;
+}
+
+/* Estilos de la card mejorada */
+.card-extra .card-img {
+  object-fit: cover;
+  transition: transform .25s ease;
+}
+.card-extra:hover .card-img {
+  transform: scale(1.03);
+}
+
+.card-extra .media-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0) 60%);
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+.card-extra:hover .media-overlay {
+  opacity: 1;
+}
+
+.card-extra .play-indicator {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  opacity: .85;
+  transform: scale(.95);
+  transition: transform .2s ease, opacity .2s ease;
+  pointer-events: none;
+}
+.card-extra:hover .play-indicator {
+  transform: scale(1.05);
+}
+
+/* Truncado de 2 líneas */
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>

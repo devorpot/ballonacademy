@@ -13,14 +13,29 @@
       ]"
     />
 
-    <!-- Video / Lista -->
-    <section class="section-panel py-3">
-      <div class="container-fluid">
-        <div class="row g-4">
-          <!-- Columna de contenido -->
-          <div class="col-12 col-lg-8" id="content" ref="contentCol" :style="stickyStyle" :class="{'lg-sticky': stickContent}">
-            <!-- Reproductor -->
-            <VideoCardPlayerLesson
+ 
+
+ <!-- Alerta -->
+
+ 
+  <!--Video Player-->
+  <section class="section-panel py-3">
+     <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+            <!-- Alerta de éxito al entrar si ya cumple -->
+<div
+  v-if="showSuccessAlert"
+  class="alert alert-success alert-dismissible fade show mb-3"
+  role="alert"
+  aria-live="polite"
+>
+  <i class="bi bi-check-circle-fill me-2"></i>
+  Has completado este video y enviado tus evaluaciones. Ya puedes continuar al siguiente video.
+  <button type="button" class="btn-close" aria-label="Cerrar" @click="showSuccessAlert = false"></button>
+</div>
+
+           <VideoCardPlayerLesson
               :key="video.id"
               :video="video"
               :lesson="lesson"
@@ -32,230 +47,109 @@
               :video-evaluations="videoEvaluations"
               @next="goToNextVideo"
               @show-evaluations="revealEvaluations"
+              @completed="onVideoCompleted"    
             />
+        </div>
+      </div>
+    </div>
+</section>
+  <!--/Video Player-->
 
-            <!-- Botones de acciones (arriba, alineados a la derecha) -->
-            <section class="py-2">
-              <div class="card border-0 shadow my-3">
-                <div class="card-body">
-                  <div class="d-flex justify-content-end gap-2">
-                <button
-                  v-if="hasEvals"
-                  type="button"
-                  class="btn btn-primary rounded-pill btn-sm"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalEvaluaciones"
-                  title="Ver evaluaciones"
-                >
-                  <i class="bi bi-clipboard-check me-1"></i> Evaluaciones
-                </button>
-
-                <button
-                  v-if="hasResources"
-                  type="button"
-                  class="btn btn-primary rounded-pill btn-sm"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalRecursos"
-                  title="Ver recursos"
-                >
-                  <i class="bi bi-link-45deg me-1"></i> Recursos
-                </button>
-
-                <button
-                  v-if="hasMaterials"
-                  type="button"
-                  class="btn btn-primary rounded-pill btn-sm"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalMateriales"
-                  title="Ver materiales"
-                >
-                  <i class="bi bi-bag-check me-1"></i> Materiales
-                </button>
-              </div>
-                </div>
-              </div>
-            </section>
 
  
-
-            <!-- Comentarios (debajo del video) -->
-            <div class="card border-0 shadow my-3">
-              <div class="card-header bg-white border-bottom">
-                <h6 class="fw-bold mb-0"><i class="bi bi-chat-dots me-1"></i> Comentarios</h6>
-              </div>
-              <div class="card-body">
-                <VideoComments
+  <!--/Comentarios-->
+  <section class="section-panel py-3">
+     <div class="container-fluid">
+      <div class="row">
+        <!--Contenido-->
+        <div class="col-12 col-md-8">
+          <div class="d-block my-3">
+            <VideoCardEvaluations
+            :video-evaluations="videoEvaluations"
+            route-show-submission="dashboard.evaluation-users.show"
+            route-start-evaluation="dashboard.courses.evaluations.evaluation.preview"
+          />
+          </div>
+          <div class="d-block my-3">
+               <VideoCardMaterials
+                :video-id="video.id"
+                :video-materials="videoMaterials"
+                :materials-summary="materialsSummary"
+                currency="MXN"
+                locale="es-MX"
+              />
+        </div>
+         <div class="d-block my-3">
+              <VideoCardResources
+                :video-resources="videoResources"
+                :video-id="video.id"
+                @show-resource="openResourceModal"
+              />
+        </div>
+        <div class="d-block my-3">
+          <VideoComments
                   :video-id="video.id"
                   :course-id="course.id"
                   :can-comment="user != null"
                 />
-              </div>
-            </div>
+        </div>
 
-            <!-- Videos anterior y siguiente -->
-            <div class="row my-3">
-              <div class="col-12 col-md-6" v-if="previousVideo">
-                <div class="card shadow-sm border-0">
-                  <div class="card-header bg-white border-bottom">
-                    <h6 class="fw-bold mb-0"><i class="bi bi-arrow-left"></i> Video Anterior</h6>
-                  </div>
-                  <div class="card-body">
-                    <VideoCardMini
-                      v-if="previousVideo"
-                      :video="previousVideo"
-                      :url="route('dashboard.courses.lessons.videos.show', {
-                        course: course.id,
-                        lesson: lesson.id,
-                        video: previousVideo.id
-                      })"
-                      :is-accessible="true"
-                    />
-                  </div>
-                </div>
-              </div>
 
-              <div class="col-12 col-md-6 ms-auto" v-if="nextVideo">
-                <div class="card shadow-sm border-0">
-                  <div class="card-header bg-white border-bottom text-end">
-                    <h6 class="fw-bold mb-0">Siguiente Video <i class="bi bi-arrow-right"></i></h6>
-                  </div>
-                  <div class="card-body">
-                    <VideoCardMini
-                      v-if="nextVideo"
-                      :video="nextVideo"
-                      :url="route('dashboard.courses.lessons.videos.show', {
-                        course: course.id,
-                        lesson: lesson.id,
-                        video: nextVideo.id
-                      })"
-                      :is-accessible="nextVideoAccessible"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sidebar (lista de videos intacta) -->
-          <div class="col-12 col-lg-4" id="sidebar" ref="sidebarCol" :style="stickyStyle" :class="{'lg-sticky': stickSidebar}">
+        </div>
+         <!--/contenido-->
+        <!--sidebar-->
+         <div class="col-12 col-lg-4" id="sidebar" ref="sidebarCol" :style="stickyStyle" :class="{'lg-sticky': stickSidebar}">
             <div class="card border-0 shadow mb-3">
               <div class="card-header bg-white border-bottom">
                 <h6 class="fw-bold mb-0">Lista de Videos</h6>
               </div>
               <div class="card-body pt-3 pb-0 px-3" id="video-list">
+
                 <VideoCardMini
-                  v-for="v in videos"
+                  v-for="(v, idx) in videos"
                   :key="v.id"
                   :video="v"
-                  :url="v.is_accessible
+                  :url="(!isLockedByCurrentEvals(idx) && v.is_accessible)
                     ? route('dashboard.courses.lessons.videos.show', {
                         course: course.id,
                         lesson: lesson.id,
                         video: v.id
                       })
                     : null"
-                  :is-accessible="v.is_accessible"
+                  :is-accessible="!isLockedByCurrentEvals(idx) && v.is_accessible"
                   :is-playing="v.id === video.id"
                   class="mb-3"
                 />
+
               </div>
             </div>
           </div>
-        </div>
+        <!--/sidebar-->
       </div>
-    </section>
+    </div>
+</section>
+  <!--/Video Player-->
+<LessonEvalAdvanceModal
+  v-model="showLessonAdvanceModal"
+  :video-evaluations="videoEvaluations"
+  :course-id="course.id"
+  :is-last-of-course="Number(video.id) === Number(videos?.[videos.length-1]?.id)"
+  :is-last-of-lesson="Number(video.id) === Number(lastVideoIdLesson)"
+  :next-url="nextVideo ? route('dashboard.courses.lessons.videos.show', { course: course.id, lesson: lesson.id, video: nextVideo.id }) : null"
+  :is-course-completed="isCourseCompleted"
+  @next="goToNextVideo"
+/>
+ <LessonCompleteModal
+    v-model="showCompleteModal"
+    :course-id="course.id"
+    :course-title="course.title"
+  />
+ 
+<!-- Modal de avance de lección/video -->
+ 
+
   </StudentLayout>
 
-  <!-- MODALES DE BOOTSTRAP -->
-
-  <!-- Modal: Evaluaciones -->
-  <div class="modal fade" id="modalEvaluaciones" tabindex="-1" aria-labelledby="modalEvaluacionesLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 id="modalEvaluacionesLabel" class="modal-title"><i class="bi bi-clipboard-check me-1"></i> Evaluaciones del video</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-          <VideoCardEvaluations
-            :video-evaluations="videoEvaluations"
-            route-show-submission="dashboard.evaluation-users.show"
-            route-start-evaluation="dashboard.courses.evaluations.evaluation.preview"
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Recursos -->
-  <div class="modal fade" id="modalRecursos" tabindex="-1" aria-labelledby="modalRecursosLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 id="modalRecursosLabel" class="modal-title"><i class="bi bi-link-45deg me-1"></i> Recursos del video</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-          <VideoCardResources
-            :video-resources="videoResources"
-            :video-id="video.id"
-            @show-resource="openResourceModal"
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Materiales -->
-  <div class="modal fade" id="modalMateriales" tabindex="-1" aria-labelledby="modalMaterialesLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 id="modalMaterialesLabel" class="modal-title"><i class="bi bi-bag-check me-1"></i> Materiales del video</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-          <VideoCardMaterials
-            :video-id="video.id"
-            :video-materials="videoMaterials"
-            :materials-summary="materialsSummary"
-            currency="MXN"
-            locale="es-MX"
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Detalle de Recurso (al hacer click desde la lista) -->
-  <div class="modal fade" id="modalRecurso" tabindex="-1" aria-labelledby="modalRecursoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content" v-if="selectedResource">
-        <div class="modal-header">
-          <h5 id="modalRecursoLabel" class="modal-title">
-            <i class="bi bi-file-earmark-text me-1"></i> {{ selectedResource.title || 'Recurso' }}
-          </h5>
-          <button type="button" class="btn-close" @click="closeResourceModal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-          <p v-if="selectedResource.description" class="mb-3">{{ selectedResource.description }}</p>
-          <div v-if="selectedResource.url" class="mb-2">
-            <a :href="selectedResource.url" target="_blank" class="btn btn-primary btn-sm">
-              <i class="bi bi-box-arrow-up-right me-1"></i> Abrir recurso
-            </a>
-          </div>
-          <div v-if="selectedResource.file_url" class="mb-2">
-            <a :href="selectedResource.file_url" target="_blank" class="btn btn-outline-secondary btn-sm">
-              <i class="bi bi-download me-1"></i> Descargar archivo
-            </a>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-light" @click="closeResourceModal">Cerrar</button>
-        </div>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup>
@@ -271,7 +165,10 @@ import VideoCardEvaluations from '@/Components/Dashboard/Video/VideoCardEvaluati
 import VideoCardResources from '@/Components/Dashboard/Video/VideoCardResources.vue'
 import VideoCardMaterials from '@/Components/Dashboard/Video/VideoCardMaterials.vue'
 import VideoComments from '@/Components/Dashboard/Video/VideoComments.vue'
-import CardsVideoEvaluations from '@/Components/Dashboard/Cards/CardsVideoEvaluations.vue'
+ 
+import LessonEvalAdvanceModal from '@/Components/Dashboard/Lesson/LessonEvalAdvanceModal.vue'
+import LessonCompleteModal from '@/Components/Dashboard/Lesson/LessonCompleteModal.vue'
+
 import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue'
 
 const page = usePage()
@@ -291,7 +188,9 @@ const {
   lastVideoIdLesson,
   firstVideoIdLesson,
   materialsSummary,
-  videoMaterials
+ 
+  videoMaterials,
+   isCourseCompleted
 } = defineProps({
   course: Object,
   lesson: Object,
@@ -307,8 +206,12 @@ const {
   lastVideoIdLesson: Number,
   firstVideoIdLesson: Number,
   materialsSummary: { type: Object, default: () => null },
-  videoMaterials: { type: Array, default: () => [] }
+  videoMaterials: { type: Array, default: () => [] },
+    shouldShowContinueAlert: { type: Boolean, default: false },
+    isCourseCompleted: { type: Boolean, default: false }
 })
+
+const showCompleteModal = ref(false);
 
 const user = computed(() => page.props?.auth?.user ?? null)
 
@@ -316,6 +219,9 @@ const user = computed(() => page.props?.auth?.user ?? null)
 const lastVideoId = computed(() =>
   Array.isArray(videos) && videos.length ? Number(videos[videos.length - 1].id) : null
 )
+
+const showSuccessAlert = ref(Boolean(page.props?.shouldShowContinueAlert ?? false))
+
 function goToNextVideo() {
   if (nextVideo) {
     router.visit(route('dashboard.courses.lessons.videos.show', {
@@ -437,6 +343,71 @@ function scheduleMeasure() {
   })
 }
 
+const showLessonAdvanceModal = ref(false)
+
+function pickEvalStatus(ev) {
+  return ev?.user_status ?? ev?.pivot?.status ?? ev?.evaluation_user?.status ?? ev?.status ?? null
+}
+function isSentStatus(s) {
+  if (s == null) return false
+  const v = String(s).trim().toUpperCase()
+  return v === 'SEND' || v === 'SENT' || v === 'ENVIADO' || v === 'SUBMITTED' || s === 111
+}
+
+function isSubmittedByMe(ev) {
+  if (ev?.submitted_by_me) return true
+  if ((ev?.submitted_by_me_count ?? 0) > 0) return true
+  if (ev?.my_last_submission?.id) return true
+  const eu = ev?.evaluation_user ?? ev?.pivot
+  if (eu?.user_id) return true
+  return false
+}
+
+// Puede continuar si NO hay evaluaciones o si TODAS las envió
+const canContinueAfterThisVideo = computed(() => {
+  if (!hasEvaluations.value) return true
+  return videoEvaluations.every(isSubmittedByMe)
+})
+
+const allEvalsSent = computed(() => {
+  if (!Array.isArray(videoEvaluations) || videoEvaluations.length === 0) return true
+  return videoEvaluations.every(isSubmittedByMe)
+})
+
+const hasEvaluations = computed(() =>
+  Array.isArray(videoEvaluations) && videoEvaluations.length > 0
+)
+
+
+
+const currentIndexInList = computed(() =>
+  Array.isArray(videos) ? videos.findIndex(v => Number(v.id) === Number(video.id)) : -1
+)
+
+// ¿Debe bloquearse un video por evaluaciones pendientes del actual?
+function isLockedByCurrentEvals(targetIndex) {
+  if (currentIndexInList.value < 0) return false
+  // Bloqueamos solo los videos posteriores al actual si NO están enviadas TODAS las evals del actual
+  return targetIndex > currentIndexInList.value && !allEvalsSent.value
+}
+
+/* Abre el modal de avance cuando el video termina y ya hay envíos */
+function onVideoCompleted() {
+  if (canContinueAfterThisVideo.value) {
+    showSuccessAlert.value = true
+
+    // Asegura que el usuario lo vea
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+
+    // Ocúltalo después de 6s (ajusta a tu gusto)
+    setTimeout(() => { showSuccessAlert.value = false }, 6000)
+  } else {
+    // Si quieres avisar distinto cuando falten evaluaciones, hazlo aquí
+    // Ejemplo: usa otro estado para un alert warning
+    // o deja que el usuario las vea en la sección de evaluaciones.
+  }
+   showLessonAdvanceModal.value = true
+}
 onMounted(() => {
   scheduleMeasure()
 
@@ -451,6 +422,12 @@ onMounted(() => {
   }
   window.addEventListener('resize', scheduleMeasure, { passive: true })
   window.addEventListener('orientationchange', scheduleMeasure, { passive: true })
+
+    if (showSuccessAlert.value) {
+    setTimeout(() => { showSuccessAlert.value = false }, 6000)
+    // Asegura visibilidad por si el usuario quedó scrolleado abajo
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 })
 
 onBeforeUnmount(() => {
@@ -471,6 +448,7 @@ watchEffect(() => {
     activeTab.value = availableTabs.value[0] || 'video'
   }
   void nextTick(() => scheduleMeasure())
+   showCompleteModal.value = !!isCourseCompleted
 })
 </script>
 

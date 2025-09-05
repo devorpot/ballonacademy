@@ -195,9 +195,9 @@ const onCreated = () => {
             <h4 class="admin-title">
               <i class="bi bi-collection-play me-2"></i> Gestionar Clases Extra
             </h4>
-            <button class="btn btn-primary" @click="showCreateModal = true">
+            <Link class="btn btn-primary" :href="route('admin.extras.create')" >
               <i class="bi bi-plus-lg me-1"></i> Nueva Clase Extra
-            </button>
+            </Link>
           </div>
         </div>
       </div>

@@ -133,7 +133,7 @@ const nickname = computed(() => {
 const L = computed(() => page.props?.L ?? {})
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 .sidebar-menu {
   height: 100vh;
   width: 100%;

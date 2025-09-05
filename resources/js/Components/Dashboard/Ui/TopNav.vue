@@ -2,11 +2,10 @@
   <nav class="top-nav navbar-card d-flex justify-content-between align-items-center px-3 py-2">
     <!-- Logo -->
     <div class="d-flex align-items-center gap-2">
-  <Link :href="route('dashboard.index')">
-     <img src="https://academiainternacionalglobos.com/wp-content/themes/academiaglobos/assets/images/logo-internacional.png" alt="" style="max-width:110px;" />
-   </Link>
-      
-    </div>
+        <Link :href="route('dashboard.index')">
+           <img src="https://academiainternacionalglobos.com/wp-content/themes/academiaglobos/assets/images/logo-internacional.png" alt="" style="max-width:110px;" />
+         </Link>
+    </div> 
 
     <!-- Menú derecho -->
     <div class="d-flex align-items-center gap-3">
@@ -240,7 +239,12 @@ async function changeLocale(locale) {
 }
 
 
-
+@media (max-width: 1200px) {
+   
+  .mobile-sidebar{
+    background:#0063AF!important;
+  }
+}
 @media (max-width: 600px) {
   .top-nav.navbar-card {
     padding: 0.2rem 0.5rem;

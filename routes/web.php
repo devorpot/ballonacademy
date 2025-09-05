@@ -11,7 +11,7 @@ use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Admin\CertificateController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\SubscriptionController;
-use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ProfileController; 
 use App\Http\Controllers\Admin\VideoController; 
 use App\Http\Controllers\Admin\VideoResourcesController; 
 use App\Http\Controllers\Admin\VideoMaterialController;
@@ -49,7 +49,8 @@ use App\Http\Controllers\Frontend\DistributorController  as FrontendDistributorC
 
 use App\Http\Controllers\Frontend\LessonsController  as FrontendLessonsController;
 use App\Http\Controllers\Frontend\VideoCommentsController  as FrontendVideoCommentsController;
-use App\Http\Controllers\Frontend\ExtraClassController as FrontExtraClassController;
+use App\Http\Controllers\Frontend\ExtraClassController as FrontendExtraClassController;
+use App\Http\Controllers\Frontend\CourseVideosController as FrontendCourseVideosController;
 
 use App\Http\Controllers\Api\VideoActivityController;
 use App\Http\Controllers\Api\ActivityController;
@@ -430,6 +431,11 @@ Route::middleware(['auth', 'role:student'])
         // Cursos → Videos
         Route::get('/courses/{course}/videos/{video}', [FrontendCoursesController::class, 'videoDetail'])
             ->name('courses.videos.show');
+ 
+
+
+           Route::get('/courses/{course}/videos', [FrontendCourseVideosController::class, 'flatIndex'])
+            ->name('courses.videos.flat');
 
         // Cursos → Evaluaciones
 
@@ -502,6 +508,6 @@ Route::middleware(['auth', 'role:student'])
                 ->name('video-comments.dislike');
         });
 
-        Route::get('/extras', [FrontExtraClassController::class, 'index'])->name('extras.index');
-        Route::get('/extras/{extra}', [FrontExtraClassController::class, 'show'])->name('extras.show');
+        Route::get('/extras', [FrontendExtraClassController::class, 'index'])->name('extras.index');
+        Route::get('/extras/{extra}', [FrontendExtraClassController::class, 'show'])->name('extras.show');
     });

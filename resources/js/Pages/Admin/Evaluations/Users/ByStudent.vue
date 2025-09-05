@@ -162,7 +162,7 @@ const rows = computed(() => props.submissions.data || [])
                     </div>
                   </td>
                   <td>
-                    <span class="badge rounded-pill"
+                    <span class="badge "
                           :class="{
                             'bg-secondary': item.status === 111,  // pendiente
                             'bg-warning':  item.status === 222,  // en revisión

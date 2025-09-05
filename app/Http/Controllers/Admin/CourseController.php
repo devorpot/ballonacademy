@@ -155,13 +155,13 @@ public function update(Request $request, Course $course)
     $rules = [
         'title' => 'required|string|max:255',
         'description' => 'required|string',
-        'description_short' => 'nullable|string|max:255',
+        'description_short' => 'nullable|string|max:500',
         'level' => 'nullable|string|max:255',
         'date_start' => 'nullable|date',
         'date_end' => 'nullable|date',
         'active' => 'required|boolean',
         'price' => 'nullable|numeric|min:0',
-        'payment_link' => 'nullable|string|max:255',
+        'payment_link' => 'nullable|string|max:1000',
         'currency_id' => 'nullable|exists:currencies,id'
     ];
 

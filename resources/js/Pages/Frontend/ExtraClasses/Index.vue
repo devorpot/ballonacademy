@@ -12,51 +12,48 @@
 
     <section class="section-panel py-3">
       <div class="container-fluid">
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="card-title mb-0">Clases Extra</h5>
-              </div>
+        <div class="card shadow-sm border-0">
+          <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h5 class="card-title mb-0">Clases Extra</h5>
 
-              <div class="card-body">
-                <!-- Empty -->
-                <div v-if="!items.length" class="alert alert-info">
-                  No hay clases extra disponibles por el momento.
-                </div>
+            <!-- Resumen paginación (si viene paginado) -->
+            <div v-if="meta" class="small text-muted">
+              Mostrando {{ meta.from }}–{{ meta.to }} de {{ meta.total }}
+            </div>
+          </div>
 
-                <!-- Grid -->
-                <div v-else class="row g-4">
-                  <div v-for="extra in items" :key="extra.id" class="col-12 col-lg-6">
-                    <article class="extra-hero h-100 rounded-4 overflow-hidden d-flex flex-column flex-lg-row shadow-0 border-0">
-                      <!-- Media -->
-                      <div class="extra-hero__media position-relative">
+          <div class="card-body">
+            <!-- Empty -->
+            <div v-if="!items.length" class="alert alert-info mb-0">
+              No hay clases extra disponibles por el momento.
+            </div>
+
+            <!-- Grid de cards -->
+            <div v-else class="row row-cols-1 row-cols-md-2 row-cols-xl-2 g-4">
+              <div v-for="extra in items" :key="extra.id" class="col">
+                <!-- Card hero Extra -->
+                <div class="card shadow-sm border-0 overflow-hidden position-relative h-100">
+                  <div class="row g-0 flex-lg-row">
+                    <!-- Media -->
+                    <div class="col-12 col-lg-5">
+                      <div class="position-relative ratio ratio-16x9 bg-light">
                         <img
                           :src="coverUrl(extra.cover_url || extra.image_url)"
                           :alt="extra.title"
-                          class="w-100 h-100 object-cover"
+                          class="w-100 h-100 object-fit-cover"
                           loading="lazy"
                           @error="onImgError"
                         />
-                        <span
-                          v-if="extra.category"
-                          class="badge bg-primary position-absolute top-0 end-0 m-2"
-                        >
-                          {{ extra.category }}
-                        </span>
-                        <span
-                          v-if="extra.created_at"
-                          class="badge bg-light text-dark position-absolute bottom-0 start-0 m-2 small"
-                        >
-                          <i class="bi bi-calendar-event me-1"></i>
-                          {{ formatDate(extra.created_at) }}
-                        </span>
+                        <!-- Badges -->
+                       
                       </div>
+                    </div>
 
-                      <!-- Content -->
-                      <div class="extra-hero__content p-4 d-flex flex-column flex-grow-1">
+                    <!-- Content -->
+                    <div class="col-12 col-lg-7">
+                      <div class="card-body d-flex flex-column h-100">
                         <!-- Title -->
-                        <h3 class="h5 fw-bold mb-2 text-body text-wrap">
+                        <h3 class="h6 fw-bold mb-2 text-body text-wrap">
                           {{ extra.title }}
                         </h3>
 
@@ -79,16 +76,10 @@
                         <!-- Stats -->
                         <ul class="list-inline small text-muted mb-3">
                           <li class="list-inline-item me-3" v-if="extra.views">
-                            <i class="bi bi-eye me-1"></i> {{ extra.views }} vistas
+                            <i class="bi bi-eye me-1"></i>{{ extra.views }} vistas
                           </li>
                           <li class="list-inline-item me-3" v-if="extra.duration">
-                            <i class="bi bi-clock me-1"></i> {{ extra.duration }}
-                          </li>
-                          <li class="list-inline-item" v-if="Number(extra.active) === 1">
-                            <i class="bi bi-check-circle-fill text-success me-1"></i> Activa
-                          </li>
-                          <li class="list-inline-item" v-else>
-                            <i class="bi bi-x-circle-fill text-danger me-1"></i> Inactiva
+                            <i class="bi bi-clock me-1"></i>{{ extra.duration }}
                           </li>
                         </ul>
 
@@ -96,48 +87,44 @@
                         <div class="mt-auto d-flex gap-2">
                           <Link
                             :href="showUrl(extra.id)"
-                            class="btn btn-primary btn-sm rounded-pill"
+                            class="btn btn-primary btn-sm"
                             :title="`Ver clase: ${extra.title}`"
                           >
                             <i class="bi bi-play-circle me-1"></i> Ver Clase
                           </Link>
-                          <button
-                            type="button"
-                            class="btn btn-outline-secondary rounded-pill btn-sm"
-                            title="Agregar a favoritos"
-                          >
-                            <i class="bi bi-heart"></i>
-                          </button>
                         </div>
                       </div>
-                    </article>
+                    </div>
                   </div>
+
+                  <!-- Stretched link para hacer clic en toda la tarjeta -->
+                  <Link :href="showUrl(extra.id)" class="stretched-link" aria-label="Ver clase"></Link>
                 </div>
+              </div>
+            </div>
 
-                <!-- Paginación (LengthAwarePaginator) -->
-                <nav v-if="hasLinks" class="mt-4">
-                  <ul class="pagination mb-0">
-                    <li
-                      v-for="(l, i) in (isPaginated ? extras.links : [])"
-                      :key="i"
-                      class="page-item"
-                      :class="{ active: l.active, disabled: !l.url }"
-                    >
-                      <Link
-                        v-if="l.url"
-                        class="page-link"
-                        :href="l.url"
-                        preserve-scroll
-                        preserve-state
-                        v-html="sanitizeLabel(l.label)"
-                      />
-                      <span v-else class="page-link" v-html="sanitizeLabel(l.label)"></span>
-                    </li>
-                  </ul>
-                </nav>
-
-              </div><!-- /card-body -->
-            </div><!-- /card -->
+            <!-- Paginación (LengthAwarePaginator) -->
+            <nav v-if="hasLinks" class="mt-4" aria-label="Paginación de clases extra">
+              <ul class="pagination justify-content-center mb-0 flex-wrap">
+                <li
+                  v-for="(l, i) in (isPaginated ? extras.links : [])"
+                  :key="i"
+                  class="page-item"
+                  :class="{ active: l.active, disabled: !l.url }"
+                >
+                  <Link
+                    v-if="l.url"
+                    class="page-link"
+                    :href="l.url"
+                    preserve-scroll
+                    preserve-state
+                  >
+                    <span v-html="labelES(l.label)"></span>
+                  </Link>
+                  <span v-else class="page-link" v-html="labelES(l.label)"></span>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
       </div>
@@ -163,9 +150,9 @@ const items = computed(() =>
   isPaginated.value ? (extras.value.data || []) : (Array.isArray(extras.value) ? extras.value : [])
 )
 const hasLinks = computed(() => isPaginated.value && Array.isArray(extras.value.links) && extras.value.links.length > 0)
+const meta = computed(() => (isPaginated.value ? extras.value.meta : null))
 
 function showUrl(id) {
-  // Ruta del dashboard (no la de dashboard/admin)
   return route('dashboard.extras.show', { extra: id })
 }
 
@@ -195,53 +182,28 @@ function coverUrl(path) {
   return `/storage/${p.replace(/^\/+/, '')}`
 }
 
-// Los labels de paginación pueden venir con &laquo; &raquo; etc.
-// Permitimos esas entidades pero evitamos HTML inesperado
-function sanitizeLabel(label) {
-  return String(label).replace(/<(?!\/?i\b)[^>]*>/g, '')
+/**
+ * Traduce y limpia las etiquetas de paginación que envía Laravel:
+ * « Previous, Next » -> Anterior, Siguiente
+ * Mantiene números y elimina HTML no deseado (se permite <i>).
+ */
+function labelES(label) {
+  const raw = String(label)
+    .replace(/&laquo;|«/g, '')
+    .replace(/&raquo;|»/g, '')
+    .trim()
+
+  const text = raw
+    .replace(/^Previous$/i, 'Anterior')
+    .replace(/^Next$/i, 'Siguiente')
+
+  // Evita HTML inesperado, permite etiquetas <i>
+  return text.replace(/<(?!\/?i\\b)[^>]*>/g, '')
 }
 </script>
 
 <style scoped>
-.extra-hero {
-  background: #fff;
-  border: 1px solid #dee2e6;
-  border-radius: .75rem;
-  box-shadow: 0 .25rem .5rem rgba(0,0,0,.05);
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.extra-hero:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 .5rem 1rem rgba(0,0,0,.1);
-}
-
-/* Media */
-.extra-hero__media {
-  width: 100%;
-  min-height: 200px;
-  max-height: 260px;
-  background: #f8f9fa;
-}
-@media (min-width: 992px) {
-  .extra-hero__media {
-    width: 40%;
-    min-height: 100%;
-  }
-}
-.object-cover {
-  object-fit: cover;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-/* Contenido */
-.extra-hero__content {
-  min-height: 200px;
-  color: #212529;
-}
-
-/* Clamp utilitario */
+/* Clamp utilitario para extracto */
 .clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -249,8 +211,7 @@ function sanitizeLabel(label) {
   overflow: hidden;
 }
 
-/* Paginación */
-.pagination .page-item.disabled .page-link {
-  pointer-events: none;
+.object-fit-cover {
+  object-fit: cover;
 }
 </style>

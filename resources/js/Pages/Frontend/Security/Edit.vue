@@ -86,11 +86,11 @@ function submit() {
               </div>
 
               <div class="d-flex gap-2">
-                <button class="btn btn-primary rounded-pill" :disabled="form.processing" @click="submit">
+                <button class="btn btn-primary " :disabled="form.processing" @click="submit">
                   <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
                   Guardar cambios
                 </button>
-                <button class="btn btn-outline-secondary rounded-pill" type="button" @click="form.reset()">Restablecer</button>
+                <button class="btn btn-outline-secondary " type="button" @click="form.reset()">Restablecer</button>
               </div>
 
               <div class="mt-3 text-success" v-if="$page.props.flash?.success">

@@ -556,6 +556,35 @@ public function showVideo($courseId, $lessonId, $videoId)
     $lastVideoIdLesson  = $this->lastVideoIdByCourseOrderedByLesson((int) $courseId);
     $firstVideoIdLesson = $this->firstVideoIdByCourseOrderedByLesson((int) $courseId);
 
+    // === NUEVO: bandera para alert al entrar ===
+
+    // ¿Terminó el video actual?
+    $hasEndedCurrent = (bool) $nextVideoAccessible;
+
+    // ¿Envió TODAS las evaluaciones del video actual?
+    $hasSubmittedAllVideoEvals = $videoEvaluations->isEmpty()
+        ? true
+        : $videoEvaluations->every(function ($eva) {
+            return ($eva->submitted_by_me ?? false)
+                || optional($eva->my_last_submission)->id;
+        });
+
+    // ¿Hay siguiente video?
+    $hasNextVideo = (bool) $nextVideo;
+
+    // Mostrar alert en la vista apenas carga (si aplica)
+    $shouldShowContinueAlert = $hasEndedCurrent && $hasSubmittedAllVideoEvals && $hasNextVideo;
+
+
+
+    // === NUEVO: ¿Curso completado? (todos los videos vistos + todas las evals de video enviadas) ===
+    $allVideoIds = collect($allVideos)->pluck('id')->map(fn($v) => (int)$v)->values();
+    $isCourseCompleted = $this->isCourseCompletedForUser(
+        (int) $courseId,
+        (int) $user->id,
+        $allVideoIds
+    );
+
     // 13) Respuesta
     return Inertia::render('Frontend/Lessons/Videos/ShowVideo', [
         'course'              => $course->only(['id','title','image_cover']),
@@ -574,12 +603,15 @@ public function showVideo($courseId, $lessonId, $videoId)
         'allVideos'           => $allVideos,
         'firstVideoIdLesson'  => $firstVideoIdLesson,
         'lastVideoIdLesson'   => $lastVideoIdLesson,
-
-        // >>> NUEVO <<<
         'videoMaterials'      => $videoMaterials,
         'materialsSummary'    => $materialsSummary,
+
+        // NUEVO
+        'shouldShowContinueAlert' => $shouldShowContinueAlert,
+        'isCourseCompleted'       => $isCourseCompleted,
     ]);
 }
+
 
   protected function videosByCourseOrderedByLesson(int $courseId)
     {
@@ -631,6 +663,62 @@ public function showVideo($courseId, $lessonId, $videoId)
         ->orderBy('videos.id')       // primer video dentro de esa lección
         ->value('videos.id');        // retorna solo el ID o null si no hay
 }
+
+/**
+ * Determina si el usuario ya vio TODOS los videos del curso y envió
+ * TODAS las evaluaciones de tipo VIDEO del curso.
+ *
+ * @param int $courseId
+ * @param int $userId
+ * @param \Illuminate\Support\Collection|\Illuminate\Support\Enumerable|array $allVideoIds  // IDs de todos los videos del curso
+ * @return bool
+ */
+private function isCourseCompletedForUser(int $courseId, int $userId, $allVideoIds): bool
+{
+    $allVideoIds = collect($allVideoIds)->map(fn($v) => (int)$v)->unique()->values();
+
+    // 1) ¿Vio TODOS los videos del curso (evento 'ended' por video)?
+    if ($allVideoIds->isEmpty()) {
+        // Si el curso no tiene videos, lo consideramos completado por definición
+        $hasEndedAllVideos = true;
+    } else {
+        $endedCount = DB::table('video_activities')
+            ->where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->where('event', 'ended')
+            ->whereIn('video_id', $allVideoIds)
+            ->distinct()
+            ->count('video_id');
+
+        $hasEndedAllVideos = ($endedCount === $allVideoIds->count());
+    }
+
+    // 2) ¿Envió TODAS las evaluaciones de tipo VIDEO del curso?
+    //    Obtenemos IDs de evaluaciones de video del curso (ligadas a cualquier video del curso)
+    $videoEvaIds = Evaluation::query()
+        ->where('course_id', $courseId)
+        ->where('type', EvaluationsTypes::VIDEO)
+        ->when($allVideoIds->isNotEmpty(), fn ($q) => $q->whereIn('video_id', $allVideoIds))
+        ->pluck('id');
+
+    if ($videoEvaIds->isEmpty()) {
+        // Si no hay evaluaciones de video, lo consideramos cumplido
+        $hasSubmittedAllCourseVideoEvals = true;
+    } else {
+        // Cuenta cuántas evaluaciones de ese set tienen al menos un envío del usuario
+        // Ajusta el nombre de la tabla si tu pivot/tabla es distinta
+        $submittedDistinct = DB::table('evaluations_users')
+            ->whereIn('evaluation_id', $videoEvaIds)
+            ->where('user_id', $userId)
+            ->distinct()
+            ->count('evaluation_id');
+
+        $hasSubmittedAllCourseVideoEvals = ($submittedDistinct === $videoEvaIds->count());
+    }
+
+    return $hasEndedAllVideos && $hasSubmittedAllCourseVideoEvals;
+}
+
 
 
 

@@ -14,6 +14,7 @@
     />
 
  
+ 
 
  
     <section class="section-panel py-3">
@@ -41,17 +42,12 @@
           >
             <!-- Encabezado de la lección -->
             <div class="card-header d-flex align-items-center gap-2 flex-wrap">
-              <span class="badge rounded-pill fw-semibold bg-dark">
+              <span class="badge  fw-semibold bg-dark">
                 {{ (lesson.order ?? 0).toString().padStart(2, '0') }}
               </span>
 
               <span class="fw-semibold d-inline-flex align-items-center gap-2">
-                <i
-                  v-if="lesson.progress?.is_completed"
-                  class="bi bi-check2-circle text-success"
-                  title="Lección completada"
-                />
-                {{ lesson.title }}
+                
               </span>
 
               <span class="ms-auto d-flex align-items-center gap-2 flex-wrap">
@@ -68,7 +64,7 @@
                 </span>
 
                 <Link
-                  class="btn btn-primary rounded-pill  align-items-center px-3 py-2"
+                  class="btn btn-primary   align-items-center px-3 py-2"
                   :href="route('dashboard.courses.lessons.show', { course: course.id, lesson: lesson.id })"
                   title="Ver lección"
                 >
@@ -81,14 +77,8 @@
             <div class="card-body">
               <div class="row g-3">
                 <!-- Portada y progreso -->
-                <div class="col-12 col-md-3">
-                  <div class="ratio ratio-16x9 mb-2">
-                    <img
-                      class="img-fluid rounded object-fit-cover"
-                      :src="lesson.thumbnail ? `/storage/${lesson.thumbnail}` : 'https://placehold.co/500x300'"
-                      :alt="lesson.title"
-                    />
-                  </div>
+                <div class="col-12 col-md-12">
+                
 
                   <div class="mb-2">
                     <div class="progress" style="height: 6px;">
@@ -102,85 +92,28 @@
                     <small class="text-muted">
                       {{ lesson.progress?.completed_videos || 0 }} / {{ lesson.progress?.total_videos || 0 }} videos completados
                     </small>
+                    <span>  <i
+                        v-if="lesson.progress?.is_completed"
+                        class="bi bi-check2-circle text-success"
+                        title="Lección completada"
+                      /></span>
                   </div>
                 </div>
 
                 <!-- Resumen y videos -->
-                <div class="col-12 col-md-9">
+                <div class="col-12 col-md-12">
+
+                  <h4>
+                {{ lesson.title }}</h4>
                   <p class="text-muted mb-3" v-if="lesson.description_short">
                     {{ lesson.description_short }}
                   </p>
 
+                  <VideoLessonList :course="course" :lesson="lesson" />
+
+
+
                   <!-- Lista de videos -->
-                  <div v-if="(lesson.videos && lesson.videos.length) || (lesson.videos_count > 0)" class="mt-1">
-                    <div class="d-flex align-items-center mb-2">
-                      <i class="bi bi-play-circle me-2"></i>
-                      <h6 class="mb-0">Clases de la lección</h6>
-                    </div>
-
-                    <ul class="list-group list-group-flush">
-                      <li
-                        v-for="(video, idx) in (lesson.videos || [])"
-                        :key="video.id ?? idx"
-                        class="list-group-item px-0 py-2"
-                      >
-                        <div class="d-flex align-items-center gap-3">
-                          <span class="text-muted small" style="width: 2rem;">
-                            {{ (idx + 1).toString().padStart(2, '0') }}
-                          </span>
-
-                          <i
-                            class="bi"
-                            :class="video.is_ended ? 'bi-check2-circle text-success' : (video.is_accessible ? 'bi-play-btn text-primary' : 'bi-lock-fill text-warning')"
-                            :title="videoTooltip(video)"
-                          />
-
-                          <div class="flex-grow-1">
-                            <div class="fw-semibold" :class="{ 'text-muted': !video.is_accessible }">
-                              {{ video.title }}
-                            </div>
-                    
-                          </div>
-
-                          <small class="text-muted text-nowrap" v-if="video.duration">{{ video.duration }}</small>
-
-                          <div class="ms-2 d-flex gap-2">
-                            <!--<button
-                              class="btn btn-sm btn-outline-primary"
-                              @click="openPreview(video)"
-                              :disabled="!video.is_accessible || !previewUrl(video)"
-                              :title="!video.is_accessible ? 'Completa el anterior para previsualizar' : 'Vista previa'"
-                            >
-                              <i class="bi bi-eye"></i>
-                              <span class="d-none d-sm-inline ms-1">Vista previa</span>
-                            </button>-->
-                            <Link
-                                v-if="video.is_accessible"
-                                :href="route('dashboard.courses.lessons.videos.show', {
-                                  course: course.id,
-                                  lesson: lesson.id,
-                                  video: video.id
-                                })"
-                                class="btn btn-primary rounded-pill  align-items-center px-3 py-2"
-                              >
-                                Ver video
-                              </Link>
-
-                               
-
-                          </div>
-                        </div>
-                      </li>
-
-                      <!-- Solo conteo si no vino el arreglo -->
-                      <li
-                        v-if="(!lesson.videos || lesson.videos.length === 0) && (lesson.videos_count > 0)"
-                        class="list-group-item px-0 text-muted"
-                      >
-                        Hay {{ lesson.videos_count }} videos asignados a esta lección.
-                      </li>
-                    </ul>
-                  </div>
 
                   <!-- Evaluaciones -->
                   <div v-if="lesson.add_evaluation" class="mt-3">
@@ -251,6 +184,7 @@
 import { Head, Link } from '@inertiajs/vue3'
 import StudentLayout from '@/Layouts/StudentLayout.vue'
 import Breadcrumbs from '@/Components/Dashboard/Ui/Breadcrumbs.vue'
+import VideoLessonList from '@/Components/Dashboard/Video/VideoLessonList.vue'
 import { route } from 'ziggy-js'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 

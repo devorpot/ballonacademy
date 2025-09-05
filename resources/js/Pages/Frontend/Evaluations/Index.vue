@@ -125,7 +125,7 @@ const hasLessonEvals = computed(() => props.groups?.lesson?.length > 0)
                       <div class="card-body d-flex flex-column">
                         <div class="d-flex align-items-start justify-content-between mb-2">
                           <h5 class="card-title mb-0 me-2 text-truncate">{{ eva.title }}</h5>
-                          <span class="badge rounded-pill" :class="statusBadgeClass(eva?.last_evaluation_user?.status)">
+                          <span class="badge " :class="statusBadgeClass(eva?.last_evaluation_user?.status)">
                             {{ statusLabel(eva?.last_evaluation_user?.status, !!eva?.last_evaluation_user) }}
                           </span>
                         </div>
@@ -210,7 +210,7 @@ const hasLessonEvals = computed(() => props.groups?.lesson?.length > 0)
                       <div class="card-body d-flex flex-column">
                         <div class="d-flex align-items-start justify-content-between mb-2">
                           <h5 class="card-title mb-0 me-2 text-truncate">{{ eva.title }}</h5>
-                          <span class="badge rounded-pill" :class="statusBadgeClass(eva?.last_evaluation_user?.status)">
+                          <span class="badge " :class="statusBadgeClass(eva?.last_evaluation_user?.status)">
                             {{ statusLabel(eva?.last_evaluation_user?.status, !!eva?.last_evaluation_user) }}
                           </span>
                         </div>
@@ -327,7 +327,7 @@ const hasLessonEvals = computed(() => props.groups?.lesson?.length > 0)
                               <div class="card-body d-flex flex-column">
                                 <div class="d-flex align-items-start justify-content-between mb-2">
                                   <h5 class="card-title mb-0 me-2 text-truncate">{{ eva.title }}</h5>
-                                  <span class="badge rounded-pill" :class="statusBadgeClass(eva?.last_evaluation_user?.status)">
+                                  <span class="badge " :class="statusBadgeClass(eva?.last_evaluation_user?.status)">
                                     {{ statusLabel(eva?.last_evaluation_user?.status, !!eva?.last_evaluation_user) }}
                                   </span>
                                 </div>

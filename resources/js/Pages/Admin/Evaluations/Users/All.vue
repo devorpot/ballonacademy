@@ -243,7 +243,7 @@ function toggleSort(key) {
 
                 <td class="text-nowrap">
           
-                  <Link class="btn btn-sm btn-primary rounded-pill" :href="route('admin.evaluation-users.show', { id: row.id })">
+                  <Link class="btn btn-sm btn-primary " :href="route('admin.evaluation-users.show', { id: row.id })">
                     <i class="bi bi-box-arrow-up-right"></i> Detalles
                   </Link>
                 </td>

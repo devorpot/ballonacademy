@@ -267,7 +267,7 @@ onMounted(() => {
               </div>
             </div>
             <div class="card-footer text-end">
-              <button type="submit" class="btn btn-primary rounded-pill  align-items-center px-3 py-2" :disabled="form.processing || !isFormValid">
+              <button type="submit" class="btn btn-primary   align-items-center px-3 py-2" :disabled="form.processing || !isFormValid">
                 <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
                 <i class="bi bi-save me-2"></i> Guardar cambios
               </button>

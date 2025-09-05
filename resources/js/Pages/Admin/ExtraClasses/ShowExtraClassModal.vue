@@ -98,7 +98,7 @@
                   <span
                     v-for="t in splitTags"
                     :key="t"
-                    class="badge rounded-pill text-bg-light border"
+                    class="badge  text-bg-light border"
                   >{{ t }}</span>
                 </div>
               </div>

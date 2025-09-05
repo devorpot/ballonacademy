@@ -42,8 +42,8 @@ const mobileItems = computed(() =>
                 <span class="avatar-initial">{{ userInitial }}</span>
               </div> -->
 
-              <div class="flex-grow-1 min-w-0">
-                <h1 class="h5 fw-medium mb-1 text-truncate" :title="lastLabel">
+              <div class="flex-grow-1 ">
+                <h1 class="h5 fw-medium mb-2 text-truncate" :title="lastLabel">
                   {{ lastLabel }}
                 </h1>
 

@@ -11,6 +11,7 @@
         :rows="rows"
         :readonly="readonly"
         :disabled="readonly"
+        :style="computedStyle"
       ></textarea>
       <label :for="id">{{ label }} <strong v-if="required">*</strong></label>
       <div v-if="(showValidation && validationMessage) || formError" class="invalid-feedback">
@@ -31,9 +32,10 @@ export default {
     showValidation: { type: Boolean, default: false },
     formError: { type: String, default: "" },
     rows: { type: Number, default: 5 },
+    height: { type: [Number, String], default: null }, // nueva prop
     validateFunction: { type: Function, default: null },
     classObject: { type: String, default: "" },
-    readonly: { type: Boolean, default: false }, // <-- Añadido aquí
+    readonly: { type: Boolean, default: false },
   },
   emits: ["update:modelValue", "blur"],
   computed: {
@@ -47,6 +49,13 @@ export default {
     },
     validationMessage() {
       return this.validateFunction ? this.validateFunction() : "";
+    },
+    computedStyle() {
+      if (this.height) {
+        // Si height es un número, lo convertimos a px
+        return { height: typeof this.height === "number" ? `${this.height}px` : this.height };
+      }
+      return {};
     }
   },
   methods: {
@@ -57,10 +66,9 @@ export default {
 };
 </script>
 
-
 <style>
-  textarea{
-    height: auto;
-    min-height: 200px!important;
-  }
+textarea {
+  height: auto;
+ 
+}
 </style>
