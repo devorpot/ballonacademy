@@ -239,6 +239,7 @@ async function changeLocale(locale) {
             <!-- Menú -->
             <nav class="w-100 px-3">
               <ul class="nav flex-column gap-2">
+                <!--
                 <li class="nav-item">
              
 
@@ -250,6 +251,7 @@ async function changeLocale(locale) {
               Ver perfil
             </a>
                 </li>
+                -->
                 <li class="nav-item">
                   <Link :href="route('dashboard.courses.index')"
                         class="btn btn-nav"
@@ -274,11 +276,13 @@ async function changeLocale(locale) {
                     {{ L.profile?.btnDistributors || 'Distribuidores' }}
                   </Link>
                 </li>
+                <!--
                 <li class="nav-item">
                   <Link :href="route('dashboard.blog.index')" class="btn btn-nav">
                     <i class="bi bi-pencil-square me-2"></i> Blog
                   </Link>
                 </li>
+                -->
                 <li class="nav-item">
                   <Link :href="route('dashboard.security.edit')"
                         class="btn btn-nav"
@@ -321,11 +325,13 @@ async function changeLocale(locale) {
             </div>
             <nav class="w-100 px-3">
               <ul class="nav flex-column gap-2">
+                <!--
                 <li class="nav-item">
                   <Link :href="route('dashboard.profile.edit')" class="btn btn-nav" :class="{ active: $page.url.startsWith('/dashboard/profile') }" @click="toggleSidebar">
                     <i class="bi bi-person-circle me-2"></i>{{ L.profile?.myProfile || 'Mi Perfil' }}
                   </Link>
                 </li>
+                -->
                 <li class="nav-item">
                   <Link :href="route('dashboard.courses.index')" class="btn btn-nav" :class="{ active: $page.url.startsWith('/dashboard/courses') }" @click="toggleSidebar">
                     <i class="bi bi-journal-bookmark-fill me-2"></i>{{ L.nav?.courses || 'Cursos' }}
@@ -341,11 +347,13 @@ async function changeLocale(locale) {
                     <i class="bi bi-person-circle me-2"></i>{{ L.profile?.btnDistributors || 'Distribuidores' }}
                   </Link>
                 </li>
+                <!--
                 <li class="nav-item">
                   <Link :href="route('dashboard.profile.edit')" class="btn btn-nav" @click="toggleSidebar">
                     <i class="bi bi-pencil-square me-2"></i> Blog
                   </Link>
                 </li>
+                -->
                 <li class="nav-item">
                   <Link :href="route('dashboard.security.edit')" class="btn btn-nav" :class="{ active: $page.url.startsWith('/dashboard/security') }" @click="toggleSidebar">
                     <i class="bi bi-person-circle me-2"></i>{{ L.profile?.security || 'Seguridad' }}
