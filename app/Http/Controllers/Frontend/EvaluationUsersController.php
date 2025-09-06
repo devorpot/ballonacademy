@@ -243,12 +243,12 @@ public function destroy($id)
 
 
     // Proteger acceso a evaluación solo si pertenece al curso
-    protected function authorizeEvaluation(Evaluation $evaluation, Course $course)
-    {
-        if ($evaluation->course_id !== $course->id) {
-            abort(403);
-        }
+protected function authorizeEvaluation(Evaluation $evaluation, Course $course)
+{
+    if ((int) $evaluation->course_id !== (int) $course->id) {
+        abort(403, 'Evaluación no pertenece al curso.');
     }
+}
 
     public function retry(Course $course, Evaluation $evaluation): RedirectResponse
     {
