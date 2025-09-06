@@ -52,8 +52,6 @@ class ActivationsController extends Controller
 
         // Agregar public_link calculado para usarlo directo en la vista
         $base = URL::to('/');
-        $activations = $query->paginate($perPage)->withQueryString();
-        $base = URL::to('/');
         $activations->getCollection()->transform(function ($a) use ($base) {
             $a->public_link = $a->hash ? "{$base}/register/student/{$a->hash}" : null;
             return $a;
@@ -63,17 +61,17 @@ class ActivationsController extends Controller
         $courses = Course::select('id', 'title')->orderBy('title')->get();
 
         return inertia('Admin/Activations/Index', [
-        'activations' => $activations,
-        'courses'     => $courses,
-        'filters'     => [
-            'q'         => $request->input('q'),   // no uses $search si puede no existir
-            'course_id' => $request->input('course_id'),
-            'active'    => $request->input('active'),
-            'sortBy'    => $sortBy,
-            'sortDir'   => $sortDir,
-            'perPage'   => $perPage,
-        ],
-    ]);
+            'activations' => $activations,
+            'courses'     => $courses,
+            'filters'     => [
+                'q'         => $search,
+                'course_id' => $request->input('course_id'),
+                'active'    => $request->input('active'),
+                'sortBy'    => $sortBy,
+                'sortDir'   => $sortDir,
+                'perPage'   => $perPage,
+            ],
+        ]);
     }
 
 
@@ -190,58 +188,55 @@ class ActivationsController extends Controller
 
 
 
-public function resend(Activation $activation, Request $request)
-{
-    try {
-        $link = \URL::to('/register/student/'.$activation->hash);
+  public function resend(Activation $activation, Request $request)
+    {
+        try {
+            $link = URL::to('/register/student/'.$activation->hash);
 
-        \Mail::to($activation->email)->send(
-            new \App\Mail\ActivationInvitationMail(
-                name: $activation->name,
-                link: $link,
-                code: $activation->code
-            )
-        );
+            Mail::to($activation->email)->send(
+                new ActivationInvitationMail(
+                    name: $activation->name,
+                    link: $link,
+                    code: $activation->code
+                )
+            );
 
-        if ($request->expectsJson() || $request->ajax()) {
-            // JSON explícito: axios no navega
-            return response()->json(['ok' => true, 'message' => 'Invitación reenviada'], 200);
+            if ($request->wantsJson()) {
+                return response()->json(['ok' => true, 'message' => 'Invitación reenviada'], 200);
+            }
+
+            return back()->with('success', 'La invitación se ha reenviado correctamente.');
+        } catch (\Throwable $e) {
+            \Log::error('Error al reenviar activación: '.$e->getMessage());
+
+            if ($request->wantsJson()) {
+                return response()->json(['ok' => false, 'message' => 'No se pudo reenviar la invitación'], 500);
+            }
+            return back()->with('error', 'No se pudo reenviar la invitación.');
         }
-
-        return back(303)->with('success', 'La invitación se ha reenviado correctamente.');
-    } catch (\Throwable $e) {
-        \Log::error('Error al reenviar activación: '.$e->getMessage());
-
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json(['ok' => false, 'message' => 'No se pudo reenviar la invitación'], 500);
-        }
-        return back(303)->with('error', 'No se pudo reenviar la invitación.');
     }
-}
 
 
+ public function toggle(Activation $activation, Request $request)
+    {
+        try {
+            $activation->active = !$activation->active;
+            $activation->save();
 
-public function toggle(Activation $activation, Request $request)
-{
-    try {
-        $activation->active = !$activation->active;
-        $activation->save();
+            if ($request->wantsJson()) {
+                return response()->json(['ok' => true, 'active' => $activation->active], 200);
+            }
 
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json(['ok' => true, 'active' => $activation->active], 200);
+            return back()->with('success', 'Estado de la activación actualizado.');
+        } catch (\Throwable $e) {
+            \Log::error('Error al actualizar estado de activación: '.$e->getMessage());
+
+            if ($request->wantsJson()) {
+                return response()->json(['ok' => false, 'message' => 'No se pudo actualizar el estado'], 500);
+            }
+            return back()->with('error', 'No se pudo actualizar el estado.');
         }
-
-        return back(303)->with('success', 'Estado de la activación actualizado.');
-    } catch (\Throwable $e) {
-        \Log::error('Error al actualizar estado de activación: '.$e->getMessage());
-
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json(['ok' => false, 'message' => 'No se pudo actualizar el estado'], 500);
-        }
-        return back(303)->with('error', 'No se pudo actualizar el estado.');
     }
-}
-
 
 
 }

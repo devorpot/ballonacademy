@@ -3,7 +3,7 @@ import { Inertia } from '@inertiajs/inertia'
 import { Head, usePage, useForm } from '@inertiajs/vue3'
 import { ref, reactive, watch, onMounted, computed } from 'vue'
 import { route } from 'ziggy-js'
-import axios from 'axios'
+
 // Layout & UI
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue'
@@ -54,12 +54,7 @@ const state = reactive({
 const currentPage = computed(() => Number(props.activations?.meta?.current_page ?? state.page))
 
 // ===== Helpers =====
-let cancelRefresh = null
-
 function refreshIndex(partials = ['activations', 'filters']) {
-  // Cancela la visita previa si existe
-  if (typeof cancelRefresh === 'function') cancelRefresh()
-
   Inertia.get(
     route('admin.activations.index'),
     {
@@ -71,16 +66,9 @@ function refreshIndex(partials = ['activations', 'filters']) {
       perPage: state.perPage,
       page: state.page,
     },
-    {
-      preserveState: true,
-      preserveScroll: true,
-      replace: true,
-      only: partials,
-      onCancelToken: (cancelToken) => { cancelRefresh = cancelToken }, // <-- clave
-    }
+    { preserveState: true, preserveScroll: true, replace: true, only: partials }
   )
 }
-
 
 let searchTimer = null
 function debouncedRefresh() {
@@ -88,23 +76,14 @@ function debouncedRefresh() {
   searchTimer = setTimeout(() => {
     state.page = 1
     refreshIndex()
-  }, 300)
+  }, 350)
 }
 
-
 // ===== Watchers =====
-watch(
-  () => ({
-    q: state.q,
-    course_id: state.course_id,
-    active: state.active,
-    sortBy: state.sortBy,
-    sortDir: state.sortDir,
-    perPage: state.perPage
-  }),
-  debouncedRefresh,
-  { deep: true }
-)
+watch(() => state.q, debouncedRefresh)
+watch(() => state.course_id, () => { state.page = 1; refreshIndex() })
+watch(() => state.active, () => { state.page = 1; refreshIndex() })
+watch(() => state.perPage, () => { state.page = 1; refreshIndex() })
 
 // ===== Flashes =====
 onMounted(() => {
@@ -173,30 +152,29 @@ function buildPublicLink(hash) {
   return `${base}/register/student/${hash}`
 }
 
-async function resendActivation(activationId) {
-  try {
-    await axios.post(route('admin.activations.resend', { activation: activationId }))
-    toast.value = { message: 'Invitación reenviada correctamente', type: 'success' }
-    // No hace falta refrescar toda la tabla, pero si quieres:
-    // refreshIndex(['activations'])
-  } catch (e) {
-    console.error(e)
-    toast.value = { message: 'Error al reenviar la invitación', type: 'danger' }
-  }
+function resendActivation(activationId) {
+  Inertia.post(route('admin.activations.resend', { activation: activationId }), {}, {
+    preserveScroll: true,
+    onSuccess: () => {
+      toast.value = { message: 'Invitación reenviada correctamente', type: 'success' }
+    },
+    onError: () => {
+      toast.value = { message: 'Error al reenviar la invitación', type: 'danger' }
+    }
+  })
 }
 
-
-async function toggleActivation(activationId) {
-  try {
-    const { data } = await axios.patch(route('admin.activations.toggle', { activation: activationId }))
-    toast.value = { message: 'Estado actualizado', type: 'success' }
-    // Si quieres evitar un GET, podrías mutar la fila en memoria con data.active.
-    // Para mantenerlo simple y consistente, recarga parcial:
-    //refreshIndex(['activations'])
-  } catch (e) {
-    console.error(e)
-    toast.value = { message: 'No se pudo actualizar el estado', type: 'danger' }
-  }
+function toggleActivation(activationId) {
+  Inertia.patch(route('admin.activations.toggle', { activation: activationId }), {}, {
+    preserveScroll: true,
+    onSuccess: () => {
+      toast.value = { message: 'Estado actualizado', type: 'success' }
+      refreshIndex(['activations'])
+    },
+    onError: () => {
+      toast.value = { message: 'No se pudo actualizar el estado', type: 'danger' }
+    }
+  })
 }
 
 function prepareDelete(id) {
@@ -238,6 +216,7 @@ function onPageChange(pageNumber) {
   state.page = pageNumber
   refreshIndex()
 }
+
 function badgeClass(val) { return val ? 'badge bg-success' : 'badge bg-secondary' }
 function formatDate(dt) {
   if (!dt) return '-'
@@ -416,10 +395,10 @@ function openDetails(activation) {
                       <button class="btn btn-outline-secondary" @click="openDetails(a)">
                         <i class="bi bi-eye"></i> Ver
                       </button>
-                      <button class="btn btn-outline-primary"  @click.prevent="resendActivation(a.id)">
+                      <button class="btn btn-outline-primary" @click="resendActivation(a.id)">
                         <i class="bi bi-send"></i> Reenviar
                       </button>
-                      <button class="btn btn-outline-secondary" @click.prevent="toggleActivation(a.id)">
+                      <button class="btn btn-outline-secondary" @click="toggleActivation(a.id)">
                         <i class="bi" :class="a.active ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
                         {{ a.active ? 'Desactivar' : 'Activar' }}
                       </button>
