@@ -8,6 +8,15 @@ use Illuminate\Support\Facades\Auth;
 
 class HandleInertiaRequests extends Middleware
 {
+
+      public function version(Request $request): ?string
+    {
+        // Válido si usas Vite/Laravel:
+        return parent::version($request);
+
+        // O fija explícitamente con el manifest de Vite:
+        // return md5_file(public_path('build/manifest.json'));
+    }
     public function share(Request $request): array
 {
     $user = $request->user();
@@ -32,7 +41,7 @@ class HandleInertiaRequests extends Middleware
                      'country' => $user->profile->country,
                    
                 ] : null,
-            ] : null,
+            ] : null, 
         ],
         'flash' => [
             'message' => fn () => $request->session()->get('message'),

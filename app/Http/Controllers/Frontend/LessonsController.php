@@ -125,6 +125,8 @@ class LessonsController extends Controller
             ];
         }
 
+  
+
         $lessonsPayload[] = [
             'id'                 => $lesson->id,
             'title'              => $lesson->title,

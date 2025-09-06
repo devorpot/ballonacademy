@@ -12,15 +12,32 @@ use Inertia\Inertia;
  
 class CourseController extends Controller
 {
-    public function index(Request $request)
+public function index(Request $request)
 {
-    $allowedSorts = ['id', 'title', 'created_at', 'videos_count']; // Agrega videos_count si lo necesitas
+    $allowedSorts = ['id', 'title', 'created_at', 'videos_count'];
     $sortBy = in_array($request->get('sortBy'), $allowedSorts) ? $request->get('sortBy') : 'created_at';
     $sortDir = $request->get('sortDir') === 'asc' ? 'asc' : 'desc';
 
     $courses = Course::withCount('videos')
         ->orderBy($sortBy, $sortDir)
-        ->get();
+        ->get([
+            'id','title','level','description_short','image_cover','logo','active',
+            'date_start','date_end','price','payment_link','currency_id','created_at'
+        ])
+        ->map(function (Course $c) {
+            // Aquí el cast ya aplicó: $c->active es boolean real
+            return [
+                'id' => $c->id,
+                'title' => $c->title,
+                'level' => $c->level,
+                'description_short' => $c->description_short,
+                'image_cover' => $c->image_cover,
+                'logo' => $c->logo,
+                'active' => $c->active,              // true/false
+                'videos_count' => $c->videos_count,  // de withCount
+                'created_at' => $c->created_at,
+            ];
+        });
 
     return Inertia::render('Admin/Courses/Index', [
         'courses' => $courses,
@@ -30,6 +47,7 @@ class CourseController extends Controller
         ],
     ]);
 }
+
 
 
     public function create()

@@ -12,29 +12,40 @@ class Activation extends Model
         'name',
         'email',
         'phone',
+        'size',
+        'street',
+        'number_int',
+        'neighborhood',
+        'postal_code',
+        'city',
+        'country',
+        'state',
+        'facebook',
+        'tiktok',
+        'instagram',
+        'occupation',
+        'experience',
+        'has_business',
+        'business_name',
+        'business_type',
+        'password_hash',
         'course_id',
         'code',
         'hash',
         'active',
         'created',
-        'activated_at', // si existe este campo en la tabla
     ];
 
-    /**
-     * Deshabilitamos los timestamps por defecto de Laravel,
-     * ya que la tabla no usa created_at ni updated_at.
-     */
-    public $timestamps = false;
+    // Tu tabla sí tiene created_at/updated_at, así que puedes dejar true
+    public $timestamps = true;
 
     protected $casts = [
-        'created'      => 'datetime',
-        'activated_at' => 'datetime',
         'active'       => 'boolean',
+        'created'      => 'datetime',
+        'created_at'   => 'datetime',
+        'updated_at'   => 'datetime',
     ];
 
-    /**
-     * Relación con cursos.
-     */
     public function course()
     {
         return $this->belongsTo(Course::class);

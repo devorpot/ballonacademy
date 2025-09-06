@@ -1,0 +1,31 @@
+
+Produccion
+
+Servidor: Localhost via UNIX socket
+Tipo de servidor: MariaDB
+Conexión del servidor: No se está utilizando SSL Documentación
+Versión del servidor: 10.6.23-MariaDB - MariaDB Server
+Versión del protocolo: 10
+Usuario: cpses_bak5vgxj6r@localhost
+Conjunto de caracteres del servidor: cp1252 West European (latin1)
+Servidor web
+cpsrvd 11.128.0.19
+Versión del cliente de base de datos: libmysql - mysqlnd 8.3.25
+extensión PHP: mysqli Documentación curl Documentación mbstring Documentación
+Versión de PHP: 8.3.25
+
+
+y esto es local
+
+Servidor: Localhost via UNIX socket
+Tipo de servidor: MySQL
+Conexión del servidor: No se está utilizando SSL Documentación
+Versión del servidor: 8.0.42-0ubuntu0.24.04.1 - (Ubuntu)
+Versión del protocolo: 10
+Usuario: admin@localhost
+Conjunto de caracteres del servidor: UTF-8 Unicode (utf8mb4)
+Servidor web
+Apache/2.4.58 (Ubuntu)
+Versión del cliente de base de datos: libmysql - mysqlnd 8.3.6
+extensión PHP: mysqli Documentación curl Documentación mbstring Documentación sodium Documentación
+Versión de PHP: 8.3.6

@@ -53,6 +53,8 @@ use App\Http\Controllers\Frontend\ExtraClassController as FrontendExtraClassCont
 use App\Http\Controllers\Frontend\CourseVideosController as FrontendCourseVideosController;
 use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
 
+use App\Http\Controllers\Frontend\ProfileTeacherController;
+
 
 
 use App\Http\Controllers\Api\VideoActivityController;
@@ -345,7 +347,13 @@ Route::get('students/{user}/edit',      [StudentController::class, 'edit'])->nam
 
     Route::resource('activations', ActivationsController::class);
     //Extraclases
+
+         Route::post('/extras/reorder', [ExtraClassController::class, 'reorder'])
+    ->name('extras.reorder');
+
+     
      Route::resource('extras', ExtraClassController::class);
+
 
 
 
@@ -378,6 +386,15 @@ Route::get('/activities', [AdminActivityController::class, 'index'])->name('acti
 // ----------------------------------
  Route::get('/u/{nickname?}', [FrontendProfileController::class, 'show'])
     ->name('dashboard.profile.show');
+
+
+
+Route::middleware(['auth', 'role:teacher'])
+    ->prefix('teachers')
+    ->name('teachers.')
+     ->group(function () {
+         Route::get('/', [ProfileTeacherController::class, 'index'])->name('index');
+     });
 
 Route::middleware(['auth', 'role:student'])
     ->prefix('frontend')

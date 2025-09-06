@@ -20,7 +20,7 @@ const props = defineProps({
 
 const searchQuery = ref('');
 const currentPage = ref(1);
-const itemsPerPage = ref(10);
+const itemsPerPage = ref(30);
 const sortKey = ref('id');
 const sortOrder = ref('asc');
 const deletingId = ref(null);
@@ -161,9 +161,9 @@ const onCreated = () => {
         <div class="row">
           <div class="col-12 d-flex justify-content-between align-items-center">
             <Title :title="'Gestionar Maestros'" />
-            <button class="btn btn-primary" @click="showCreateModal = true">
+            <Link class="btn btn-primary" :href="route('admin.teachers.create')">
               <i class="bi bi-plus-lg me-1"></i> Nuevo Maestro
-            </button>
+            </Link>
           </div>
         </div>
       </div>

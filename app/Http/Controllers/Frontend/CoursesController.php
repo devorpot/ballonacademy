@@ -78,6 +78,8 @@ $courses = Course::query()
             'last_seen'   => $video->last_seen,
         ]);
 
+   
+
     $welcome = session()->pull('welcome_message');
 
     return Inertia::render('Frontend/Courses/Index', [

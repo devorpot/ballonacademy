@@ -1,72 +1,77 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
+ 
 use App\Http\Controllers\Controller;
 use App\Models\ExtraClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+
 use Inertia\Inertia;
 
 class ExtraClassController extends Controller
 {
     public function index(Request $request)
-    {
-        // Sort seguro
-        $allowedSorts = ['id', 'title', 'category', 'active', 'order', 'created_at'];
-        $sortBy  = in_array($request->get('sortBy'), $allowedSorts) ? $request->get('sortBy') : 'created_at';
-        $sortDir = $request->get('sortDir') === 'asc' ? 'asc' : 'desc';
+{
+    $allowedSorts = ['id', 'title', 'category', 'active', 'order', 'created_at'];
+    $sortBy  = in_array($request->get('sortBy'), $allowedSorts) ? $request->get('sortBy') : null;
+    $sortDir = $request->get('sortDir') === 'asc' ? 'asc' : 'desc';
 
-        // Filtros
-        $q        = trim((string) $request->get('q', ''));
-        $active   = $request->get('active');   // 1 o 2
-        $category = $request->get('category'); // string
-        $perPage  = (int) $request->get('per_page', 20);
+    // Filtros...
+    $q        = trim((string) $request->get('q', ''));
+    $active   = $request->get('active');
+    $category = $request->get('category');
+    $perPage  = (int) $request->get('per_page', 20);
 
-        $query = ExtraClass::query();
+    $query = ExtraClass::query();
 
-        if ($q !== '') {
-            $query->where(function ($qq) use ($q) {
-                $qq->where('title', 'like', "%{$q}%")
-                   ->orWhere('extract', 'like', "%{$q}%")
-                   ->orWhere('description', 'like', "%{$q}%")
-                   ->orWhere('tags', 'like', "%{$q}%");
-            });
-        }
-
-        if ($active !== null && in_array((int)$active, [1, 2], true)) {
-            $query->where('active', (int)$active);
-        }
-
-        if (!empty($category)) {
-            $query->where('category', $category);
-        }
-
-        $extras = $query->orderBy($sortBy, $sortDir)
-            ->paginate($perPage)
-            ->appends($request->all());
-
-        // Asegurar que las URLs calculadas lleguen a Inertia (sin $appends en el modelo)
-        $extras->getCollection()->each->append(['image_url', 'cover_url', 'video_url', 'subt_url']);
-
-
-    
-        return Inertia::render('Admin/ExtraClasses/Index', [
-            'extras'  => $extras,
-            'filters' => [
-                'q'        => $q,
-                'active'   => $active,
-                'category' => $category,
-                'per_page' => $perPage,
-                'sortBy'   => $sortBy,
-                'sortDir'  => $sortDir,
-            ],
-            'categories' => $this->categories(), // opcional para <select>
-            'statuses'   => [1 => 'Activo', 2 => 'Inactivo'],
-            'videoTypes' => [1 => 'YouTube', 2 => 'Archivo'],
-        ]);
+    if ($q !== '') {
+        $query->where(function ($qq) use ($q) {
+            $qq->where('title', 'like', "%{$q}%")
+               ->orWhere('extract', 'like', "%{$q}%")
+               ->orWhere('description', 'like', "%{$q}%")
+               ->orWhere('tags', 'like', "%{$q}%");
+        });
     }
+
+    if ($active !== null && in_array((int)$active, [1, 2], true)) {
+        $query->where('active', (int)$active);
+    }
+
+    if (!empty($category)) {
+        $query->where('category', $category);
+    }
+
+    // Si NO viene sort explícito, usa orden lógico por defecto
+    if ($sortBy === null) {
+        $query->orderBy('order', 'asc')
+              ->orderBy('created_at', 'desc');
+    } else {
+        $query->orderBy($sortBy, $sortDir);
+    }
+
+    $extras = $query->paginate($perPage)->appends($request->all());
+
+    $extras->getCollection()->each->append(['image_url', 'cover_url', 'video_url', 'subt_url']);
+
+    return Inertia::render('Admin/ExtraClasses/Index', [
+        'extras'  => $extras,
+        'filters' => [
+            'q'        => $q,
+            'active'   => $active,
+            'category' => $category,
+            'per_page' => $perPage,
+            'sortBy'   => $sortBy ?? 'order',
+            'sortDir'  => $sortBy ? $sortDir : 'asc',
+        ],
+        'categories' => $this->categories(),
+        'statuses'   => [1 => 'Activo', 2 => 'Inactivo'],
+        'videoTypes' => [1 => 'YouTube', 2 => 'Archivo'],
+    ]);
+}
+
 
     public function create()
     {
@@ -261,4 +266,49 @@ class ExtraClassController extends Controller
             'Otros',
         ];
     }
+
+      public function reorder(Request $request)
+    {
+        // Opción A: array simple de IDs en el orden deseado
+        if ($request->has('ids')) {
+            $data = $request->validate([
+                'ids'   => ['required', 'array', 'min:1'],
+                'ids.*' => ['integer', 'distinct'],
+            ]);
+
+            $ids = $data['ids'];
+
+            DB::transaction(function () use ($ids) {
+                // setea order = 1..n según la posición
+                foreach ($ids as $idx => $id) {
+                    ExtraClass::where('id', $id)->update(['order' => $idx + 1]);
+                }
+            });
+
+            return back()->with('success', 'Orden actualizado correctamente.');
+        }
+
+        // Opción B: array de objetos con id + order explícito
+        if ($request->has('items')) {
+            $data = $request->validate([
+                'items'        => ['required', 'array', 'min:1'],
+                'items.*.id'   => ['required', 'integer', 'distinct'],
+                'items.*.order'=> ['required', 'integer', 'min:1'],
+            ]);
+
+            DB::transaction(function () use ($data) {
+                $rows = collect($data['items'])
+                    ->map(fn ($i) => ['id' => (int)$i['id'], 'order' => (int)$i['order']])
+                    ->all();
+
+                // upsert por eficiencia
+                ExtraClass::upsert($rows, ['id'], ['order']);
+            });
+
+            return back()->with('success', 'Orden actualizado correctamente.');
+        }
+
+        return back()->with('error', 'Payload inválido: envía "ids" o "items".');
+    }
+
 }

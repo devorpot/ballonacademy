@@ -39,21 +39,25 @@ class TeacherController extends Controller
                 'name'     => $data['name'],
                 'email'    => $data['email'],
                 'password' => Hash::make($data['password']),
+                'active'   => $request->boolean('user_active', true),
+                'locale'   => $request->string('user_locale')->toString() ?: 'es',
             ]);
             $user->assignRole('teacher');
 
-            // Preparar payload de Teacher
+            // Payload base Teacher
             $payload = [
                 'firstname' => $data['firstname'],
                 'lastname'  => $data['lastname'],
                 'phone'     => $data['phone'],
                 'specialty' => $data['specialty'],
                 'country'   => $data['country'],
+                'address'   => $data['address'] ?? null,
 
                 'facebook'  => $data['facebook']  ?? null,
                 'instagram' => $data['instagram'] ?? null,
                 'tiktok'    => $data['tiktok']    ?? null,
                 'website'   => $data['website']   ?? null,
+                'youtube'   => $data['youtube']   ?? null,
 
                 'profile_image' => null,
                 'cover_image'   => null,
@@ -89,12 +93,24 @@ class TeacherController extends Controller
         $data = $this->validateUpdate($request, $teacher);
 
         return DB::transaction(function () use ($request, $teacher, $data) {
+            // Soportar ambos nombres de campos (user_* y legacy)
+            $userName  = $request->input('user_name', $request->input('name', $teacher->user->name));
+            $userEmail = $request->input('user_email', $request->input('email', $teacher->user->email));
+
             // Actualizar User
             $teacher->user->fill([
-                'name'  => $data['name'],
-                'email' => $data['email'],
+                'name'   => $userName,
+                'email'  => $userEmail,
+                'active' => $request->has('user_active')
+                    ? $request->boolean('user_active')
+                    : ($teacher->user->active ?? true),
+                'locale' => $request->filled('user_locale')
+                    ? (string) $request->input('user_locale')
+                    : ($teacher->user->locale ?? 'es'),
             ]);
-            if (!empty($data['password'])) {
+
+            // Password opcional (si llega en alguna forma vieja)
+            if (!empty($data['password'] ?? null)) {
                 $teacher->user->password = Hash::make($data['password']);
             }
             $teacher->user->save();
@@ -106,11 +122,13 @@ class TeacherController extends Controller
                 'phone'     => $data['phone'],
                 'specialty' => $data['specialty'],
                 'country'   => $data['country'],
+                'address'   => $data['address'] ?? null,
 
                 'facebook'  => $data['facebook']  ?? null,
                 'instagram' => $data['instagram'] ?? null,
                 'tiktok'    => $data['tiktok']    ?? null,
                 'website'   => $data['website']   ?? null,
+                'youtube'   => $data['youtube']   ?? null,
             ];
 
             // Eliminar imágenes existentes si se solicita
@@ -191,75 +209,98 @@ class TeacherController extends Controller
     private function validateStore(Request $request): array
     {
         return $request->validate(
-            [
-                // User
-                'name'     => ['required', 'string', 'max:255'],
-                'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
+    [
+        // User (creación)
+        'name'     => ['required', 'string', 'max:255'],
+        'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
+        'password' => ['required', 'string', 'min:8', 'confirmed'],
 
-                // Teacher
-                'firstname' => ['required', 'string', 'max:255'],
-                'lastname'  => ['required', 'string', 'max:255'],
-                'phone'     => ['required', 'string', 'max:255'],
-                'specialty' => ['required', 'string', 'max:255'],
-                'country'   => ['required', 'string', 'max:255'],
+        // Opcionales de cuenta en create
+        'user_active' => ['sometimes', 'boolean'],
+        'user_locale' => ['sometimes', 'string', 'max:10'],
 
-                // Redes / sitio
-                'facebook'  => ['nullable', 'url', 'max:255'],
-                'instagram' => ['nullable', 'url', 'max:255'],
-                'tiktok'    => ['nullable', 'url', 'max:255'],
-                'website'   => ['nullable', 'url', 'max:255'],
+        // Teacher  (AQUÍ: requeridos para empatar con el front)
+        'firstname' => ['required', 'string', 'max:255'],
+        'lastname'  => ['required', 'string', 'max:255'],
+        'phone'     => ['nullable', 'string', 'max:255'],     // antes: nullable
+        'specialty' => ['nullable', 'string', 'max:255'],     // antes: nullable
+        'country'   => ['required', 'string', 'max:255'],     // antes: nullable
+        'address'   => ['nullable', 'string', 'max:500'],
 
-                // Imágenes
-                'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-                'cover_image'   => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            ],
-            $this->validationMessages()
-        );
+        // Redes / sitio
+        'facebook'  => ['nullable', 'url', 'max:255'],
+        'instagram' => ['nullable', 'url', 'max:255'],
+        'tiktok'    => ['nullable', 'url', 'max:255'],
+        'website'   => ['nullable', 'url', 'max:255'],
+        'youtube'   => ['nullable', 'url', 'max:255'],
+
+        // Imágenes
+        'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        'cover_image'   => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+    ],
+    $this->validationMessages()
+);
     }
 
     private function validateUpdate(Request $request, Teacher $teacher): array
     {
-        return $request->validate(
-            [
-                // User
-                'name'  => ['required', 'string', 'max:255'],
-                'email' => [
-                    'required', 'email', 'max:255',
-                    Rule::unique('users', 'email')->ignore($teacher->user->id),
-                ],
-                'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        // Notas: permitimos user_* y legacy para compatibilidad.
+        // Mapeo previo no es necesario aquí porque validamos ambos.
+       return $request->validate(
+    [
+        // User (edición)
+        'user_name' => ['sometimes', 'required', 'string', 'max:255'],
+        'user_email' => [
+            'sometimes', 'required', 'email', 'max:255',
+            Rule::unique('users', 'email')->ignore($teacher->user->id),
+        ],
+        // Compat legacy:
+        'name'  => ['sometimes', 'required', 'string', 'max:255'],
+        'email' => [
+            'sometimes', 'required', 'email', 'max:255',
+            Rule::unique('users', 'email')->ignore($teacher->user->id),
+        ],
+        'password' => ['nullable', 'string', 'min:8', 'confirmed'], // opcional
 
-                // Teacher
-                'firstname' => ['required', 'string', 'max:255'],
-                'lastname'  => ['required', 'string', 'max:255'],
-                'phone'     => ['required', 'string', 'max:255'],
-                'specialty' => ['required', 'string', 'max:255'],
-                'country'   => ['required', 'string', 'max:255'],
+        'user_active' => ['sometimes', 'boolean'],
+        'user_locale' => ['sometimes', 'string', 'max:10'],
 
-                // Redes / sitio
-                'facebook'  => ['nullable', 'url', 'max:255'],
-                'instagram' => ['nullable', 'url', 'max:255'],
-                'tiktok'    => ['nullable', 'url', 'max:255'],
-                'website'   => ['nullable', 'url', 'max:255'],
+        // Teacher (AQUÍ: requeridos para empatar con el front)
+        'firstname' => ['required', 'string', 'max:255'],
+        'lastname'  => ['required', 'string', 'max:255'],
+        'phone'     => ['nullable', 'string', 'max:255'],     // antes: nullable
+        'specialty' => ['nullable', 'string', 'max:255'],     // antes: nullable
+        'country'   => ['required', 'string', 'max:255'],     // antes: nullable
+        'address'   => ['nullable', 'string', 'max:500'],
 
-                // Imágenes + flags de eliminación
-                'profile_image'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-                'cover_image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-                'remove_profile_image' => ['sometimes', 'boolean'],
-                'remove_cover_image'   => ['sometimes', 'boolean'],
-            ],
-            $this->validationMessages()
-        );
+        // Redes / sitio
+        'facebook'  => ['nullable', 'url', 'max:255'],
+        'instagram' => ['nullable', 'url', 'max:255'],
+        'tiktok'    => ['nullable', 'url', 'max:255'],
+        'website'   => ['nullable', 'url', 'max:255'],
+        'youtube'   => ['nullable', 'url', 'max:255'],
+
+        // Imágenes + flags de eliminación
+        'profile_image'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        'cover_image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+        'remove_profile_image' => ['sometimes', 'boolean'],
+        'remove_cover_image'   => ['sometimes', 'boolean'],
+    ],
+    $this->validationMessages()
+);
     }
 
     private function validationMessages(): array
     {
         return [
             'name.required'       => 'El nombre es obligatorio.',
+            'user_name.required'  => 'El nombre de cuenta es obligatorio.',
             'email.required'      => 'El correo electrónico es obligatorio.',
+            'user_email.required' => 'El correo electrónico de cuenta es obligatorio.',
             'email.email'         => 'El correo debe tener un formato válido.',
+            'user_email.email'    => 'El correo debe tener un formato válido.',
             'email.unique'        => 'Este correo ya está registrado.',
+            'user_email.unique'   => 'Este correo ya está registrado.',
             'password.required'   => 'La contraseña es obligatoria.',
             'password.min'        => 'La contraseña debe tener al menos 8 caracteres.',
             'password.confirmed'  => 'Las contraseñas no coinciden.',
@@ -274,6 +315,7 @@ class TeacherController extends Controller
             'instagram.url'       => 'Instagram debe ser una URL válida.',
             'tiktok.url'          => 'TikTok debe ser una URL válida.',
             'website.url'         => 'El sitio web debe ser una URL válida.',
+            'youtube.url'         => 'YouTube debe ser una URL válida.',
 
             'profile_image.image' => 'La imagen de perfil debe ser una imagen.',
             'profile_image.mimes' => 'Formatos permitidos: jpg, jpeg, png, webp.',

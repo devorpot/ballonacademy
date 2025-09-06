@@ -33,6 +33,10 @@ class Course extends Model
         ->orderBy('lesson_videos.order');
 }
     
+
+    protected $casts = [
+        'active' => 'boolean',
+    ];
     public function subscriptions()
     {
         return $this->hasMany(Subscription::class);

@@ -11,7 +11,7 @@ class Teacher extends Model
 
     protected $fillable = [
         'user_id',
-        'teacher_id',
+        // Datos básicos
         'firstname',
         'lastname',
         'phone',
@@ -22,35 +22,45 @@ class Teacher extends Model
         'experience_years',
         'birth_date',
         'status',
+
+        // Redes / sitio
         'facebook',
         'instagram',
         'tiktok',
         'website',
+        'youtube',
+
+        // Imágenes
         'profile_image',
-        'cover_image'
+        'cover_image',
     ];
 
-       protected $appends = ['display_name'];
+    protected $appends = ['display_name'];
+
     /**
-     * Relación: Un maestro pertenece a un usuario.
+     * Relación: un maestro pertenece a un usuario.
      */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-     public function certificates()
+    public function certificates()
     {
         return $this->hasMany(Certificate::class, 'master_id');
     }
-     public function lessons()
+
+    public function lessons()
     {
-        return $this->hasMany(\App\Models\Lesson::class);
+        return $this->hasMany(Lesson::class);
     }
 
-      public function getDisplayNameAttribute(): string
+    /**
+     * Accessor: nombre completo o fallback al nombre de usuario.
+     */
+    public function getDisplayNameAttribute(): string
     {
-        $fromNames = trim(trim(($this->firstname ?? '').' '.($this->lastname ?? '')));
+        $fromNames = trim(($this->firstname ?? '') . ' ' . ($this->lastname ?? ''));
         $fromUser  = optional($this->user)->name ?? '';
         return $fromNames !== '' ? $fromNames : $fromUser;
     }

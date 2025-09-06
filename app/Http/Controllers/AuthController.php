@@ -30,6 +30,11 @@ class AuthController extends Controller
                 return redirect()->route('dashboard.index');
             }
 
+
+            if ($user->hasRole('teacher')) {
+                return redirect()->route('teachers.index');
+            }
+
             // Si no tiene rol válido, cerrar sesión por seguridad
             Auth::logout();
             return redirect()->route('login');
@@ -64,6 +69,10 @@ class AuthController extends Controller
         if ($user->hasRole('student')) {
             return redirect()->route('dashboard.index');
         }
+
+        if ($user->hasRole('teacher')) {
+                return redirect()->route('teachers.index');
+         }
 
         Auth::logout();
         return back()->withErrors([

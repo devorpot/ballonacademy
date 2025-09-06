@@ -84,6 +84,7 @@ public function store(Request $request)
 {
     $validated = $this->validateData($request);
 
+    // Files
     $validated['image_cover'] = $this->handleUpload($request, 'image_cover', 'videos/image_covers');
     $validated['video_path']  = $this->handleUpload($request, 'video_path', 'videos');
 
@@ -97,6 +98,14 @@ public function store(Request $request)
         $validated['size']       = round($file->getSize() / 1048576, 2) . ' MB';
         $validated['duration']   = $this->getDurationFromFile($file->getRealPath()) ?? '00:00:00';
     }
+
+    // Nuevos flags + fecha publicada (defaults)
+    $validated['active']         = $request->boolean('active', true);
+    $validated['private']        = $request->boolean('private', false);
+    $validated['published']      = $request->boolean('published', true);
+    $validated['published_date'] = $request->filled('published_date')
+        ? \Illuminate\Support\Carbon::parse($request->input('published_date'))->toDateString()
+        : now()->toDateString();
 
     DB::transaction(function () use ($request, &$validated) {
         $video = Video::create($validated);
@@ -113,14 +122,14 @@ public function store(Request $request)
             ]);
         }
 
-        // redirección usando el id del curso del video recién creado
-        $validated['__created_video_id'] = $video->id; // si lo quieres usar luego
+        $validated['__created_video_id'] = $video->id;
     });
 
     return redirect()
         ->route('admin.courses.videos.panel', ['course' => $validated['course_id']])
         ->with('success', 'Video creado correctamente.');
 }
+
 
 
 
@@ -170,7 +179,7 @@ public function update(Request $request, Video $video)
     $validated = $this->validateData($request, false);
 
     DB::transaction(function () use ($request, $video, $validated) {
-        // Actualizar campos del video
+        // Actualizar campos textuales/base
         $video->fill($validated);
 
         // Imagen
@@ -196,26 +205,39 @@ public function update(Request $request, Video $video)
             $video->duration   = null;
         }
 
+        // Flags: si el checkbox no viene, queremos poder forzarlo a false.
+        // Usamos has() para distinguir "no llegó" vs "llegó en false".
+        if ($request->has('active'))    { $video->active    = $request->boolean('active'); }
+        if ($request->has('private'))   { $video->private   = $request->boolean('private'); }
+        if ($request->has('published')) { $video->published = $request->boolean('published'); }
+
+        // Fecha publicada: si viene vacía, usamos hoy; si no viene, conservamos
+        if ($request->has('published_date')) {
+            $video->published_date = $request->filled('published_date')
+                ? \Illuminate\Support\Carbon::parse($request->input('published_date'))->toDateString()
+                : now()->toDateString();
+        }
+
         $video->save();
 
-        // Sincronizar vínculo lesson_videos según lesson_id (opcional)
-        // Política: un video pertenece como máximo a UNA lección (si quieres múltiples, adapta esto).
+        // Sincronizar vínculo lesson_videos según lesson_id (opcional: una sola lección)
         if ($request->filled('lesson_id')) {
-            // Eliminar otros vínculos del video
-            LessonVideo::where('video_id', $video->id)->where('lesson_id', '!=', (int) $request->lesson_id)->delete();
+            LessonVideo::where('video_id', $video->id)
+                ->where('lesson_id', '!=', (int) $request->lesson_id)
+                ->delete();
 
-            // Crear o actualizar el vínculo para la lección seleccionada
             $pivot = LessonVideo::firstOrNew([
                 'lesson_id' => (int) $request->lesson_id,
                 'video_id'  => $video->id,
             ]);
 
-            $pivot->course_id = (int) $validated['course_id'];
-            // Si no tiene orden, le asignamos el siguiente
+            $pivot->course_id = (int) ($validated['course_id'] ?? $video->course_id);
+
             if (!$pivot->exists || !$pivot->order) {
-                $nextOrder   = (int) LessonVideo::where('lesson_id', $request->lesson_id)->max('order');
+                $nextOrder    = (int) LessonVideo::where('lesson_id', $request->lesson_id)->max('order');
                 $pivot->order = $nextOrder + 1;
             }
+
             $pivot->active = true;
             $pivot->save();
         } else {
@@ -228,6 +250,7 @@ public function update(Request $request, Video $video)
         ->route('admin.courses.videos.panel', ['course' => $validated['course_id'] ?? $video->course_id])
         ->with('success', 'Video actualizado correctamente.');
 }
+
 
 
 
@@ -300,24 +323,31 @@ public function update(Request $request, Video $video)
         return response()->json($videos);
     }
 
-  public function reorderVideos(Request $request, Course $course)
-    {
+public function reorderVideos(Request $request, Course $course)
+{
+    \Log::info('Reordenando videos', $request->all());
 
+    $validated = $request->validate([
+        'order'   => 'required|array',
+        'order.*' => 'integer',
+    ]);
 
-          \Log::info('Reordenando videos', $request->all());
-        $validated = $request->validate([
-            'order' => 'required|array',
-            'order.*' => 'integer'
-        ]);
+    $ids = array_values($validated['order']); // [videoId1, videoId2, ...]
 
-        foreach ($validated['order'] as $index => $videoId) {
-            $course->videos()->where('id', $videoId)->update(['order' => $index + 1]);
+    DB::transaction(function () use ($ids, $course) {
+        foreach ($ids as $index => $videoId) {
+            // Actualiza directamente la tabla videos, no la relación
+            Video::query()
+                ->where('id', $videoId)
+                ->where('course_id', $course->id)
+                ->update(['order' => $index + 1]);
         }
+    });
 
-           return response()->json($request->all(), 200);
-    }
+    return response()->json(['ok' => true], 200);
+}
 
-
+ 
 
  
 
@@ -332,7 +362,6 @@ private function validateData(Request $request, $includeFiles = true)
         'lesson_id'          => [
             'nullable',
             'integer',
-            // Solo aceptar lecciones del mismo curso
             Rule::exists('lessons', 'id')->where(function ($q) use ($request) {
                 return $q->where('course_id', $request->input('course_id'));
             }),
@@ -342,6 +371,12 @@ private function validateData(Request $request, $includeFiles = true)
         'keep_video'         => 'nullable|boolean',
         'size'               => 'nullable|string|max:20',
         'duration'           => 'nullable|string|max:20',
+
+        // Nuevos campos
+        'active'             => 'nullable|boolean',
+        'private'            => 'nullable|boolean',
+        'published'          => 'nullable|boolean',
+        'published_date'     => 'nullable|date',
     ];
 
     if ($includeFiles) {
@@ -355,6 +390,7 @@ private function validateData(Request $request, $includeFiles = true)
 
     return $request->validate($rules);
 }
+
 
 
     private function checkOwnership(Course $course, Video $video)

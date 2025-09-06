@@ -6,23 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('activations', function (Blueprint $table) {
-            //
+        Schema::table('videos', function (Blueprint $table) {
+            $table->dateTime('published_date')->nullable()->after('video_path');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('activations', function (Blueprint $table) {
-            //
+        Schema::table('videos', function (Blueprint $table) {
+            $table->dropColumn('published_date');
         });
     }
 };

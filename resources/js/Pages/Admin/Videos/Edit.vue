@@ -8,10 +8,10 @@
           :breadcrumbs="[
             { label: 'Dashboard', route: 'admin.dashboard' },
             { label: 'Cursos', route: 'admin.courses.index' },
-            { label: `Videos - ${props.course.title}`, route: 'admin.courses.videos.panel', params: props.course.id },
-            { label: `Editar - ${props.video.title}` } // Último breadcrumb solo con label, sin route
+            { label: `Videos - ${props.course?.title ?? ''}`, route: 'admin.courses.videos.panel', params: props.course?.id },
+            { label: `Editar - ${props.video.title}` }
           ]"
-        /> 
+        />
 
         <section class="section-heading my-2">
           <div class="container-fluid">
@@ -31,32 +31,26 @@
           </div>
         </section>
 
-
         <section class="section-form my-2">
           <div class="container-fluid">
             <form @submit.prevent="submit" enctype="multipart/form-data">
               <div class="card">
                 <div class="card-body">
                   <div class="row">
-                    
-                     <div class="col-md-12 mb-3">
+                    <div class="col-md-12 mb-3">
+                      <FieldVideo
+                        id="video_path"
+                        label="Reemplazar video (opcional)"
+                        :initial-path="props.video.stream_url"
+                        :form-error="form.errors.video_path"
+                        :show-validation="true"
+                        :subtitles="videoSubtitles"
+                        @update:modelValue="form.video_path = $event"
+                        @update:keep="form.keep_video = $event"
+                      />
+                    </div>
 
-                      
-       <FieldVideo
-  id="video_path"
-  label="Reemplazar video (opcional)"
-  :initial-path="props.video.stream_url"
-  :form-error="form.errors.video_path"
-  :show-validation="true"
-  :subtitles="videoSubtitles"
-  @update:modelValue="form.video_path = $event"
-  @update:keep="form.keep_video = $event"
-/>
-
-
-                      </div>
-
-                       <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3">
                       <FieldSelect
                         id="course_id"
                         label="Curso"
@@ -69,10 +63,11 @@
                         @blur="() => handleBlur('course_id')"
                       />
                     </div>
-                      <div class="col-md-6 mb-3">
+
+                    <div class="col-md-6 mb-3">
                       <FieldSelect
                         id="lesson_id"
-                        :key="form.course_id"              
+                        :key="form.course_id"
                         label="Lección (opcional)"
                         v-model="form.lesson_id"
                         :options="lessonOptions"
@@ -83,7 +78,6 @@
                       />
                       <small v-if="loadingLessons" class="text-muted">Cargando lecciones…</small>
                     </div>
-
 
                     <div class="col-md-6 mb-3">
                       <FieldSelect
@@ -98,7 +92,8 @@
                         @blur="() => handleBlur('teacher_id')"
                       />
                     </div>
-                      <div class="col-md-6 mb-3">
+
+                    <div class="col-md-6 mb-3">
                       <FieldText
                         id="title"
                         label="Título"
@@ -111,9 +106,6 @@
                         @blur="() => handleBlur('title')"
                       />
                     </div>
-                       
-
-                   
 
                     <div class="col-md-6 mb-3">
                       <FieldText
@@ -126,7 +118,7 @@
                       />
                     </div>
 
-                     <div class="col-md-12 mb-3">
+                    <div class="col-md-12 mb-3">
                       <FieldTextarea
                         id="description"
                         label="Descripción"
@@ -137,25 +129,64 @@
                       />
                     </div>
 
-                     
-
-                   
-
                     <div class="col-md-12 mb-3">
-                     <FieldImage
-                      id="image_cover"
-                      label="Imagen de portada"
-                      v-model="form.image_cover"
-                      :showValidation="touched.image_cover"
-                      :formError="form.errors.image_cover"
-                      :initialPreview="imagePreview"
-                      @blur="() => handleBlur('image_cover')"
-                      @update:keep="form.keep_image = $event"
-     
-                    />
-          
-
+                      <FieldImage
+                        id="image_cover"
+                        label="Imagen de portada"
+                        v-model="form.image_cover"
+                        :showValidation="touched.image_cover"
+                        :formError="form.errors.image_cover"
+                        :initialPreview="imagePreview"
+                        @blur="() => handleBlur('image_cover')"
+                        @update:keep="form.keep_image = $event"
+                      />
                     </div>
+
+                    <!-- ======= NUEVOS CAMPOS ======= -->
+                    <div class="col-12">
+                      <hr class="my-3" />
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                      <FieldSwitch
+                        id="active"
+                        label="Activo"
+                        v-model="form.active"
+                        :formError="form.errors.active"
+                        helper="Controla si el video está activo en la plataforma"
+                      />
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                      <FieldSwitch
+                        id="private"
+                        label="Privado"
+                        v-model="form.private"
+                        :formError="form.errors.private"
+                        helper="Si está activo, solo usuarios autorizados lo verán"
+                      />
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                      <FieldSwitch
+                        id="published"
+                        label="Publicado"
+                        v-model="form.published"
+                        :formError="form.errors.published"
+                        helper="Controla la visibilidad pública del video"
+                      />
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                      <FieldDate
+                        id="published_date"
+                        label="Fecha de publicación"
+                        v-model="form.published_date"
+                        :formError="form.errors.published_date"
+                        helper="Si se deja vacío, se usará la fecha de hoy"
+                      />
+                    </div>
+                    <!-- ===== FIN NUEVOS CAMPOS ===== -->
                   </div>
                 </div>
 
@@ -170,44 +201,38 @@
           </div>
         </section>
 
-         <section class="section-captions my-3">
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span><i class="bi bi-box-seam me-1"></i> Captions del video</span>
-      
-    </div>
-    <div class="card-body">
-     <VideoCaptionsCrud :video="props.video" />
+        <section class="section-captions my-3">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-box-seam me-1"></i> Captions del video</span>
+            </div>
+            <div class="card-body">
+              <VideoCaptionsCrud :video="props.video" />
+            </div>
+          </div>
+        </section>
 
-    </div>
-  </div>
-</section>
+        <section class="section-materials my-3">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-box-seam me-1"></i> Materiales del video</span>
+            </div>
+            <div class="card-body">
+              <VideoMaterialRow :video-id="props.video.id" />
+            </div>
+          </div>
+        </section>
 
- <section class="section-materials my-3">
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span><i class="bi bi-box-seam me-1"></i> Materiales del video</span>
-      
-    </div>
-    <div class="card-body">
-     <VideoMaterialRow :video-id="props.video.id" />
-
-    </div>
-  </div>
-</section>
- <section class="section-resources my-3">
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span><i class="bi bi-box-seam me-1"></i> Recursos del video</span>
-      
-    </div>
-    <div class="card-body">
-     <VideoResourcesCrud :video="props.video" />
-
-    </div>
-  </div>
-</section>
-
+        <section class="section-resources my-3">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-box-seam me-1"></i> Recursos del video</span>
+            </div>
+            <div class="card-body">
+              <VideoResourcesCrud :video="props.video" />
+            </div>
+          </div>
+        </section>
       </div>
 
       <SpinnerOverlay v-if="form.processing" />
@@ -218,38 +243,40 @@
 <script setup>
 import { Head, useForm, router } from '@inertiajs/vue3'
 import { ref, computed, watch } from 'vue'
-import { route } from 'ziggy-js';
+import { route } from 'ziggy-js'
 
-import AdminLayout from '@/Layouts/AdminLayout.vue';
-import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue';
-import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue';
-import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue';
+import AdminLayout from '@/Layouts/AdminLayout.vue'
+import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue'
+import ButtonBack from '@/Components/Admin/Ui/ButtonBack.vue'
+import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue'
 
+import FieldText from '@/Components/Admin/Fields/FieldText.vue'
+import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue'
+import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue'
+import FieldImage from '@/Components/Admin/Fields/FieldImage.vue'
+import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue'
+import FieldSwitch from '@/Components/Admin/Fields/FieldSwitch.vue'
+import FieldDate from '@/Components/Admin/Fields/FieldDate.vue'
 
+import VideoMaterialRow from '@/Components/Admin/Videos/VideoMaterialRow.vue'
+import VideoResourcesCrud from '@/Components/Admin/Videos/VideoResourcesCrud.vue'
+import VideoCaptionsCrud from '@/Components/Admin/Videos/VideoCaptionsCrud.vue'
 
-import FieldText from '@/Components/Admin/Fields/FieldText.vue';
-import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue';
-import FieldSelect from '@/Components/Admin/Fields/FieldSelect.vue';
-import FieldImage from '@/Components/Admin/Fields/FieldImage.vue';
-import FieldFile from '@/Components/Admin/Fields/FieldFile.vue';
-import FieldVideo from '@/Components/Admin/Fields/FieldVideo.vue';
-
-
-import VideoMaterialRow from '@/Components/Admin/Videos/VideoMaterialRow.vue';
-import VideoResourcesCrud from '@/Components/Admin/Videos/VideoResourcesCrud.vue';
-import VideoCaptionsCrud from '@/Components/Admin/Videos/VideoCaptionsCrud.vue';
 const props = defineProps({
   video: Object,
   courses: Array,
   teachers: Array,
-  course:Object,
-    lessons: Array,
-      selected_course: Number, 
+  course: Object,
+  lessons: Array,
+  selected_course: Number,
   initialMaterials: {
     type: Array,
     default: () => []
   }
-});
+})
+
+const iso = (d) => new Date(d).toISOString().slice(0, 10)
+const today = new Date().toISOString().slice(0, 10)
 
 const form = useForm({
   _method: 'PUT',
@@ -257,90 +284,64 @@ const form = useForm({
   description: props.video.description,
   description_short: props.video.description_short,
   comments: props.video.comments,
-  lesson_id: props.video.lesson_id ?? '', 
+  lesson_id: props.video.lesson_id ?? '',
   course_id: props.video.course_id,
   teacher_id: props.video.teacher_id,
-  image_cover: null,     // si suben una nueva
-  video_path: null,      // si suben un nuevo video
+  image_cover: null,
+  video_path: null,
   keep_image: !!props.video.image_cover,
-  keep_video: !!props.video.video_path
-});
+  keep_video: !!props.video.video_path,
+
+  // Nuevos campos
+  active: props.video.active ?? true,
+  private: props.video.private ?? false,
+  published: props.video.published ?? true,
+  published_date: props.video.published_date ? String(props.video.published_date).slice(0, 10) : today
+})
 
 const loadingLessons = ref(false)
-
-const imagePreview = props.video.image_cover ? '/storage/' + props.video.image_cover : null;
-const touched = ref({});
+const imagePreview = props.video.image_cover ? '/storage/' + props.video.image_cover : null
+const touched = ref({})
 
 const courseOptions = computed(() =>
-  props.courses.map(c => ({ value: c.id, label: c.title }))
-);
+  (props.courses ?? []).map(c => ({ value: c.id, label: c.title }))
+)
 
 const teacherOptions = computed(() =>
-  props.teachers.map(t => ({
-    value: t.id,
-    label: `${t.firstname} ${t.lastname}`
-  }))
-);
+  (props.teachers ?? []).map(t => ({ value: t.id, label: `${t.firstname} ${t.lastname}` }))
+)
 
 const lessonOptions = computed(() =>
   (props.lessons ?? []).map(l => ({ value: l.id, label: l.title }))
 )
 
- 
- 
-
-const breadcrumbs = computed(() => {
-  // Si course no está listo, usa textos genéricos y evita acceder a sus props
-  if (!props.course) {
-    return [
-      { label: 'Dashboard', route: route('admin.dashboard') },
-      { label: 'Cursos', route: route('admin.courses.index') },
-      { label: 'Videos', route: '' },
-      { label: 'Editar', route: '' }
-    ];
-  }
-  // Cuando course ya existe
-  return [
-    { label: 'Dashboard', route: route('admin.dashboard') },
-    { label: 'Cursos', route: route('admin.courses.index') },
-    { label: `Videos - ${props.course.title}`, route: route('admin.courses.videos.panel', props.course.id) },
-    { label: 'Editar', route: '' }
-  ];
-});
-
-
-const handleBlur = (field) => {
-  touched.value[field] = true;
-};
+const handleBlur = (field) => { touched.value[field] = true }
 
 const validateField = (field) => {
   if (!form[field] || (typeof form[field] === 'string' && !form[field].trim())) {
-    return `El campo ${field.replace('_', ' ')} es obligatorio`;
+    return `El campo ${field.replace('_', ' ')} es obligatorio`
   }
-  return '';
-};
+  return ''
+}
 
 const isFormValid = computed(() => {
   return !validateField('title') &&
- 
          !validateField('course_id') &&
-         !validateField('teacher_id');
-});
+         !validateField('teacher_id')
+})
 
 const submit = () => {
-  Object.keys(form).forEach(key => touched.value[key] = true);
-
+  Object.keys(form).forEach(key => (touched.value[key] = true))
   if (isFormValid.value) {
     form.post(route('admin.videos.update', props.video.id), {
       forceFormData: true,
       preserveScroll: true
-    });
+    })
   }
-};
+}
 
 const videoSubtitles = computed(() => {
-  if (!props.video || !props.video.captions || !Array.isArray(props.video.captions)) return []
-
+  if (!props.video || !Array.isArray(props.video.captions)) return []
   return props.video.captions
     .filter(c => !!c.file)
     .map(c => ({
@@ -351,36 +352,39 @@ const videoSubtitles = computed(() => {
     }))
 })
 
-
-// Traducción rápida para etiquetas
 function getLabel(lang) {
   switch (lang) {
     case 'es': return 'Español'
     case 'en': return 'English'
     case 'fr': return 'Français'
     case 'pt': return 'Português'
-    default: return lang.toUpperCase()
+    default: return (lang || '').toUpperCase()
   }
 }
 
 watch(
   () => form.course_id,
   (newVal) => {
-    form.lesson_id = '' // limpiar selección
-
+    form.lesson_id = ''
     if (!newVal) return
-
     router.visit(route('admin.videos.edit', { video: props.video.id, course_id: newVal }), {
       preserveScroll: true,
       preserveState: true,
       replace: true,
-      only: ['lessons', 'selected_course', 'course'], // course es útil para breadcrumbs
+      only: ['lessons', 'selected_course', 'course'],
       onStart: () => (loadingLessons.value = true),
-      onFinish: () => (loadingLessons.value = false),
+      onFinish: () => (loadingLessons.value = false)
     })
   }
 )
 
+// Si marcan "Publicado" y no hay fecha, rellena con hoy
+watch(
+  () => form.published,
+  (val) => {
+    if (val && !form.published_date) form.published_date = today
+  }
+)
 </script>
 
 <style scoped>

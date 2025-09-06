@@ -13,15 +13,18 @@ const props = defineProps({
 
 const computedHref = computed(() => {
   if (props.href) return props.href
-  try {
-    return route(props.routeName, props.course.id)
-  } catch {
-    return `/courses/${props.course.id}`
-  }
+  try { return route(props.routeName, props.course.id) }
+  catch { return `/courses/${props.course.id}` }
 })
+
+// Convierte "0"/"1" o 0/1 a boolean consistente
+const isActive = computed(() => Boolean(Number(props.course.active)))
 </script>
 
+
 <template>
+
+  
 
   <div class="card h-100 shadow-sm border-0">
     <!-- Portada + logo flotante -->
@@ -53,17 +56,17 @@ const computedHref = computed(() => {
 
       <!-- Botón al fondo -->
       <div class="mt-auto">
-        <template v-if="course.active">
-          <Link :href="computedHref" class="btn btn-primary w-100 d-flex align-items-center justify-content-center py-2">
-            <i class="bi bi-play-circle me-2"></i>{{ buttonText }}
-          </Link>
-        </template>
-        <template v-else>
-          <button class="btn btn-secondary w-100 d-flex align-items-center justify-content-center py-2" disabled>
-            <i class="bi bi-lock me-2"></i>{{ inactiveText }}
-          </button>
-        </template>
-      </div>
+    <template v-if="isActive">
+      <Link :href="computedHref" class="btn btn-primary w-100 d-flex align-items-center justify-content-center py-2">
+        <i class="bi bi-play-circle me-2"></i>{{ buttonText }}
+      </Link>
+    </template>
+    <template v-else>
+      <button class="btn btn-secondary w-100 d-flex align-items-center justify-content-center py-2" disabled>
+        <i class="bi bi-lock me-2"></i>{{ inactiveText }}
+      </button>
+    </template>
+  </div>
     </div>
   </div>
 </template>

@@ -1,5 +1,7 @@
+<!-- resources/js/Pages/Admin/Teachers/Create.vue -->
 <template>
-  <Head title="Crear Nuevo Maestro" />
+  <Head title="Nuevo Maestro" />
+
   <AdminLayout>
     <div class="position-relative">
       <div :class="{ 'blur-overlay': form.processing }">
@@ -23,7 +25,7 @@
                   @click="submit"
                 >
                   <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
-                  <i class="bi bi-save me-1"></i> Guardar
+                  <i class="bi bi-save me-1"></i> Guardar cambios
                 </button>
               </div>
             </div>
@@ -34,75 +36,239 @@
           <div class="container-fluid">
             <form @submit.prevent="submit" novalidate>
               <div class="card">
+                <div class="card-header">
+                  <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <a
+                        class="nav-link"
+                        :class="{ active: activeTab === 'personal' }"
+                        href="#"
+                        role="tab"
+                        aria-controls="tab-personal"
+                        :aria-selected="activeTab === 'personal'"
+                        @click.prevent="switchTab('personal')"
+                      >Perfil Personal</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <a
+                        class="nav-link"
+                        :class="{ active: activeTab === 'social' }"
+                        href="#"
+                        role="tab"
+                        aria-controls="tab-social"
+                        :aria-selected="activeTab === 'social'"
+                        @click.prevent="switchTab('social')"
+                      >Redes y Medios</a>
+                    </li>
+                    <li class="ms-auto nav-item" role="presentation">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        @click="showAccount = !showAccount"
+                        :aria-expanded="showAccount ? 'true' : 'false'"
+                        aria-controls="account-section"
+                      >
+                        <i class="bi bi-person-gear me-1"></i>
+                        Datos de cuenta
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+
                 <div class="card-body">
-                  <h6 class="text-muted mb-3">Datos de usuario</h6>
-                  <div class="row">
-                    <div class="col-md-6 mb-3">
-                      <FieldText
-                        id="name"
-                        label="Nombre de usuario"
-                        v-model="form.name"
-                        :required="true"
-                        :showValidation="touched.name"
-                        :formError="form.errors.name"
-                        :validateFunction="validateName"
-                        placeholder="Ingrese el nombre de usuario"
-                        @blur="() => handleBlur('name')"
-                      />
+                  <!-- Datos de cuenta -->
+                  <transition name="fade">
+                    <div v-if="showAccount" id="account-section" class="alert alert-secondary small">
+                      <div class="row g-2 align-items-end">
+                        <div class="col-md-4">
+                          <FieldText
+                            id="user_name"
+                            label="Nombre de cuenta"
+                            v-model="form.user_name"
+                            :required="true"
+                            :showValidation="touched.user_name"
+                            :formError="form.errors.user_name || form.errors.name"
+                            :validateFunction="() => validateRequired(form.user_name, 'Nombre de cuenta')"
+                            @blur="() => handleBlur('user_name')"
+                          />
+                        </div>
+                        <div class="col-md-4">
+                          <FieldEmail
+                            id="user_email"
+                            label="Email de cuenta"
+                            v-model="form.user_email"
+                            :required="true"
+                            :showValidation="touched.user_email"
+                            :formError="form.errors.user_email || form.errors.email"
+                            :validateFunction="() => validateEmail(form.user_email)"
+                            @blur="() => handleBlur('user_email')"
+                          />
+                        </div>
+                        <div class="col-md-2">
+                          <label class="form-label d-block">Activo</label>
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="user_active" v-model="form.user_active">
+                            <label class="form-check-label" for="user_active">{{ form.user_active ? 'Sí' : 'No' }}</label>
+                          </div>
+                        </div>
+                        <div class="col-md-2">
+                          <FieldText id="user_locale" label="Locale" v-model="form.user_locale" placeholder="es, en, ..." />
+                        </div>
+
+                        <div class="col-md-4">
+                           <FieldPassword
+                    id="password"
+                    confirmId="password_confirmation"
+                    label="Contraseña"
+                    :password="form.password"
+                    :passwordConfirmation="form.password_confirmation"
+                    :required="true"
+                    :showValidation="touched.password || touched.password_confirmation"
+                    :formError="form.errors.password"
+                    :confirmFormError="form.errors.password_confirmation"
+                    :validateFunction="validatePassword"
+                    :validateConfirmFunction="validatePasswordConfirmation"
+                    @update:password="val => form.password = val"
+                    @update:passwordConfirmation="val => form.password_confirmation = val"
+                    @blur="(field) => handleBlur(field)"
+                  />
+                        </div>
+                      </div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                      <FieldEmail
-                        id="email"
-                        label="Email"
-                        v-model="form.email"
-                        :required="true"
-                        :showValidation="touched.email"
-                        :formError="form.errors.email"
-                        :validateFunction="validateEmail"
-                        placeholder="Ingrese el email"
-                        @blur="() => handleBlur('email')"
-                      />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <FieldPassword
-                        id="password"
-                        confirmId="password_confirmation"
-                        label="Contraseña"
-                        :password="form.password"
-                        :passwordConfirmation="form.password_confirmation"
-                        :required="true"
-                        :showValidation="touched.password || touched.password_confirmation"
-                        :formError="form.errors.password"
-                        :confirmFormError="form.errors.password_confirmation"
-                        :validateFunction="validatePassword"
-                        :validateConfirmFunction="validatePasswordConfirmation"
-                        @update:password="val => form.password = val"
-                        @update:passwordConfirmation="val => form.password_confirmation = val"
-                        @blur="(field) => handleBlur(field)"
-                      />
+                  </transition>
+
+                  <!-- Tab: Personal -->
+                  <div v-show="activeTab === 'personal'" id="tab-personal" role="tabpanel">
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <FieldText
+                          id="firstname"
+                          label="Nombre"
+                          v-model="form.firstname"
+                          :required="true"
+                          :showValidation="touched.firstname"
+                          :formError="form.errors.firstname"
+                          :validateFunction="() => validateRequired(form.firstname, 'Nombre')"
+                          placeholder="Ingrese el nombre"
+                          @blur="() => handleBlur('firstname')"
+                        />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText
+                          id="lastname"
+                          label="Apellido"
+                          v-model="form.lastname"
+                          :required="true"
+                          :showValidation="touched.lastname"
+                          :formError="form.errors.lastname"
+                          :validateFunction="() => validateRequired(form.lastname, 'Apellido')"
+                          placeholder="Ingrese el apellido"
+                          @blur="() => handleBlur('lastname')"
+                        />
+                      </div>
+
+                      <div class="col-md-6 mb-3">
+                        <FieldPhone
+                          id="phone"
+                          label="Teléfono"
+                          v-model="form.phone"
+                          
+                          :showValidation="touched.phone"
+                          :formError="form.errors.phone"
+                          :validateFunction="() => validateRequired(form.phone, 'Teléfono')"
+                          placeholder="Ingrese el teléfono"
+                          @blur="() => handleBlur('phone')"
+                        />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText
+                          id="country"
+                          label="País"
+                          v-model="form.country"
+                          :required="true"
+                          :showValidation="touched.country"
+                          :formError="form.errors.country"
+                          :validateFunction="() => validateRequired(form.country, 'País')"
+                          placeholder="Ingrese país"
+                          @blur="() => handleBlur('country')"
+                        />
+                      </div>
+
+                      <div class="col-md-6 mb-3">
+                        <FieldText
+                          id="specialty"
+                          label="Especialidad"
+                          v-model="form.specialty"
+                          :required="true"
+                          :showValidation="touched.specialty"
+                          :formError="form.errors.specialty"
+                          :validateFunction="() => validateRequired(form.specialty, 'Especialidad')"
+                          placeholder="Ingrese la especialidad"
+                          @blur="() => handleBlur('specialty')"
+                        />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldTextarea
+                          id="address"
+                          label="Dirección"
+                          v-model="form.address"
+                          :showValidation="touched.address"
+                          :formError="form.errors.address"
+                          :validateFunction="() => ''"
+                          placeholder="Ingrese la dirección"
+                          @blur="() => handleBlur('address')"
+                        />
+                      </div>
+
+                      <!-- Imágenes -->
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label mb-1">Foto de perfil</label>
+                        <FieldImage
+                          id="profile_image"
+                          label=""
+                          v-model="form.profile_image"
+                          :initialPreview="null"
+                          :disabled="form.processing"
+                        />
+                        <div v-if="form.errors.profile_image" class="invalid-feedback d-block">
+                          {{ form.errors.profile_image }}
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label mb-1">Foto de portada</label>
+                        <FieldImage
+                          id="cover_image"
+                          label=""
+                          v-model="form.cover_image"
+                          :initialPreview="null"
+                          :disabled="form.processing"
+                        />
+                        <div v-if="form.errors.cover_image" class="invalid-feedback d-block">
+                          {{ form.errors.cover_image }}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <h6 class="text-muted mt-4 mb-3">Datos del maestro</h6>
-                  <div class="row">
-                    <div
-                      v-for="field in teacherFields"
-                      :key="field.key"
-                      class="col-md-6 mb-3"
-                    >
-                      <component
-                        :is="field.component"
-                        :id="field.key"
-                        :label="field.label"
-                        v-model="form[field.key]"
-                        :required="field.required === true"
-                        :showValidation="touched[field.key]"
-                        :formError="form.errors[field.key]"
-                        :validateFunction="() => validateField(field.key)"
-                        :placeholder="field.placeholder"
-                        v-bind="field.bind || {}"
-                        @blur="() => handleBlur(field.key)"
-                      />
+                  <!-- Tab: Redes y Medios -->
+                  <div v-show="activeTab === 'social'" id="tab-social" role="tabpanel">
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <FieldUrl id="website" label="Sitio web" v-model="form.website" />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="facebook" label="Facebook" v-model="form.facebook" />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="instagram" label="Instagram" v-model="form.instagram" />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="tiktok" label="TikTok" v-model="form.tiktok" />
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <FieldText id="youtube" label="YouTube" v-model="form.youtube" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -110,7 +276,7 @@
                 <div class="card-footer text-end">
                   <button type="submit" class="btn btn-primary" :disabled="form.processing || !isFormValid">
                     <span v-if="form.processing" class="spinner-border spinner-border-sm me-1"></span>
-                    <i class="bi bi-save me-2"></i> Guardar
+                    <i class="bi bi-save me-2"></i> Guardar cambios
                   </button>
                 </div>
               </div>
@@ -119,7 +285,10 @@
         </section>
       </div>
 
-      <SpinnerOverlay v-if="form.processing" />
+      <!-- Spinner a body -->
+      <teleport to="body">
+        <SpinnerOverlay v-if="form.processing" :fullscreen="true" />
+      </teleport>
     </div>
   </AdminLayout>
 </template>
@@ -127,7 +296,7 @@
 <script setup>
 import { Head, useForm } from '@inertiajs/vue3'
 import { route } from 'ziggy-js'
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
 
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import Breadcrumbs from '@/Components/Admin/Ui/Breadcrumbs.vue'
@@ -136,135 +305,155 @@ import SpinnerOverlay from '@/Components/Admin/Ui/SpinnerOverlay.vue'
 
 import FieldText from '@/Components/Admin/Fields/FieldText.vue'
 import FieldEmail from '@/Components/Admin/Fields/FieldEmail.vue'
-import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue'
-import FieldPhone from '@/Components/Admin/Fields/FieldPhone.vue'
 import FieldTextarea from '@/Components/Admin/Fields/FieldTextarea.vue'
 import FieldImage from '@/Components/Admin/Fields/FieldImage.vue'
+import FieldUrl from '@/Components/Admin/Fields/FieldUrl.vue'
+import FieldPhone from '@/Components/Admin/Fields/FieldPhone.vue'
+import FieldPassword from '@/Components/Admin/Fields/FieldPassword.vue'
+// Create no recibe teacher
+const TAB_KEY = 'teachers.create.tab'
+const activeTab = ref(localStorage.getItem(TAB_KEY) || 'personal')
+function switchTab(tab) {
+  activeTab.value = tab
+  localStorage.setItem(TAB_KEY, tab)
+}
 
+const showAccount = ref(true) // en create, por defecto abierto
+const touched = ref({})
+
+// Form (store)
 const form = useForm({
-  // Usuario
-  name: '',
-  email: '',
+  // Cuenta de usuario
+  user_name: '',
+  user_email: '',
+  user_active: true,
+  user_locale: 'es',
   password: '',
   password_confirmation: '',
 
-  // Maestro (obligatorios)
+  // Datos personales
   firstname: '',
   lastname: '',
   phone: '',
-  specialty: '',
-  address: '',
-  country: '',
+  country: 'México',
+  specialty: '--------',
+  address: '--------',
 
-  // Opcionales
+  // Redes
+  website: '',
   facebook: '',
   instagram: '',
   tiktok: '',
-  website: '',
-  profile_image: '',
-  cover_image: ''
+  youtube: '',
+
+  // Archivos
+  profile_image: null,
+  cover_image: null,
 })
 
-const teacherFields = [
-  { key: 'firstname', label: 'Nombre', component: FieldText, placeholder: 'Ingrese el nombre', required: true },
-  { key: 'lastname', label: 'Apellido', component: FieldText, placeholder: 'Ingrese el apellido', required: true },
-  { key: 'phone', label: 'Teléfono', component: FieldPhone, placeholder: 'Ingrese el teléfono', required: true },
-  { key: 'specialty', label: 'Especialidad', component: FieldText, placeholder: 'Ingrese la especialidad', required: true },
-  { key: 'address', label: 'Dirección', component: FieldTextarea, placeholder: 'Ingrese la dirección', required: true },
-  { key: 'country', label: 'País', component: FieldText, placeholder: 'Ingrese el país', required: true },
+// Touched
+const handleBlur = (field) => { touched.value[field] = true }
 
-  // Redes / sitio (opcionales)
-  { key: 'facebook', label: 'Facebook (URL)', component: FieldText, placeholder: 'https://facebook.com/usuario' },
-  { key: 'instagram', label: 'Instagram (URL)', component: FieldText, placeholder: 'https://instagram.com/usuario' },
-  { key: 'tiktok', label: 'TikTok (URL)', component: FieldText, placeholder: 'https://tiktok.com/@usuario' },
-  { key: 'website', label: 'Sitio Web (URL)', component: FieldText, placeholder: 'https://mi-sitio.com' },
-
-  // Imágenes (opcionales)
-  {
-    key: 'profile_image',
-    label: 'Imagen de perfil',
-    component: FieldImage,
-    bind: { accept: 'image/*', hint: 'Opcional. JPG/PNG recomendado.' }
-  },
-  {
-    key: 'cover_image',
-    label: 'Imagen de portada',
-    component: FieldImage,
-    bind: { accept: 'image/*', hint: 'Opcional. Formato apaisado recomendado.' }
-  }
-]
-
-const touched = ref({})
-
-const handleBlur = (field) => {
-  touched.value[field] = true
-}
-
-const validateName = () => {
-  if (!form.name.trim()) return 'El nombre es obligatorio'
-  if (form.name.length < 3) return 'Mínimo 3 caracteres'
+// Validaciones
+const validateEmail = (val) => {
+  const v = String(val || '').trim()
+  if (!v) return 'El email es requerido'
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!re.test(v)) return 'Ingrese un email válido'
   return ''
 }
-
-const validateEmail = () => {
-  if (!form.email.trim()) return 'El email es obligatorio'
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(form.email)) return 'Email inválido'
+const validateRequired = (val, label) => {
+  if (val === undefined || val === null) return `${label} es obligatorio`
+  if (typeof val === 'string' && !val.trim()) return `${label} es obligatorio`
   return ''
 }
-
-// Mantengo FieldPassword como en esta vista
 const validatePassword = () => {
-  if (!form.password) return 'La contraseña es obligatoria'
-  if (form.password.length < 8) return 'Mínimo 8 caracteres'
+  const v = form.password || ''
+  if (!v.trim()) return 'La contraseña es obligatoria'
+  if (v.length < 8) return 'Debe tener al menos 8 caracteres'
+  if (!/[A-Z]/.test(v)) return 'Debe contener una mayúscula'
+  if (!/[0-9]/.test(v)) return 'Debe contener un número'
   return ''
 }
-
 const validatePasswordConfirmation = () => {
+  if (!form.password_confirmation?.trim()) return 'Confirma la contraseña'
   if (form.password !== form.password_confirmation) return 'Las contraseñas no coinciden'
   return ''
 }
 
-// Igual que en Students: requerido genérico por key
-const validateField = (key) => {
-  const value = form[key]
-  // Requerido si el campo está marcado 'required' en teacherFields
-  const meta = teacherFields.find(f => f.key === key)
-  if (meta?.required) {
-    if (value == null) return `El campo ${meta.label || key} es obligatorio`
-    if (typeof value === 'string' && !value.trim()) return `El campo ${meta.label || key} es obligatorio`
+const isFormValid = computed(() =>
+  !validateRequired(form.user_name, 'Nombre de cuenta') &&
+  !validateEmail(form.user_email) &&
+  !validatePassword() &&
+  !validatePasswordConfirmation() &&
+  !validateRequired(form.firstname, 'Nombre') &&
+  !validateRequired(form.lastname, 'Apellido') &&
+  !validateRequired(form.country, 'País') 
+ 
+)
+
+function submit() {
+  Object.keys(form).forEach(k => (touched.value[k] = true))
+  if (!isFormValid.value) {
+    focusFirstError()
+    return
   }
-  // Validación URL opcional cuando tenga valor
-  if (['facebook', 'instagram', 'tiktok', 'website'].includes(key) && value) {
-    try {
-      new URL(value)
-    } catch {
-      return 'URL inválida'
+
+  form.transform((data) => {
+    const fileOrNull = (v) => (v instanceof File ? v : null)
+    // Mapea a los nombres que espera el store:
+    return {
+      // user
+      name: data.user_name,            // store usa name/email/password
+      email: data.user_email,
+      password: data.password,
+      password_confirmation: data.password_confirmation,
+      user_active: data.user_active,
+      user_locale: data.user_locale,
+
+      // teacher
+      firstname: data.firstname,
+      lastname: data.lastname,
+      phone: data.phone,
+      specialty: data.specialty,
+      country: data.country,
+      address: data.address || null,
+
+      website: data.website || null,
+      facebook: data.facebook || null,
+      instagram: data.instagram || null,
+      tiktok: data.tiktok || null,
+      youtube: data.youtube || null,
+
+      profile_image: fileOrNull(data.profile_image),
+      cover_image: fileOrNull(data.cover_image),
     }
-  }
-  return ''
+  }).post(route('admin.teachers.store'), {
+    preserveScroll: true,
+    forceFormData: true,
+    onError: () => nextTick(() => focusFirstError()),
+  })
 }
 
-const isFormValid = computed(() => {
-  const baseValid =
-    !validateName() &&
-    !validateEmail() &&
-    !validatePassword() &&
-    !validatePasswordConfirmation()
+// UX: foco al primer error del servidor
+function focusFirstError() {
+  const keys = Object.keys(form.errors || {})
+  if (!keys.length) return
+  const first = keys[0]
+  const el = document.getElementById(first)
+  if (el && typeof el.focus === 'function') el.focus()
+}
 
-  const teacherValid = teacherFields.every(f => !validateField(f.key))
-  return baseValid && teacherValid
+// Mantener pestaña al llegar con errores del servidor
+onMounted(() => {
+  const errKeys = Object.keys(form.errors || {})
+  if (errKeys.length) {
+    const socialSet = new Set(['website','facebook','instagram','tiktok','youtube'])
+    const first = errKeys[0]
+    activeTab.value = socialSet.has(first) ? 'social' : 'personal'
+    localStorage.setItem(TAB_KEY, activeTab.value)
+  }
 })
-
-const submit = () => {
-  Object.keys(form).forEach((key) => (touched.value[key] = true))
-  if (isFormValid.value) {
-    form.post(route('admin.teachers.store'), {
-      preserveScroll: true,
-      onSuccess: () => form.reset()
-    })
-  }
-}
 </script>
 
 <style scoped>
@@ -273,4 +462,6 @@ const submit = () => {
   pointer-events: none;
   user-select: none;
 }
+.fade-enter-active, .fade-leave-active { transition: opacity .15s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
